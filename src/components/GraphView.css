@@ -1,0 +1,157 @@
+.graph-shell {
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(56, 224, 198, 0.03), transparent 40%),
+    var(--bg-elevated);
+  position: relative;
+  overflow: hidden;
+}
+
+.graph-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-soft) 1px, transparent 1px);
+  background-size: 5% 5%;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.graph-svg {
+  width: 100%;
+  height: 100%;
+  min-height: 420px;
+  position: relative;
+}
+
+.cluster-label {
+  font-family: var(--font-mono);
+  font-size: 2.4px;
+  letter-spacing: 0.06em;
+  fill: var(--text-tertiary);
+}
+
+.graph-edge {
+  transition: stroke-opacity 220ms ease;
+}
+
+.merchant-node {
+  cursor: pointer;
+  transition: opacity 220ms ease;
+}
+
+.node-circle {
+  fill: var(--bg-card);
+  stroke: var(--accent-cyan);
+  stroke-width: 0.45;
+  transition: r 160ms ease, stroke-width 160ms ease;
+}
+
+.merchant-node:hover .node-circle,
+.merchant-node.is-selected .node-circle {
+  r: 3.2;
+  stroke-width: 0.7;
+}
+
+.merchant-node.is-selected .node-circle {
+  fill: var(--accent-cyan-dim);
+}
+
+.node-name {
+  font-family: var(--font-display);
+  font-size: 2.5px;
+  font-weight: 600;
+  fill: var(--text-primary);
+}
+
+.node-category {
+  font-family: var(--font-mono);
+  font-size: 1.9px;
+  fill: var(--text-tertiary);
+}
+
+/* Gap markers (prong 3) */
+.gap-marker {
+  cursor: pointer;
+}
+
+.gap-ring {
+  fill: none;
+  stroke: var(--accent-rose);
+  stroke-width: 0.4;
+  stroke-dasharray: 1.2 1.4;
+  animation: spin 18s linear infinite;
+  transform-origin: center;
+}
+
+.gap-marker.is-selected .gap-ring {
+  stroke-width: 0.6;
+}
+
+.gap-core {
+  fill: var(--accent-rose-dim);
+  stroke: var(--accent-rose);
+  stroke-width: 0.35;
+}
+
+.gap-label {
+  font-family: var(--font-mono);
+  font-size: 2.1px;
+  fill: var(--accent-rose);
+  letter-spacing: 0.03em;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Ghost prospect node (prong 2) */
+.ghost-node {
+  animation: fadeIn 420ms ease both;
+}
+
+.ghost-edge {
+  stroke: var(--accent-gold);
+  stroke-width: 0.35;
+  stroke-dasharray: 1 1.2;
+  opacity: 0.7;
+}
+
+.ghost-circle {
+  fill: var(--accent-gold-dim);
+  stroke: var(--accent-gold);
+  stroke-width: 0.45;
+  stroke-dasharray: 1.4 0.8;
+}
+
+.ghost-label {
+  font-family: var(--font-display);
+  font-size: 2.4px;
+  font-weight: 600;
+  fill: var(--accent-gold);
+}
+
+.ghost-tag {
+  font-family: var(--font-mono);
+  font-size: 1.6px;
+  fill: var(--text-tertiary);
+  letter-spacing: 0.05em;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gap-ring {
+    animation: none;
+  }
+}
