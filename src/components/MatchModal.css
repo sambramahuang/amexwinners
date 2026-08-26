@@ -1,0 +1,52 @@
+.match-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(43, 43, 45, 0.5);
+  z-index: 50;
+  animation: fadeIn 0.2s ease both;
+}
+
+.match-modal {
+  position: relative;
+  width: min(420px, 90vw);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 28px;
+  box-shadow: 0 12px 32px rgba(43, 43, 45, 0.22);
+  animation: popIn 0.25s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.match-modal-eyebrow {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.match-modal-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 24px;
+  margin-bottom: 14px;
+}
+
+.match-modal-note {
+  margin: 0 0 14px;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.match-modal-terms {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-bottom: 20px;
+}
+
+.match-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}

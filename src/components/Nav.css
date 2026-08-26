@@ -1,0 +1,35 @@
+.top-nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 14px 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  margin-right: auto;
+}
+
+.brand-slash {
+  color: var(--accent);
+}
+
+.nav-link {
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px 0;
+  transition: color 0.15s ease;
+}
+
+.nav-link:hover {
+  color: var(--accent);
+}
+
+.nav-link.is-active {
+  color: var(--accent);
+  font-weight: 500;
+}

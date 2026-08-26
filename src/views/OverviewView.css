@@ -1,0 +1,138 @@
+.overview-main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 48px 32px 80px;
+  animation: fadeUp 0.35s ease both;
+}
+
+.overview-intro {
+  max-width: 640px;
+  margin-bottom: 44px;
+}
+
+.overview-intro .eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.overview-intro h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 38px;
+  margin: 0 0 12px;
+}
+
+.overview-intro p {
+  margin: 0;
+  opacity: 0.8;
+  font-size: 15px;
+}
+
+.overview-diagram {
+  border: 1px solid var(--border);
+  padding: 28px;
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+  gap: 36px;
+  flex-wrap: wrap;
+}
+
+.overview-diagram-copy {
+  flex: 1;
+  min-width: 240px;
+}
+
+.overview-diagram-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  margin-bottom: 6px;
+}
+
+.overview-diagram-copy p {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.overview-diagram-link {
+  font-size: 13px;
+  color: var(--accent);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.15s ease;
+  flex: none;
+}
+
+.overview-diagram-link:hover {
+  color: var(--accent-active);
+  text-decoration: underline;
+}
+
+.prong-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 760px) {
+  .prong-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.prong-card {
+  position: relative;
+  border: 1px solid var(--border);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.prong-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 3px 10px rgba(43, 43, 45, 0.16);
+}
+
+.prong-label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.prong-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.prong-description {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.75;
+  flex: 1;
+}
+
+.prong-link {
+  font-size: 13px;
+  color: var(--accent);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.15s ease;
+}
+
+.prong-link:hover {
+  color: var(--accent-active);
+  text-decoration: underline;
+}

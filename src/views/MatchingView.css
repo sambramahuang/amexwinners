@@ -1,0 +1,375 @@
+.matching-main {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 36px 32px 80px;
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  gap: 36px;
+  animation: fadeUp 0.35s ease both;
+}
+
+@media (max-width: 800px) {
+  .matching-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+.matching-header {
+  margin-bottom: 20px;
+}
+
+.matching-header h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 26px;
+  margin: 0 0 6px;
+}
+
+.matching-header p {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.card-stack {
+  position: relative;
+  height: 520px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.stack-card {
+  position: absolute;
+  top: 16px;
+  width: 400px;
+  max-width: 100%;
+  height: 480px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.stack-card.peek-1 {
+  top: 8px;
+  transform: scale(0.97) translateY(3px);
+}
+
+.stack-card.peek-2 {
+  top: 16px;
+  transform: scale(0.94) translateY(6px);
+}
+
+.swipe-card {
+  position: absolute;
+  top: 0;
+  width: 400px;
+  max-width: 100%;
+  min-height: 480px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 32px rgba(43, 43, 45, 0.18);
+  touch-action: none;
+}
+
+.swipe-badge {
+  position: absolute;
+  top: 22px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  padding: 3px 9px;
+}
+
+.swipe-badge-match {
+  left: 22px;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  transform: rotate(-8deg);
+}
+
+.swipe-badge-pass {
+  right: 22px;
+  color: var(--gray);
+  border: 1px solid var(--gray);
+  transform: rotate(8deg);
+}
+
+.swipe-card-top {
+  padding: 26px 26px 0;
+}
+
+.swipe-card-logo {
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: repeating-linear-gradient(135deg, rgba(89, 128, 166, 0.08) 0 6px, transparent 6px 12px);
+  font-family: ui-monospace, monospace;
+  font-size: 9px;
+  color: var(--accent);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.swipe-card-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.swipe-card-category {
+  font-size: 12px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 2px;
+}
+
+.swipe-card-overlap {
+  padding: 16px 26px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-top: 1px solid var(--border-soft);
+  border-bottom: 1px solid var(--border-soft);
+  margin-top: 16px;
+}
+
+.swipe-card-overlap svg {
+  flex: none;
+}
+
+.swipe-card-overlap-pct {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 22px;
+  color: var(--accent-active);
+}
+
+.swipe-card-overlap-label {
+  font-size: 10px;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.swipe-card-sequential {
+  padding: 14px 26px;
+  display: flex;
+  gap: 8px;
+}
+
+.swipe-card-sequential svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.swipe-card-sequential p {
+  margin: 0;
+  font-size: 12.5px;
+  opacity: 0.85;
+}
+
+.swipe-card-symmetry {
+  padding: 6px 26px 14px;
+}
+
+.swipe-card-symmetry-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  opacity: 0.55;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.symmetry-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.symmetry-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.symmetry-bar-name {
+  font-size: 10.5px;
+  width: 60px;
+  flex: none;
+  opacity: 0.65;
+}
+
+.symmetry-bar-track {
+  flex: 1;
+  height: 7px;
+  background: #e7e7ea;
+  position: relative;
+}
+
+.symmetry-bar-fill {
+  height: 100%;
+}
+
+.symmetry-bar-fill-you {
+  background: var(--accent);
+}
+
+.symmetry-bar-fill-them {
+  background: var(--accent-active);
+}
+
+.symmetry-bar-value {
+  font-size: 11px;
+  width: 34px;
+  flex: none;
+  text-align: right;
+}
+
+.symmetry-note {
+  font-size: 11px;
+  margin-top: 8px;
+}
+
+.swipe-card-terms {
+  padding: 0 26px 20px;
+}
+
+.swipe-card-terms-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  opacity: 0.55;
+  margin-bottom: 5px;
+}
+
+.swipe-card-terms p {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.swipe-controls {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.swipe-btn {
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.swipe-btn:active {
+  transform: scale(0.94);
+}
+
+.swipe-btn-pass {
+  color: var(--gray);
+}
+
+.swipe-btn-pass:hover {
+  border-color: var(--gray);
+  background: rgba(29, 31, 32, 0.05);
+  transform: scale(1.06);
+}
+
+.swipe-btn-match {
+  color: var(--bg);
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.swipe-btn-match:hover {
+  background: var(--accent-hover);
+  transform: scale(1.06);
+}
+
+.swipe-btn-match:active {
+  background: var(--accent-active);
+}
+
+.queue-done {
+  border: 1px solid var(--border);
+  padding: 40px;
+  text-align: center;
+}
+
+.queue-done-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 22px;
+  margin-bottom: 8px;
+}
+
+.queue-done p {
+  margin: 0 0 20px;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.matching-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sidebar-card {
+  border: 1px solid var(--border);
+  padding: 16px;
+}
+
+.sidebar-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  opacity: 0.55;
+  margin-bottom: 10px;
+}
+
+.sidebar-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.sidebar-row-last {
+  margin-bottom: 0;
+}
+
+.sidebar-value-accent {
+  color: var(--accent-active);
+}
+
+.sidebar-chips {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar-chip {
+  font-size: 12px;
+  border: 1px solid var(--border);
+  padding: 5px 8px;
+}
+
+.sidebar-empty {
+  font-size: 12px;
+  opacity: 0.5;
+}

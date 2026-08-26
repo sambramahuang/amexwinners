@@ -1,47 +1,50 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;700&family=Barlow+Condensed:wght@400;600&display=swap');
 
 :root {
-  --bg: #0a0f1c;
-  --bg-elevated: #111a2d;
-  --bg-card: #14203a;
-  --border: #253355;
-  --border-soft: #1c2841;
+  --bg: #f2f2f3;
+  --text: #1d1f20;
+  --text-85: rgba(29, 31, 32, 0.85);
+  --text-80: rgba(29, 31, 32, 0.8);
+  --text-75: rgba(29, 31, 32, 0.75);
+  --text-70: rgba(29, 31, 32, 0.7);
+  --text-65: rgba(29, 31, 32, 0.65);
+  --text-60: rgba(29, 31, 32, 0.6);
+  --text-55: rgba(29, 31, 32, 0.55);
 
-  --text-primary: #f2f5f9;
-  --text-secondary: #92a1bd;
-  --text-tertiary: #5c6d92;
+  --border: rgba(29, 31, 32, 0.16);
+  --border-soft: rgba(29, 31, 32, 0.08);
+  --border-strong: rgba(29, 31, 32, 0.2);
 
-  --accent-cyan: #38e0c6;
-  --accent-cyan-dim: rgba(56, 224, 198, 0.16);
-  --accent-gold: #e8b54d;
-  --accent-gold-dim: rgba(232, 181, 77, 0.16);
-  --accent-rose: #ea7290;
-  --accent-rose-dim: rgba(234, 114, 144, 0.14);
+  --accent: #5980a6;
+  --accent-hover: #597ea3;
+  --accent-active: #416180;
+  --accent-dim: rgba(89, 128, 166, 0.08);
+  --accent-dim-strong: rgba(89, 128, 166, 0.1);
 
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
-  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --gray: #7a7a7d;
+  --gray-light: #98989b;
 
-  --radius: 14px;
-  --radius-sm: 8px;
+  --font-display: 'Barlow Condensed', system-ui, sans-serif;
+  --font-body: 'Barlow', system-ui, sans-serif;
 }
 
 * {
   box-sizing: border-box;
 }
 
-html, body, #root {
-  height: 100%;
+html,
+body,
+#root {
+  min-height: 100%;
 }
 
 body {
   margin: 0;
   background: var(--bg);
-  background-image:
-    radial-gradient(circle at 14% 8%, rgba(56, 224, 198, 0.07), transparent 42%),
-    radial-gradient(circle at 88% 78%, rgba(232, 181, 77, 0.06), transparent 45%);
-  color: var(--text-primary);
+  color: var(--text);
   font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -50,28 +53,13 @@ button {
 }
 
 ::selection {
-  background: var(--accent-cyan-dim);
-  color: var(--text-primary);
+  background: var(--accent-dim-strong);
+  color: var(--text);
 }
 
-/* Focus visibility, kept even though the palette is dark */
 :focus-visible {
-  outline: 2px solid var(--accent-cyan);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 4px;
-}
-
-.mono {
-  font-family: var(--font-mono);
-  letter-spacing: 0.01em;
-}
-
-.eyebrow {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -80,4 +68,70 @@ button {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.btn {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn-ghost {
+  border-color: var(--border);
+  background: transparent;
+  color: var(--text);
+  padding: 9px 16px;
+}
+
+.btn-ghost:hover {
+  background: rgba(29, 31, 32, 0.06);
+}
+
+.btn-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--bg);
+  padding: 9px 16px;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn-primary:active {
+  background: var(--accent-active);
 }

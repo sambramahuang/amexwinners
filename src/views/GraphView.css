@@ -1,0 +1,83 @@
+.graph-main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 36px 32px 80px;
+  animation: fadeUp 0.35s ease both;
+}
+
+.graph-main h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 26px;
+  margin: 0 0 6px;
+}
+
+.graph-intro {
+  margin: 0 0 24px;
+  font-size: 13px;
+  opacity: 0.7;
+  max-width: 640px;
+}
+
+.graph-canvas-frame {
+  border: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.graph-legend-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 700px) {
+  .graph-legend-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.graph-legend-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  opacity: 0.55;
+  margin-bottom: 10px;
+}
+
+.graph-legend-items {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+}
+
+.graph-legend-items-stacked {
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.graph-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.graph-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.graph-legend-dash {
+  width: 12px;
+  height: 12px;
+  border: 1.5px dashed;
+  flex: none;
+}
+
+.graph-legend-note {
+  margin: 14px 0 0;
+  font-size: 12px;
+  opacity: 0.65;
+}

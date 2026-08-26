@@ -1,0 +1,12 @@
+.graph-canvas {
+  width: 100%;
+  cursor: grab;
+}
+
+.graph-canvas:active {
+  cursor: grabbing;
+}
+
+.graph-canvas canvas {
+  display: block;
+}
