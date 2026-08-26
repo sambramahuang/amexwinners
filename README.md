@@ -1,4 +1,4 @@
-# Concord — Amex AI Hackathon 2026, Round 1 prototype
+# Circuit — Amex AI Hackathon 2026, Round 1 prototype
 
 Built with React + TypeScript + Vite.
 
@@ -30,7 +30,16 @@ prospect data, `src/data/graphSceneConfigs.ts` for the 3D graph layout):
   that sank Amex's earlier Plenti coalition-loyalty program: a match
   where value flows mostly one way is flagged, even if the raw customer
   overlap looks strong. Swipe right (or click the check button) to match
-  and add to the pipeline; swipe left to pass.
+  and add to the pipeline; swipe left to pass. The "It's a match" dialog's
+  AI explainability layer calls a small Express backend (`server/`) which
+  asks OpenAI to explain the match in plain language, grounded in the
+  card's own numbers — see "Running it" below for the extra setup step.
+  Before the queue, an optional four-question partnership-preferences
+  questionnaire adds a secondary, self-reported signal: it can nudge
+  ranking by up to 30% and color the AI explanation, but the real
+  closed-loop transaction data — customer overlap, sequential-visit
+  signal, uplift — stays the dominant 70% weight, and the questionnaire is
+  fully skippable, so the app works the same without it.
 - **Gap Radar (Prong 3)** — a 3D graph per cluster showing a tight,
   mutually overlapping merchant group with a structural hole (a category
   that's clearly missing), plus a ranked table of recruit targets that
@@ -45,8 +54,16 @@ prospect data, `src/data/graphSceneConfigs.ts` for the 3D graph layout):
 
 ```bash
 npm install
+cp .env.example .env   # then fill in OPENAI_API_KEY
 npm run dev
 ```
+
+`npm run dev` runs the Vite dev server and the AI backend together
+(`vite` + `node server/index.js`, via `concurrently`); the frontend
+proxies `/api/*` to the backend on port 8787. To run either alone, use
+`npm run dev:web` or `npm run dev:server`. Without a valid
+`OPENAI_API_KEY`, the AI backend refuses to start, and the "It's a
+match" dialog falls back to the card's static sequential-signal text.
 
 Then open the local URL Vite prints (usually `http://localhost:5173`).
 
@@ -66,10 +83,19 @@ src/
                               (typed: MatchCandidate, ProspectTarget)
     graphSceneConfigs.ts      node/edge/gap layout for the three.js graphs
                               (typed: GraphSceneConfig)
+    personalityQuiz.ts        the four partnership-preference questions +
+                              profile builder (typed: PersonalityQuestion,
+                              PersonalityProfile)
+  utils/
+    personalityFit.ts         local heuristic blending questionnaire answers
+                              with the transaction overlap score — no model call
   components/
     Nav.tsx                 top navigation between the five views
     CornerBrackets.tsx       shared corner-crosshair card decoration
-    MatchModal.tsx           "it's a match" confirmation dialog
+    MatchModal.tsx           "it's a match" confirmation dialog + AI
+                              explainability layer
+    PersonalityQuiz.tsx       optional partnership-preferences questionnaire
+                              shown before the matching queue
     GraphCanvas.tsx           reusable three.js node-link graph (mount/
                               rotate/dispose lifecycle), used by both
                               Graph and Gap Radar
@@ -81,6 +107,10 @@ src/
     RecruitPitchView.tsx      Prong 2 — projected pitch for a prospect
   App.tsx                    view state + routing; Graph and Gap Radar are
                               lazy-loaded so three.js only ships when opened
+server/
+  index.js                   Express backend; POST /api/explain-match
+                              calls OpenAI to generate the match
+                              explanation shown in MatchModal
 ```
 
 ## What would change for a real build

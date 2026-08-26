@@ -1,31 +1,40 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;700&family=Barlow+Condensed:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 :root {
-  --bg: #f2f2f3;
-  --text: #1d1f20;
-  --text-85: rgba(29, 31, 32, 0.85);
-  --text-80: rgba(29, 31, 32, 0.8);
-  --text-75: rgba(29, 31, 32, 0.75);
-  --text-70: rgba(29, 31, 32, 0.7);
-  --text-65: rgba(29, 31, 32, 0.65);
-  --text-60: rgba(29, 31, 32, 0.6);
-  --text-55: rgba(29, 31, 32, 0.55);
+  --bg: #ffffff;
+  --bg-panel: #f5f8fc;
+  --bg-panel-alt: #eaf1fa;
+  --text: #0b1c33;
+  --text-85: rgba(11, 28, 51, 0.85);
+  --text-80: rgba(11, 28, 51, 0.8);
+  --text-75: rgba(11, 28, 51, 0.75);
+  --text-70: rgba(11, 28, 51, 0.7);
+  --text-65: rgba(11, 28, 51, 0.65);
+  --text-60: rgba(11, 28, 51, 0.6);
+  --text-55: rgba(11, 28, 51, 0.55);
 
-  --border: rgba(29, 31, 32, 0.16);
-  --border-soft: rgba(29, 31, 32, 0.08);
-  --border-strong: rgba(29, 31, 32, 0.2);
+  --border: rgba(11, 28, 51, 0.12);
+  --border-soft: rgba(11, 28, 51, 0.07);
+  --border-strong: rgba(11, 28, 51, 0.22);
 
-  --accent: #5980a6;
-  --accent-hover: #597ea3;
-  --accent-active: #416180;
-  --accent-dim: rgba(89, 128, 166, 0.08);
-  --accent-dim-strong: rgba(89, 128, 166, 0.1);
+  --accent: #006fcf;
+  --accent-hover: #0057a3;
+  --accent-active: #003d75;
+  --accent-dim: rgba(0, 111, 207, 0.08);
+  --accent-dim-strong: rgba(0, 111, 207, 0.14);
 
-  --gray: #7a7a7d;
-  --gray-light: #98989b;
+  --gold: #9c6b1f;
+  --gold-dim: rgba(156, 107, 31, 0.1);
 
-  --font-display: 'Barlow Condensed', system-ui, sans-serif;
-  --font-body: 'Barlow', system-ui, sans-serif;
+  --rose: #c81e2e;
+  --rose-dim: rgba(200, 30, 46, 0.1);
+
+  --gray: #5b6b82;
+  --gray-light: #8a97ac;
+
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
 * {
@@ -40,7 +49,14 @@ body,
 
 body {
   margin: 0;
-  background: var(--bg);
+  background:
+    radial-gradient(ellipse 900px 600px at -10% -10%, rgba(0, 111, 207, 0.07), transparent 60%),
+    radial-gradient(ellipse 900px 600px at 110% 110%, rgba(0, 111, 207, 0.05), transparent 60%),
+    linear-gradient(rgba(11, 28, 51, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(11, 28, 51, 0.04) 1px, transparent 1px),
+    var(--bg);
+  background-size: auto, auto, 48px 48px, 48px 48px, auto;
+  background-attachment: fixed;
   color: var(--text);
   font-family: var(--font-body);
   font-size: 15px;
@@ -118,7 +134,7 @@ button {
 }
 
 .btn-ghost:hover {
-  background: rgba(29, 31, 32, 0.06);
+  background: var(--border-soft);
 }
 
 .btn-primary {
@@ -134,4 +150,13 @@ button {
 
 .btn-primary:active {
   background: var(--accent-active);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.btn-primary:disabled:hover {
+  background: var(--accent);
 }

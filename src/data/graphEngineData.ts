@@ -22,6 +22,8 @@ export interface MatchCandidate {
   balanceColor: string
   balanceNote: string
   terms: string
+  /** Synthetic brand-vibe tags used only for the optional personality-fit nudge. */
+  personalityTags: string[]
 }
 
 export const MATCH_CANDIDATES: MatchCandidate[] = [
@@ -34,9 +36,10 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     sequential: 'Customers who buy from Spinebound return to Basin for coffee the same day 44% of the time.',
     upliftYou: 21,
     upliftThem: 24,
-    balanceColor: '#416180',
+    balanceColor: '#2bb8a3',
     balanceNote: 'Balanced · Δ3pts — value flows both ways.',
     terms: 'In-store QR at Spinebound: book club members get their first coffee free at Basin.',
+    personalityTags: ['slow-browse', 'community', 'ritual'],
   },
   {
     id: 2,
@@ -47,9 +50,10 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     sequential: "38% of Basin's customers visit Fern & Fold within two weeks of their coffee run.",
     upliftYou: 16,
     upliftThem: 19,
-    balanceColor: '#416180',
+    balanceColor: '#2bb8a3',
     balanceNote: 'Balanced · Δ3pts — value flows both ways.',
     terms: 'Joint loyalty stamp: every 5th coffee unlocks 10% off any stationery item.',
+    personalityTags: ['occasion', 'brand-aesthetic', 'shared-regulars'],
   },
   {
     id: 3,
@@ -60,9 +64,10 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     sequential: '29% of florist customers stop at Basin within the same week.',
     upliftYou: 13,
     upliftThem: 15,
-    balanceColor: '#416180',
+    balanceColor: '#2bb8a3',
     balanceNote: 'Balanced · Δ2pts — value flows both ways.',
     terms: 'Shared window display plus cross-tagged social posts each Friday.',
+    personalityTags: ['occasion', 'brand-aesthetic', 'shared-events'],
   },
   {
     id: 4,
@@ -73,9 +78,10 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     sequential: '21% overlap; sequencing signal is still forming — fewer than 90 days of data.',
     upliftYou: 9,
     upliftThem: 27,
-    balanceColor: '#7a7a7d',
+    balanceColor: '#e8b54d',
     balanceNote: 'Auto-rebalanced: added a Basin gift-card bonus for Loom referrals to close an 18pt gap.',
     terms: 'Referral card: bike tune-up customers get a free drip coffee at Basin.',
+    personalityTags: ['fast-paced', 'convenience', 'shared-regulars'],
   },
   {
     id: 5,
@@ -86,9 +92,10 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     sequential: 'Early signal — 18% overlap, sequencing still sparse.',
     upliftYou: 8,
     upliftThem: 20,
-    balanceColor: '#7a7a7d',
+    balanceColor: '#e8b54d',
     balanceNote: 'Auto-rebalanced: added a post-class coffee voucher to close a 12pt gap.',
     terms: 'Post-class voucher: first coffee free after any studio class.',
+    personalityTags: ['ritual', 'community', 'shared-events'],
   },
   {
     id: 6,
@@ -99,9 +106,10 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     sequential: "Low overlap — customers don't yet cross-shop between these two.",
     upliftYou: 4,
     upliftThem: 6,
-    balanceColor: '#98989b',
+    balanceColor: '#96a3c0',
     balanceNote: 'Low confidence · thin signal — hold until more data accrues.',
     terms: 'No proposal yet — insufficient signal to suggest terms.',
+    personalityTags: ['low-maintenance', 'occasion'],
   },
 ]
 

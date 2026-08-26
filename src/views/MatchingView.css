@@ -46,7 +46,7 @@
   max-width: 100%;
   height: 480px;
   border: 1px solid var(--border);
-  background: var(--bg);
+  background: var(--bg-panel);
 }
 
 .stack-card.peek-1 {
@@ -65,9 +65,9 @@
   width: 400px;
   max-width: 100%;
   min-height: 480px;
-  background: var(--bg);
+  background: var(--bg-panel);
   border: 1px solid var(--border);
-  box-shadow: 0 12px 32px rgba(43, 43, 45, 0.18);
+  box-shadow: 0 12px 32px rgba(2, 5, 12, 0.4);
   touch-action: none;
 }
 
@@ -106,8 +106,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: repeating-linear-gradient(135deg, rgba(89, 128, 166, 0.08) 0 6px, transparent 6px 12px);
-  font-family: ui-monospace, monospace;
+  background: repeating-linear-gradient(135deg, var(--accent-dim) 0 6px, transparent 6px 12px);
+  font-family: var(--font-mono);
   font-size: 9px;
   color: var(--accent);
   text-align: center;
@@ -121,6 +121,7 @@
 }
 
 .swipe-card-category {
+  font-family: var(--font-mono);
   font-size: 12px;
   color: var(--accent);
   text-transform: uppercase;
@@ -150,10 +151,31 @@
 }
 
 .swipe-card-overlap-label {
+  font-family: var(--font-mono);
   font-size: 10px;
   opacity: 0.6;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.swipe-card-vibe {
+  padding: 8px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.swipe-card-vibe-label {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.5;
+}
+
+.swipe-card-vibe-value {
+  color: var(--accent);
+  font-size: 12px;
 }
 
 .swipe-card-sequential {
@@ -178,6 +200,7 @@
 }
 
 .swipe-card-symmetry-label {
+  font-family: var(--font-mono);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -210,7 +233,7 @@
 .symmetry-bar-track {
   flex: 1;
   height: 7px;
-  background: #e7e7ea;
+  background: var(--border-soft);
   position: relative;
 }
 
@@ -243,6 +266,7 @@
 }
 
 .swipe-card-terms-label {
+  font-family: var(--font-mono);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -285,7 +309,7 @@
 
 .swipe-btn-pass:hover {
   border-color: var(--gray);
-  background: rgba(29, 31, 32, 0.05);
+  background: var(--border-soft);
   transform: scale(1.06);
 }
 
@@ -335,6 +359,7 @@
 }
 
 .sidebar-label {
+  font-family: var(--font-mono);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -372,4 +397,17 @@
 .sidebar-empty {
   font-size: 12px;
   opacity: 0.5;
+}
+
+.sidebar-personality-status {
+  margin: 0 0 12px;
+  font-size: 12px;
+  opacity: 0.7;
+  line-height: 1.5;
+}
+
+.sidebar-vibe-btn {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 12.5px;
 }

@@ -40,6 +40,11 @@ export default function App() {
       {view === 'pitch' && (
         <RecruitPitchView selectedIdx={selectedProspectIdx} onSelect={setSelectedProspectIdx} />
       )}
+
+      <footer className="app-footer">
+        Synthetic demo data — all merchants, customers, scores, and uplift figures are invented
+        to illustrate the system's reasoning, not real Amex data.
+      </footer>
     </div>
   )
 }

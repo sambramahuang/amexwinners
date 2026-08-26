@@ -3,7 +3,7 @@
   inset: 0;
   display: grid;
   place-items: center;
-  background: rgba(43, 43, 45, 0.5);
+  background: rgba(2, 5, 12, 0.6);
   z-index: 50;
   animation: fadeIn 0.2s ease both;
 }
@@ -11,14 +11,15 @@
 .match-modal {
   position: relative;
   width: min(420px, 90vw);
-  background: var(--bg);
+  background: var(--bg-panel);
   border: 1px solid var(--border);
   padding: 28px;
-  box-shadow: 0 12px 32px rgba(43, 43, 45, 0.22);
+  box-shadow: 0 12px 32px rgba(2, 5, 12, 0.5);
   animation: popIn 0.25s cubic-bezier(0.2, 0.8, 0.3, 1) both;
 }
 
 .match-modal-eyebrow {
+  font-family: var(--font-mono);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -37,6 +38,34 @@
   margin: 0 0 14px;
   font-size: 13px;
   opacity: 0.8;
+}
+
+.match-modal-ai {
+  border: 1px solid var(--accent-dim-strong);
+  background: var(--accent-dim);
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.match-modal-ai-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.match-modal-ai p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  opacity: 0.9;
+}
+
+.match-modal-ai-loading {
+  opacity: 0.55 !important;
+  font-style: italic;
 }
 
 .match-modal-terms {

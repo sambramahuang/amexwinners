@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { View } from '../App'
 import './Nav.css'
 
@@ -15,20 +16,58 @@ interface NavProps {
 }
 
 export default function Nav({ view, onChange }: NavProps) {
+  const [mobileOpen, setMobileOpen] = useState(false)
+
+  function select(id: View) {
+    onChange(id)
+    setMobileOpen(false)
+  }
+
   return (
-    <nav className="top-nav">
-      <span className="brand">
-        Concord <span className="brand-slash">/</span> Merchant Graph
-      </span>
-      {NAV_ITEMS.map((item) => (
-        <span
-          key={item.id}
-          className={`nav-link ${view === item.id ? 'is-active' : ''}`}
-          onClick={() => onChange(item.id)}
-        >
-          {item.label}
+    <div className="nav-wrap">
+      <nav className={`top-nav ${scrolled ? 'is-scrolled' : ''}`}>
+        <span className="brand">
+          Circuit <span className="brand-slash">/</span> Merchant Graph
         </span>
-      ))}
-    </nav>
+
+        <div className="nav-links">
+          {NAV_ITEMS.map((item) => (
+            <span
+              key={item.id}
+              className={`nav-link ${view === item.id ? 'is-active' : ''}`}
+              onClick={() => select(item.id)}
+            >
+              {item.label}
+            </span>
+          ))}
+        </div>
+
+        <button
+          className={`nav-toggle ${mobileOpen ? 'is-open' : ''}`}
+          type="button"
+          aria-label="Toggle menu"
+          aria-expanded={mobileOpen}
+          onClick={() => setMobileOpen((v) => !v)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
+      </nav>
+
+      {mobileOpen && (
+        <div className="nav-mobile-menu">
+          {NAV_ITEMS.map((item) => (
+            <span
+              key={item.id}
+              className={`nav-mobile-link ${view === item.id ? 'is-active' : ''}`}
+              onClick={() => select(item.id)}
+            >
+              {item.label}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
   )
 }

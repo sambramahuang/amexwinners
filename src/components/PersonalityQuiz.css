@@ -1,0 +1,90 @@
+.personality-quiz {
+  position: relative;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  padding: 32px;
+  max-width: 640px;
+  margin: 0 auto;
+  animation: fadeUp 0.35s ease both;
+}
+
+.personality-quiz-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.personality-quiz-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 26px;
+  margin: 0 0 10px;
+}
+
+.personality-quiz-intro {
+  font-size: 13px;
+  opacity: 0.75;
+  line-height: 1.5;
+  margin: 0 0 28px;
+  max-width: 52ch;
+}
+
+.personality-quiz-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.personality-question-prompt {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 10px;
+}
+
+.personality-question-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+@media (max-width: 560px) {
+  .personality-question-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+.personality-option {
+  text-align: left;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  line-height: 1.4;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.personality-option:hover {
+  border-color: var(--border-strong);
+  background: var(--border-soft);
+}
+
+.personality-option.is-selected {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.personality-quiz-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  gap: 12px;
+}

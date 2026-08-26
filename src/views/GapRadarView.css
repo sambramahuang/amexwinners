@@ -44,24 +44,16 @@
   margin-bottom: 10px;
 }
 
-.cluster-diagram-names {
-  display: flex;
-  justify-content: space-between;
-  font-size: 9.5px;
-  opacity: 0.6;
-  margin-top: 8px;
-  gap: 6px;
-}
-
 .cluster-diagram-caption {
   font-size: 9.5px;
   text-align: center;
   opacity: 0.5;
-  margin-top: 4px;
-  font-family: ui-monospace, monospace;
+  margin-top: 8px;
+  font-family: var(--font-mono);
 }
 
 .gaps-table-label {
+  font-family: var(--font-mono);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -80,6 +72,7 @@
 }
 
 .gaps-table th {
+  font-family: var(--font-mono);
   text-align: left;
   font-size: 11px;
   letter-spacing: 0.06em;
@@ -101,7 +94,7 @@
 }
 
 .gaps-table tbody tr:hover {
-  background: rgba(29, 31, 32, 0.04);
+  background: var(--border-soft);
 }
 
 .gaps-table-name {

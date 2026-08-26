@@ -7,21 +7,14 @@ import './GapRadarView.css'
 interface ClusterGraphCardProps {
   title: string
   config: GraphSceneConfig
-  merchantNames: [string, string, string]
-  gapLabel: string
 }
 
-function ClusterGraphCard({ title, config, merchantNames, gapLabel }: ClusterGraphCardProps) {
+function ClusterGraphCard({ title, config }: ClusterGraphCardProps) {
   return (
     <div className="cluster-diagram-card">
       <div className="cluster-diagram-title">{title}</div>
       <GraphCanvas config={config} height={190} />
-      <div className="cluster-diagram-names">
-        {merchantNames.map((name) => (
-          <span key={name}>{name}</span>
-        ))}
-      </div>
-      <div className="cluster-diagram-caption">{gapLabel} · drag to rotate</div>
+      <div className="cluster-diagram-caption">drag to rotate</div>
     </div>
   )
 }
@@ -40,18 +33,8 @@ export default function GapRadarView({ onGeneratePitch }: GapRadarViewProps) {
       </p>
 
       <div className="cluster-diagram-grid">
-        <ClusterGraphCard
-          title="Downtown Loop cluster"
-          config={DOWNTOWN_LOOP_GRAPH}
-          merchantNames={['Basin Coffee', 'Spinebound Books', 'Nettle & Bloom']}
-          gapLabel="gift shop — gap"
-        />
-        <ClusterGraphCard
-          title="Riverside Row cluster"
-          config={RIVERSIDE_ROW_GRAPH}
-          merchantNames={['Ridgeline Yoga', 'Loom Bicycle Co.', 'Anchor & Awl']}
-          gapLabel="wellness — gap"
-        />
+        <ClusterGraphCard title="Downtown Loop cluster" config={DOWNTOWN_LOOP_GRAPH} />
+        <ClusterGraphCard title="Riverside Row cluster" config={RIVERSIDE_ROW_GRAPH} />
       </div>
 
       <div className="gaps-table-label">Recruit targets, ranked by gap fit</div>

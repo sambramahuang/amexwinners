@@ -1,14 +1,55 @@
-import { useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import { useMemo, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { MATCH_CANDIDATES, type MatchCandidate } from '../data/graphEngineData'
+import type { PersonalityProfile } from '../data/personalityQuiz'
+import { computeBlendedScore, computePersonalityFit } from '../utils/personalityFit'
 import CornerBrackets from '../components/CornerBrackets'
 import MatchModal from '../components/MatchModal'
+import PersonalityQuiz from '../components/PersonalityQuiz'
 import './MatchingView.css'
 
 const SWIPE_THRESHOLD = 120
 const EXIT_DISTANCE = 700
 const EXIT_DURATION_MS = 280
 
+const PROFILE_KEY = 'circuit.personalityProfile.v1'
+const SKIP_KEY = 'circuit.personalitySkipped.v1'
+
+function loadProfile(): PersonalityProfile | null {
+  try {
+    const raw = localStorage.getItem(PROFILE_KEY)
+    return raw ? (JSON.parse(raw) as PersonalityProfile) : null
+  } catch {
+    return null
+  }
+}
+
+function loadSkipped(): boolean {
+  try {
+    return localStorage.getItem(SKIP_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+function savePersonalityProfile(profile: PersonalityProfile) {
+  try {
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile))
+    localStorage.removeItem(SKIP_KEY)
+  } catch {
+    /* localStorage unavailable — quiz just won't persist across visits */
+  }
+}
+
+function saveSkipFlag() {
+  try {
+    localStorage.setItem(SKIP_KEY, '1')
+  } catch {
+    /* ignore */
+  }
+}
+
 type SwipeDirection = 'left' | 'right'
+export type RankedCandidate = MatchCandidate & { personalityFit: number | null }
 
 export default function MatchingView() {
   const [qIndex, setQIndex] = useState(0)
@@ -18,12 +59,26 @@ export default function MatchingView() {
   const [exiting, setExiting] = useState<SwipeDirection | null>(null)
   const [matchedNames, setMatchedNames] = useState<string[]>([])
   const [passedCount, setPassedCount] = useState(0)
-  const [modalCard, setModalCard] = useState<MatchCandidate | null>(null)
+  const [modalCard, setModalCard] = useState<RankedCandidate | null>(null)
+  const [profile, setProfile] = useState<PersonalityProfile | null>(() => loadProfile())
+  const [showQuiz, setShowQuiz] = useState<boolean>(() => !loadProfile() && !loadSkipped())
 
-  const total = MATCH_CANDIDATES.length
-  const current = MATCH_CANDIDATES[qIndex] ?? null
-  const peek1 = MATCH_CANDIDATES[qIndex + 1] ?? null
-  const peek2 = MATCH_CANDIDATES[qIndex + 2] ?? null
+  const rankedCandidates = useMemo<RankedCandidate[]>(() => {
+    const withFit = MATCH_CANDIDATES.map((c) => ({
+      ...c,
+      personalityFit: profile ? computePersonalityFit(c.personalityTags, profile) : null,
+    }))
+    if (!profile) return withFit
+    return [...withFit].sort(
+      (a, b) =>
+        computeBlendedScore(b.overlapPct, b.personalityFit) - computeBlendedScore(a.overlapPct, a.personalityFit),
+    )
+  }, [profile])
+
+  const total = rankedCandidates.length
+  const current = rankedCandidates[qIndex] ?? null
+  const peek1 = rankedCandidates[qIndex + 1] ?? null
+  const peek2 = rankedCandidates[qIndex + 2] ?? null
   const matchDone = qIndex >= total
   const matchedCount = matchedNames.length
 
@@ -50,7 +105,7 @@ export default function MatchingView() {
   }
 
   function swipeAway(dir: SwipeDirection) {
-    const card = MATCH_CANDIDATES[qIndex]
+    const card = rankedCandidates[qIndex]
     setExiting(dir)
     setDragging(false)
     setTimeout(() => {
@@ -78,13 +133,29 @@ export default function MatchingView() {
   const likeOpacity = Math.min(1, Math.max(0, activeDx / 100))
   const nopeOpacity = Math.min(1, Math.max(0, -activeDx / 100))
 
-  function restart() {
+  function resetQueue() {
     setQIndex(0)
     setMatchedNames([])
     setPassedCount(0)
     setDragging(false)
     setDrag({ x: 0, y: 0 })
     setExiting(null)
+  }
+
+  function restart() {
+    resetQueue()
+  }
+
+  function handleQuizComplete(newProfile: PersonalityProfile) {
+    savePersonalityProfile(newProfile)
+    setProfile(newProfile)
+    setShowQuiz(false)
+    resetQueue()
+  }
+
+  function handleQuizSkip() {
+    saveSkipFlag()
+    setShowQuiz(false)
   }
 
   return (
@@ -95,7 +166,9 @@ export default function MatchingView() {
           <p>Candidates already on Amex, ranked by graph signal strength. Swipe or use the controls below.</p>
         </div>
 
-        {!matchDone && (
+        {showQuiz && <PersonalityQuiz onComplete={handleQuizComplete} onSkip={handleQuizSkip} />}
+
+        {!showQuiz && !matchDone && (
           <>
             <div className="card-stack">
               {peek2 && <div className="stack-card peek-2" />}
@@ -131,15 +204,15 @@ export default function MatchingView() {
                         y1="26"
                         x2="130"
                         y2="26"
-                        stroke="#5980a6"
+                        stroke="#006fcf"
                         strokeWidth={0.6 + current.overlapPct / 22}
                       />
-                      <circle cx="20" cy="26" r="8" fill="#416180" />
-                      <circle cx="130" cy="26" r="8" fill="#5980a6" />
-                      <text x="20" y="46" fontSize="8" fill="#1d1f20" opacity="0.6" textAnchor="middle" fontFamily="Barlow">
+                      <circle cx="20" cy="26" r="8" fill="#003d75" />
+                      <circle cx="130" cy="26" r="8" fill="#006fcf" />
+                      <text x="20" y="46" fontSize="8" fill="#0b1c33" opacity="0.65" textAnchor="middle" fontFamily="IBM Plex Sans">
                         Basin
                       </text>
-                      <text x="130" y="46" fontSize="8" fill="#1d1f20" opacity="0.6" textAnchor="middle" fontFamily="Barlow">
+                      <text x="130" y="46" fontSize="8" fill="#0b1c33" opacity="0.65" textAnchor="middle" fontFamily="IBM Plex Sans">
                         {current.shortName}
                       </text>
                     </svg>
@@ -149,8 +222,15 @@ export default function MatchingView() {
                     </div>
                   </div>
 
+                  {current.personalityFit !== null && (
+                    <div className="swipe-card-vibe">
+                      <span className="swipe-card-vibe-label">Partnership fit (secondary, self-reported)</span>
+                      <span className="swipe-card-vibe-value">{current.personalityFit}%</span>
+                    </div>
+                  )}
+
                   <div className="swipe-card-sequential">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5980a6" strokeWidth="1.5">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#006fcf" strokeWidth="1.5">
                       <circle cx="12" cy="12" r="10" />
                       <polyline points="12 6 12 12 16 14" />
                     </svg>
@@ -216,7 +296,7 @@ export default function MatchingView() {
           </>
         )}
 
-        {matchDone && (
+        {!showQuiz && matchDone && (
           <div className="queue-done">
             <div className="queue-done-title">Queue cleared</div>
             <p>
@@ -229,38 +309,53 @@ export default function MatchingView() {
         )}
       </div>
 
-      <aside className="matching-sidebar">
-        <div className="sidebar-card">
-          <div className="sidebar-label">Session</div>
-          <div className="sidebar-row">
-            <span>Reviewed</span>
-            <span>
-              {Math.min(qIndex, total)} / {total}
-            </span>
-          </div>
-          <div className="sidebar-row">
-            <span>Matched</span>
-            <span className="sidebar-value-accent">{matchedCount}</span>
-          </div>
-          <div className="sidebar-row sidebar-row-last">
-            <span>Passed</span>
-            <span>{passedCount}</span>
-          </div>
-        </div>
-        <div className="sidebar-card">
-          <div className="sidebar-label">Matched this session</div>
-          <div className="sidebar-chips">
-            {matchedNames.map((n) => (
-              <span className="sidebar-chip" key={n}>
-                {n}
+      {!showQuiz && (
+        <aside className="matching-sidebar">
+          <div className="sidebar-card">
+            <div className="sidebar-label">Session</div>
+            <div className="sidebar-row">
+              <span>Reviewed</span>
+              <span>
+                {Math.min(qIndex, total)} / {total}
               </span>
-            ))}
-            {matchedNames.length === 0 && <span className="sidebar-empty">None yet — swipe right to match.</span>}
+            </div>
+            <div className="sidebar-row">
+              <span>Matched</span>
+              <span className="sidebar-value-accent">{matchedCount}</span>
+            </div>
+            <div className="sidebar-row sidebar-row-last">
+              <span>Passed</span>
+              <span>{passedCount}</span>
+            </div>
           </div>
-        </div>
-      </aside>
+          <div className="sidebar-card">
+            <div className="sidebar-label">Matched this session</div>
+            <div className="sidebar-chips">
+              {matchedNames.map((n) => (
+                <span className="sidebar-chip" key={n}>
+                  {n}
+                </span>
+              ))}
+              {matchedNames.length === 0 && <span className="sidebar-empty">None yet — swipe right to match.</span>}
+            </div>
+          </div>
+          <div className="sidebar-card">
+            <div className="sidebar-label">Partnership profile</div>
+            <p className="sidebar-personality-status">
+              {profile
+                ? 'Profile answered — nudging rank up to 30%, transaction data still leads.'
+                : 'Not answered — ranked by transaction data only.'}
+            </p>
+            <button className="btn btn-ghost sidebar-vibe-btn" onClick={() => setShowQuiz(true)}>
+              {profile ? 'Retake questionnaire' : 'Complete questionnaire'}
+            </button>
+          </div>
+        </aside>
+      )}
 
-      {modalCard && <MatchModal candidate={modalCard} onClose={() => setModalCard(null)} />}
+      {modalCard && (
+        <MatchModal candidate={modalCard} personalityProfile={profile} onClose={() => setModalCard(null)} />
+      )}
     </main>
   )
 }

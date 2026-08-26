@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js'
 import type { GraphSceneConfig } from '../data/graphSceneConfigs'
 import './GraphCanvas.css'
 
-const DEFAULT_NODE_COLOR = 0x5980a6
-const EDGE_COLOR = 0x5980a6
-const DASHED_EDGE_COLOR = 0x98989b
+const DEFAULT_NODE_COLOR = 0x006fcf
+const EDGE_COLOR = 0x006fcf
+const DASHED_EDGE_COLOR = 0x5b6b82
 
 interface GraphCanvasProps {
   config: GraphSceneConfig
@@ -32,6 +33,14 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     container.appendChild(renderer.domElement)
 
+    const labelRenderer = new CSS2DRenderer()
+    labelRenderer.setSize(width, startHeight)
+    labelRenderer.domElement.style.position = 'absolute'
+    labelRenderer.domElement.style.top = '0'
+    labelRenderer.domElement.style.left = '0'
+    labelRenderer.domElement.style.pointerEvents = 'none'
+    container.appendChild(labelRenderer.domElement)
+
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(40, width / startHeight, 0.1, 100)
     camera.position.set(...config.cameraPosition)
@@ -55,6 +64,15 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
       const mesh = new THREE.Mesh(nodeGeometry, material)
       mesh.position.set(...node.position)
       scene.add(mesh)
+
+      if (node.name) {
+        const el = document.createElement('div')
+        el.className = 'graph-node-label'
+        el.textContent = node.name
+        const label = new CSS2DObject(el)
+        label.position.set(node.position[0], node.position[1] + 0.24, node.position[2])
+        scene.add(label)
+      }
     }
 
     const edgeMaterial = new THREE.LineBasicMaterial({ color: EDGE_COLOR })
@@ -97,6 +115,15 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
         gapMesh.position.set(...gap.position)
         scene.add(gapMesh)
 
+        if (gap.label) {
+          const el = document.createElement('div')
+          el.className = 'graph-gap-label'
+          el.textContent = gap.label
+          const label = new CSS2DObject(el)
+          label.position.set(gap.position[0], gap.position[1] + 0.22, gap.position[2])
+          scene.add(label)
+        }
+
         const dashMaterial = new THREE.LineDashedMaterial({ color: gap.color, dashSize: 0.08, gapSize: 0.06 })
         disposables.push({ material: dashMaterial })
         for (const idx of gap.connectedNodeIndexes) {
@@ -118,12 +145,13 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
     controls.enableDamping = true
     controls.dampingFactor = 0.08
     controls.autoRotate = true
-    controls.autoRotateSpeed = 1.4
+    controls.autoRotateSpeed = 0.6
 
     function animate() {
       if (disposed) return
       controls.update()
       renderer.render(scene, camera)
+      labelRenderer.render(scene, camera)
       raf = requestAnimationFrame(animate)
     }
     animate()
@@ -135,6 +163,7 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
       camera.aspect = w / h
       camera.updateProjectionMatrix()
       renderer.setSize(w, h)
+      labelRenderer.setSize(w, h)
     }
     window.addEventListener('resize', handleResize)
 
@@ -149,6 +178,7 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
       }
       renderer.dispose()
       renderer.domElement.parentNode?.removeChild(renderer.domElement)
+      labelRenderer.domElement.parentNode?.removeChild(labelRenderer.domElement)
     }
   }, [config])
 
