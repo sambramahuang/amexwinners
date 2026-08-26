@@ -31,6 +31,11 @@
   opacity: 0.7;
 }
 
+.matching-tier-blurb {
+  margin-top: 6px !important;
+  opacity: 0.55 !important;
+}
+
 .card-stack {
   position: relative;
   height: 520px;
@@ -59,11 +64,26 @@
   transform: scale(0.94) translateY(6px);
 }
 
-.swipe-card {
+.swipe-card-mount {
   position: absolute;
   top: 0;
   width: 400px;
   max-width: 100%;
+  animation: card-pop-in 0.32s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+@keyframes card-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.93) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.swipe-card {
   min-height: 480px;
   background: var(--bg-panel);
   border: 1px solid var(--border);
@@ -79,6 +99,7 @@
   font-size: 13px;
   letter-spacing: 0.06em;
   padding: 3px 9px;
+  transition: opacity 0.12s ease;
 }
 
 .swipe-badge-match {
@@ -211,6 +232,35 @@
   gap: 5px;
 }
 
+.tier-badge {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 7px;
+  border: 1px solid var(--border);
+  opacity: 1;
+  white-space: nowrap;
+}
+
+.tier-badge-1 {
+  color: inherit;
+  opacity: 0.6;
+}
+
+.tier-badge-2 {
+  color: var(--accent);
+  border-color: var(--accent-dim-strong);
+  background: var(--accent-dim);
+}
+
+.tier-badge-3 {
+  color: var(--gold);
+  border-color: var(--gold);
+  background: var(--gold-dim);
+}
+
 .symmetry-bars {
   display: flex;
   flex-direction: column;
@@ -278,6 +328,16 @@
   margin: 0;
   font-size: 12px;
   opacity: 0.8;
+}
+
+.swipe-card-proposal-btn {
+  display: block;
+  width: calc(100% - 52px);
+  margin: 0 26px 22px;
+  font-size: 12px;
+  padding: 9px 14px;
+  text-align: center;
+  cursor: pointer;
 }
 
 .swipe-controls {

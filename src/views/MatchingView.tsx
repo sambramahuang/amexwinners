@@ -1,5 +1,5 @@
 import { useMemo, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
-import { MATCH_CANDIDATES, type MatchCandidate } from '../data/graphEngineData'
+import { MATCH_CANDIDATES, TIER_LABELS, type MatchCandidate } from '../data/graphEngineData'
 import type { PersonalityProfile } from '../data/personalityQuiz'
 import { computeBlendedScore, computePersonalityFit } from '../utils/personalityFit'
 import CornerBrackets from '../components/CornerBrackets'
@@ -9,7 +9,7 @@ import './MatchingView.css'
 
 const SWIPE_THRESHOLD = 120
 const EXIT_DISTANCE = 700
-const EXIT_DURATION_MS = 280
+const EXIT_DURATION_MS = 320
 
 const PROFILE_KEY = 'circuit.personalityProfile.v1'
 const SKIP_KEY = 'circuit.personalitySkipped.v1'
@@ -60,6 +60,7 @@ export default function MatchingView() {
   const [matchedNames, setMatchedNames] = useState<string[]>([])
   const [passedCount, setPassedCount] = useState(0)
   const [modalCard, setModalCard] = useState<RankedCandidate | null>(null)
+  const [previewCard, setPreviewCard] = useState<RankedCandidate | null>(null)
   const [profile, setProfile] = useState<PersonalityProfile | null>(() => loadProfile())
   const [showQuiz, setShowQuiz] = useState<boolean>(() => !loadProfile() && !loadSkipped())
 
@@ -105,6 +106,7 @@ export default function MatchingView() {
   }
 
   function swipeAway(dir: SwipeDirection) {
+    if (exiting) return
     const card = rankedCandidates[qIndex]
     setExiting(dir)
     setDragging(false)
@@ -164,6 +166,10 @@ export default function MatchingView() {
         <div className="matching-header">
           <h1>Matching queue — Basin Coffee Roasters</h1>
           <p>Candidates already on Amex, ranked by graph signal strength. Swipe or use the controls below.</p>
+          <p className="matching-tier-blurb">
+            Matches start as a single linked offer and can grow into a recurring or longer-term relationship as
+            performance holds up over time.
+          </p>
         </div>
 
         {showQuiz && <PersonalityQuiz onComplete={handleQuizComplete} onSkip={handleQuizSkip} />}
@@ -174,6 +180,7 @@ export default function MatchingView() {
               {peek2 && <div className="stack-card peek-2" />}
               {peek1 && <div className="stack-card peek-1" />}
               {current && (
+                <div className="swipe-card-mount" key={current.id}>
                 <div
                   className="swipe-card"
                   style={cardStyle}
@@ -244,6 +251,7 @@ export default function MatchingView() {
                         <line x1="5" y1="15" x2="19" y2="15" />
                       </svg>
                       Value symmetry
+                      <span className={`tier-badge tier-badge-${current.tier}`}>{TIER_LABELS[current.tier]}</span>
                     </div>
                     <div className="symmetry-bars">
                       <div className="symmetry-bar-row">
@@ -276,6 +284,18 @@ export default function MatchingView() {
                     <div className="swipe-card-terms-label">Suggested terms</div>
                     <p>{current.terms}</p>
                   </div>
+
+                  <button
+                    className="btn btn-ghost swipe-card-proposal-btn"
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setPreviewCard(current)
+                    }}
+                  >
+                    See Amex's proposal &amp; predicted benefits
+                  </button>
+                </div>
                 </div>
               )}
             </div>
@@ -355,6 +375,15 @@ export default function MatchingView() {
 
       {modalCard && (
         <MatchModal candidate={modalCard} personalityProfile={profile} onClose={() => setModalCard(null)} />
+      )}
+
+      {previewCard && (
+        <MatchModal
+          candidate={previewCard}
+          personalityProfile={profile}
+          mode="preview"
+          onClose={() => setPreviewCard(null)}
+        />
       )}
     </main>
   )

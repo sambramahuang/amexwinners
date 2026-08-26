@@ -70,6 +70,53 @@ Suggested terms: ${candidate.terms}${personalityBlock}`
   }
 })
 
+app.post('/api/pitch-copy', async (req, res) => {
+  const { prospect } = req.body ?? {}
+
+  if (!prospect?.name || !prospect?.category || !prospect?.cluster || !prospect?.upliftRange) {
+    res.status(400).json({ error: 'Missing prospect data.' })
+    return
+  }
+
+  const waitingList = Array.isArray(prospect.waiting)
+    ? prospect.waiting
+        .filter((w) => w && typeof w.name === 'string' && typeof w.why === 'string')
+        .map((w) => `- ${w.name}: ${w.why}`)
+        .join('\n')
+    : ''
+
+  const prompt = `You are writing a short recruitment pitch (2-3 sentences, plain language, no bullet points)
+inviting a small business to join a merchant-partnership program. Ground every claim in the data given below —
+do not invent new statistics, customer counts, or merchant claims beyond what's provided. This prospect has no
+transaction history with the program yet, so these numbers are a category-level projected estimate, not measured
+from this merchant's own data — keep the tone confident but honest about that (e.g. "businesses like yours
+typically see...", never "you will see...").
+
+Prospect: ${prospect.name} (${prospect.category})
+Cluster: ${prospect.cluster}
+Why this gap matters: ${prospect.reasoning ?? 'not provided'}
+Projected uplift range: ${prospect.upliftRange}
+Merchants in the cluster already waiting for a partner like this:
+${waitingList || 'none provided'}`
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.6,
+      max_tokens: 180,
+    })
+
+    const pitch = completion.choices[0]?.message?.content?.trim()
+    if (!pitch) throw new Error('Empty completion')
+
+    res.json({ pitch })
+  } catch (err) {
+    console.error('OpenAI request failed:', err.message)
+    res.status(502).json({ error: 'AI pitch unavailable right now.' })
+  }
+})
+
 app.listen(PORT, () => {
   console.log(`AI backend listening on http://localhost:${PORT}`)
 })

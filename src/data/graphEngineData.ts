@@ -5,6 +5,13 @@
 // from real anonymised, aggregated Amex closed-loop transaction data.
 // -----------------------------------------------------------------------
 
+/**
+ * Relationship tier — Circuit's own suggested framing for a match, not
+ * something merchants configure. Tier 1 is every match's starting point;
+ * Tier 2/3 are suggested once performance and symmetry hold up over time.
+ */
+export type RelationshipTier = 1 | 2 | 3
+
 /** Prong 1: a merchant already accepting Amex, queued for matching against Basin Coffee Roasters. */
 export interface MatchCandidate {
   id: number
@@ -24,6 +31,14 @@ export interface MatchCandidate {
   terms: string
   /** Synthetic brand-vibe tags used only for the optional personality-fit nudge. */
   personalityTags: string[]
+  /** Circuit's suggested relationship tier for this match. */
+  tier: RelationshipTier
+  /** Simulated — how long this match has been live, in months. */
+  monthsActive: number
+  /** Why this match sits at its current tier. */
+  tierRationale: string
+  /** Tier-3 only: a non-binding starter benchmark for a structural relationship. */
+  tier3Suggestion?: string
 }
 
 export const MATCH_CANDIDATES: MatchCandidate[] = [
@@ -40,6 +55,12 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Balanced · Δ3pts — value flows both ways.',
     terms: 'In-store QR at Spinebound: book club members get their first coffee free at Basin.',
     personalityTags: ['slow-browse', 'community', 'ritual'],
+    tier: 3,
+    monthsActive: 8,
+    tierRationale:
+      '8 months of consistent redemption and the tightest value symmetry in the cluster (Δ3pts) make this a candidate for a standing relationship, not just a recurring offer.',
+    tier3Suggestion:
+      'Peer café–bookstore pairs of this size typically settle into a shared weekly event slot (one in-store reading or tasting per week) rather than a one-off offer.',
   },
   {
     id: 2,
@@ -54,6 +75,9 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Balanced · Δ3pts — value flows both ways.',
     terms: 'Joint loyalty stamp: every 5th coffee unlocks 10% off any stationery item.',
     personalityTags: ['occasion', 'brand-aesthetic', 'shared-regulars'],
+    tier: 2,
+    monthsActive: 5,
+    tierRationale: '5 months and 3 offer cycles of steady redemption support repeating this on an ongoing cadence instead of renegotiating each time.',
   },
   {
     id: 3,
@@ -68,6 +92,9 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Balanced · Δ2pts — value flows both ways.',
     terms: 'Shared window display plus cross-tagged social posts each Friday.',
     personalityTags: ['occasion', 'brand-aesthetic', 'shared-events'],
+    tier: 2,
+    monthsActive: 4,
+    tierRationale: '4 months and 2 offer cycles of consistent redemption support repeating this on an ongoing cadence instead of renegotiating each time.',
   },
   {
     id: 4,
@@ -82,6 +109,9 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Auto-rebalanced: added a Basin gift-card bonus for Loom referrals to close an 18pt gap.',
     terms: 'Referral card: bike tune-up customers get a free drip coffee at Basin.',
     personalityTags: ['fast-paced', 'convenience', 'shared-regulars'],
+    tier: 1,
+    monthsActive: 1,
+    tierRationale: 'A new, single-offer proposal — sequencing signal is still forming, so it starts here rather than at a recurring cadence.',
   },
   {
     id: 5,
@@ -96,6 +126,9 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Auto-rebalanced: added a post-class coffee voucher to close a 12pt gap.',
     terms: 'Post-class voucher: first coffee free after any studio class.',
     personalityTags: ['ritual', 'community', 'shared-events'],
+    tier: 1,
+    monthsActive: 2,
+    tierRationale: 'A new, single-offer proposal — sequencing signal is still sparse, so it starts here rather than at a recurring cadence.',
   },
   {
     id: 6,
@@ -110,8 +143,17 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Low confidence · thin signal — hold until more data accrues.',
     terms: 'No proposal yet — insufficient signal to suggest terms.',
     personalityTags: ['low-maintenance', 'occasion'],
+    tier: 1,
+    monthsActive: 1,
+    tierRationale: 'Signal is too thin to propose anything beyond a single trial offer yet.',
   },
 ]
+
+export const TIER_LABELS: Record<RelationshipTier, string> = {
+  1: 'Tier 1 · Linked Offer',
+  2: 'Tier 2 · Recurring',
+  3: 'Tier 3 · Structural',
+}
 
 /** Prong 2: a prospect with no Amex transaction history, linked to a Prong-3 gap. */
 export interface WaitingMerchant {

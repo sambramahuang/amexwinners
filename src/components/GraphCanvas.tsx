@@ -8,6 +8,8 @@ import './GraphCanvas.css'
 const DEFAULT_NODE_COLOR = 0x006fcf
 const EDGE_COLOR = 0x006fcf
 const DASHED_EDGE_COLOR = 0x5b6b82
+const TIER3_EDGE_COLOR = 0xe8b54d
+const TIER3_OFFSET = 0.045
 
 interface GraphCanvasProps {
   config: GraphSceneConfig
@@ -102,6 +104,20 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
         const line = new THREE.Line(geometry, dashedEdgeMaterial)
         line.computeLineDistances()
         scene.add(line)
+      }
+    }
+
+    if (config.tier3Edges) {
+      const tier3Material = new THREE.LineBasicMaterial({ color: TIER3_EDGE_COLOR })
+      disposables.push({ material: tier3Material })
+      for (const [a, b] of config.tier3Edges) {
+        const pointA = new THREE.Vector3(...config.nodes[a].position)
+        const pointB = new THREE.Vector3(...config.nodes[b].position)
+        const direction = pointB.clone().sub(pointA).normalize()
+        const offset = direction.clone().cross(new THREE.Vector3(0, 1, 0)).normalize().multiplyScalar(TIER3_OFFSET)
+        const geometry = new THREE.BufferGeometry().setFromPoints([pointA.clone().add(offset), pointB.clone().add(offset)])
+        disposables.push({ geometry })
+        scene.add(new THREE.Line(geometry, tier3Material))
       }
     }
 

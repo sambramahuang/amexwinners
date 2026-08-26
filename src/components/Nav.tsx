@@ -25,7 +25,7 @@ export default function Nav({ view, onChange }: NavProps) {
 
   return (
     <div className="nav-wrap">
-      <nav className={`top-nav ${scrolled ? 'is-scrolled' : ''}`}>
+      <nav className="top-nav">
         <span className="brand">
           Circuit <span className="brand-slash">/</span> Merchant Graph
         </span>

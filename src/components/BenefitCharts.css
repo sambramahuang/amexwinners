@@ -1,0 +1,101 @@
+.benefit-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.benefit-bar-svg,
+.benefit-trend-svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.benefit-gridline {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.benefit-baseline {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+
+.benefit-tick-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  fill: var(--text-55);
+}
+
+.benefit-row-label {
+  font-family: var(--font-body);
+  font-size: 9.5px;
+  fill: var(--text-70);
+}
+
+.benefit-value-label {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  fill: var(--text);
+  dominant-baseline: middle;
+}
+
+.benefit-bar-you {
+  fill: var(--series-1);
+}
+
+.benefit-bar-them {
+  fill: var(--series-2);
+}
+
+.benefit-line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.benefit-line-you {
+  stroke: var(--series-1);
+}
+
+.benefit-line-them {
+  stroke: var(--series-2);
+}
+
+.benefit-dot-you {
+  fill: var(--series-1);
+}
+
+.benefit-dot-them {
+  fill: var(--series-2);
+}
+
+.benefit-legend {
+  display: flex;
+  gap: 16px;
+  padding-left: 4px;
+}
+
+.benefit-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-70);
+}
+
+.benefit-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex: none;
+}
+
+.benefit-swatch-you {
+  background: var(--series-1);
+}
+
+.benefit-swatch-them {
+  background: var(--series-2);
+}

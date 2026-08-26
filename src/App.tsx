@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import Nav from './components/Nav'
 import OverviewView from './views/OverviewView'
 import MatchingView from './views/MatchingView'
@@ -12,9 +12,31 @@ const GapRadarView = lazy(() => import('./views/GapRadarView'))
 
 export type View = 'overview' | 'graph' | 'match' | 'gaps' | 'pitch'
 
+const VIEWS: View[] = ['overview', 'graph', 'match', 'gaps', 'pitch']
+
+function readViewFromHash(): View {
+  const hash = window.location.hash.slice(1)
+  return (VIEWS as string[]).includes(hash) ? (hash as View) : 'overview'
+}
+
 export default function App() {
-  const [view, setView] = useState<View>('overview')
+  const [view, setViewState] = useState<View>(() => readViewFromHash())
   const [selectedProspectIdx, setSelectedProspectIdx] = useState(0)
+
+  function setView(nextView: View) {
+    setViewState(nextView)
+    if (window.location.hash.slice(1) !== nextView) {
+      window.location.hash = nextView
+    }
+  }
+
+  useEffect(() => {
+    function onHashChange() {
+      setViewState(readViewFromHash())
+    }
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
 
   function generatePitch(prospectIdx: number, nextView: View) {
     setSelectedProspectIdx(prospectIdx)

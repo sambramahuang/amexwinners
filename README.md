@@ -125,3 +125,7 @@ server/
 - The graph and gap-radar node positions in `graphSceneConfigs.ts` are
   hand-placed for a stable, legible demo rather than computed from a live
   force-directed graph-layout algorithm over the full merchant network.
+- Relationship-tier progression (Tier 1 → 2 → 3 in `graphEngineData.ts`)
+  would be computed automatically from real offer-redemption and
+  transaction data over time, not simulated with a static `monthsActive`
+  field as in this prototype.
