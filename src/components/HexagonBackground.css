@@ -1,0 +1,50 @@
+.hexagon-background {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--border-soft);
+}
+
+.hexagon-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.hexagon-row {
+  display: inline-flex;
+}
+
+.hexagon-cell {
+  position: relative;
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+}
+
+.hexagon-cell {
+  --glow: 0;
+}
+
+.hexagon-cell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(11, 28, 51, calc(0.032 * var(--glow))), rgba(11, 28, 51, calc(0.032 * var(--glow)))),
+    linear-gradient(rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.35));
+  transition: background-image 260ms ease-out;
+}
+
+.hexagon-cell::after {
+  content: '';
+  position: absolute;
+  inset: var(--hexagon-margin, 3px);
+  background-image:
+    linear-gradient(rgba(11, 28, 51, calc(0.016 * var(--glow))), rgba(11, 28, 51, calc(0.016 * var(--glow)))),
+    linear-gradient(rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.25));
+  clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  transition: background-image 260ms ease-out;
+}

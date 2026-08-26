@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import Nav from './components/Nav'
+import HexagonBackground from './components/HexagonBackground'
 import OverviewView from './views/OverviewView'
 import MatchingView from './views/MatchingView'
 import RecruitPitchView from './views/RecruitPitchView'
@@ -45,6 +46,7 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      <HexagonBackground className="app-hexagon-backdrop" hexagonSize={55} />
       <Nav view={view} onChange={setView} />
 
       {view === 'overview' && <OverviewView onNavigate={setView} />}

@@ -1,7 +1,36 @@
 .app-shell {
+  position: relative;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+.app-hexagon-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+}
+
+.nav-wrap,
+.app-shell > main,
+.app-footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* .nav-wrap and .app-footer span the full page width but have no background
+   of their own — their empty side margins would otherwise sit on top of the
+   hexagon backdrop and block its glow. .app-shell > main is deliberately left
+   alone: it's the bulk of every page's interactive surface, and pointer-events
+   is inherited, so disabling it there is one missed override away from
+   silently breaking clicks across the whole app. */
+.nav-wrap,
+.app-footer {
+  pointer-events: none;
+}
+
+.nav-wrap > * {
+  pointer-events: auto;
 }
 
 .app-footer {

@@ -13,7 +13,7 @@ function ClusterGraphCard({ title, config }: ClusterGraphCardProps) {
   return (
     <div className="cluster-diagram-card">
       <div className="cluster-diagram-title">{title}</div>
-      <GraphCanvas config={config} height={190} />
+      <GraphCanvas config={config} height={320} />
       <div className="cluster-diagram-caption">drag to rotate</div>
     </div>
   )

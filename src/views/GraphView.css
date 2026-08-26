@@ -21,6 +21,7 @@
 
 .graph-canvas-frame {
   border: 1px solid var(--border);
+  background: var(--bg);
   margin-bottom: 24px;
 }
 
