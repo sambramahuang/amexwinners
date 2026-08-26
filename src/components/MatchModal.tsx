@@ -1,18 +1,22 @@
 import { useEffect, useState } from 'react'
 import type { MatchCandidate } from '../data/graphEngineData'
 import type { PersonalityProfile } from '../data/personalityQuiz'
+import type { MatchScore } from '../utils/circuitScore'
 import CornerBrackets from './CornerBrackets'
+import IntroDraft from './IntroDraft'
 import './MatchModal.css'
 
 interface MatchModalProps {
   candidate: MatchCandidate
   personalityProfile: PersonalityProfile | null
+  /** Present on a mutual match, which is the only time the draft is released. */
+  score?: MatchScore
   onClose: () => void
 }
 
 const ANCHOR = { name: 'Basin Coffee Roasters', category: 'Café' }
 
-export default function MatchModal({ candidate, personalityProfile, onClose }: MatchModalProps) {
+export default function MatchModal({ candidate, personalityProfile, score, onClose }: MatchModalProps) {
   const [explanation, setExplanation] = useState<string | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
 
@@ -57,6 +61,10 @@ export default function MatchModal({ candidate, personalityProfile, onClose }: M
         <div className="match-modal-title">
           Basin Coffee Roasters × {candidate.name}
         </div>
+        <p className="match-modal-mutual">
+          {candidate.name} had already connected with Basin, so both sides have now
+          agreed. Contact details are released to each of you.
+        </p>
         <p className="match-modal-note">{candidate.balanceNote}</p>
 
         <div className="match-modal-ai">
@@ -69,12 +77,14 @@ export default function MatchModal({ candidate, personalityProfile, onClose }: M
         </div>
 
         <div className="match-modal-terms">Suggested terms: {candidate.terms}</div>
+
+        {score && <IntroDraft candidate={candidate} score={score} />}
         <div className="match-modal-actions">
           <button className="btn btn-ghost" onClick={onClose}>
             Keep reviewing
           </button>
           <button className="btn btn-primary" onClick={onClose}>
-            Add to pipeline
+            Save to requests
           </button>
         </div>
       </div>

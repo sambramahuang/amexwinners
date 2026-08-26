@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { View } from '../App'
 import './Nav.css'
 
@@ -17,6 +17,15 @@ interface NavProps {
 
 export default function Nav({ view, onChange }: NavProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  // The nav takes its condensed treatment (.is-scrolled) once the page moves.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   function select(id: View) {
     onChange(id)

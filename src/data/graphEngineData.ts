@@ -24,6 +24,23 @@ export interface MatchCandidate {
   terms: string
   /** Synthetic brand-vibe tags used only for the optional personality-fit nudge. */
   personalityTags: string[]
+  /** Trading area, shown on the card next to name and category. */
+  region: string
+  /**
+   * Whether this merchant has already sent a connect request to Basin. Fixed in
+   * data rather than rolled at runtime, so a request always resolves the same
+   * way in a demo and a mutual match is reproducible.
+   */
+  alreadyConnected: boolean
+  /** Released to the other side only once both merchants have connected. */
+  contact: MerchantContact
+}
+
+export interface MerchantContact {
+  name: string
+  role: string
+  /** Reserved .example domain, so no illustrative address can reach a real inbox. */
+  email: string
 }
 
 export const MATCH_CANDIDATES: MatchCandidate[] = [
@@ -40,6 +57,9 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Balanced · Δ3pts — value flows both ways.',
     terms: 'In-store QR at Spinebound: book club members get their first coffee free at Basin.',
     personalityTags: ['slow-browse', 'community', 'ritual'],
+    region: 'Downtown Loop',
+    alreadyConnected: true,
+    contact: { name: 'Maya Rehn', role: 'Owner', email: 'maya@spineboundbooks.example' },
   },
   {
     id: 2,
@@ -54,6 +74,9 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Balanced · Δ3pts — value flows both ways.',
     terms: 'Joint loyalty stamp: every 5th coffee unlocks 10% off any stationery item.',
     personalityTags: ['occasion', 'brand-aesthetic', 'shared-regulars'],
+    region: 'Downtown Loop',
+    alreadyConnected: false,
+    contact: { name: 'Owen Marsh', role: 'Founder', email: 'owen@fernandfold.example' },
   },
   {
     id: 3,
@@ -68,6 +91,9 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Balanced · Δ2pts — value flows both ways.',
     terms: 'Shared window display plus cross-tagged social posts each Friday.',
     personalityTags: ['occasion', 'brand-aesthetic', 'shared-events'],
+    region: 'Downtown Loop',
+    alreadyConnected: true,
+    contact: { name: 'Priya Raman', role: 'Owner', email: 'priya@nettleandbloom.example' },
   },
   {
     id: 4,
@@ -82,6 +108,9 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Auto-rebalanced: added a Basin gift-card bonus for Loom referrals to close an 18pt gap.',
     terms: 'Referral card: bike tune-up customers get a free drip coffee at Basin.',
     personalityTags: ['fast-paced', 'convenience', 'shared-regulars'],
+    region: 'Riverside Row',
+    alreadyConnected: false,
+    contact: { name: 'Theo Vance', role: 'Managing Director', email: 'theo@loombicycle.example' },
   },
   {
     id: 5,
@@ -96,6 +125,9 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Auto-rebalanced: added a post-class coffee voucher to close a 12pt gap.',
     terms: 'Post-class voucher: first coffee free after any studio class.',
     personalityTags: ['ritual', 'community', 'shared-events'],
+    region: 'Riverside Row',
+    alreadyConnected: true,
+    contact: { name: 'Dana Okafor', role: 'Founder', email: 'dana@ridgelineyoga.example' },
   },
   {
     id: 6,
@@ -110,6 +142,9 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Low confidence · thin signal — hold until more data accrues.',
     terms: 'No proposal yet — insufficient signal to suggest terms.',
     personalityTags: ['low-maintenance', 'occasion'],
+    region: 'Riverside Row',
+    alreadyConnected: false,
+    contact: { name: 'Sam Idris', role: 'Owner', email: 'sam@anchorandawl.example' },
   },
 ]
 

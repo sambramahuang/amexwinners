@@ -1,0 +1,99 @@
+.consent-gate {
+  position: relative;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 28px 30px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  animation: fadeUp 0.3s ease both;
+}
+
+.consent-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.consent-title {
+  margin: 8px 0 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.consent-intro {
+  margin: 10px 0 0;
+  color: var(--text-70);
+  font-size: 14px;
+}
+
+.consent-list {
+  margin: 20px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.consent-row {
+  display: flex;
+  gap: 11px;
+  font-size: 14px;
+  color: var(--text-80);
+}
+
+.consent-mark {
+  flex: 0 0 auto;
+  width: 19px;
+  height: 19px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 1px;
+}
+
+.consent-mark.is-shared {
+  background: rgba(43, 184, 163, 0.14);
+  color: #1c8877;
+}
+
+.consent-mark.is-withheld {
+  background: var(--border-soft);
+  color: var(--text-55);
+}
+
+.consent-check {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  margin-top: 22px;
+  padding: 14px 16px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-soft);
+  font-size: 13px;
+  color: var(--text-80);
+  cursor: pointer;
+}
+
+.consent-check input {
+  margin-top: 2px;
+  accent-color: var(--accent);
+}
+
+.consent-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+.consent-footnote {
+  font-size: 12px;
+  color: var(--text-55);
+}

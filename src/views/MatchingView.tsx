@@ -1,8 +1,16 @@
-import { useMemo, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import {
+  useMemo,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import { MATCH_CANDIDATES, type MatchCandidate } from '../data/graphEngineData'
 import type { PersonalityProfile } from '../data/personalityQuiz'
-import { computeBlendedScore, computePersonalityFit } from '../utils/personalityFit'
+import { computePersonalityFit } from '../utils/personalityFit'
+import { displayWeight, scoreCandidate, type MatchScore } from '../utils/circuitScore'
+import ConsentGate from '../components/ConsentGate'
 import CornerBrackets from '../components/CornerBrackets'
+import IntroDraft from '../components/IntroDraft'
 import MatchModal from '../components/MatchModal'
 import PersonalityQuiz from '../components/PersonalityQuiz'
 import './MatchingView.css'
@@ -13,6 +21,7 @@ const EXIT_DURATION_MS = 280
 
 const PROFILE_KEY = 'circuit.personalityProfile.v1'
 const SKIP_KEY = 'circuit.personalitySkipped.v1'
+const CONSENT_KEY = 'circuit.matchingConsent.v1'
 
 function loadProfile(): PersonalityProfile | null {
   try {
@@ -31,12 +40,20 @@ function loadSkipped(): boolean {
   }
 }
 
+function loadConsent(): boolean {
+  try {
+    return localStorage.getItem(CONSENT_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
 function savePersonalityProfile(profile: PersonalityProfile) {
   try {
     localStorage.setItem(PROFILE_KEY, JSON.stringify(profile))
     localStorage.removeItem(SKIP_KEY)
   } catch {
-    /* localStorage unavailable — quiz just won't persist across visits */
+    /* localStorage unavailable, so the quiz just will not persist across visits */
   }
 }
 
@@ -48,39 +65,62 @@ function saveSkipFlag() {
   }
 }
 
+function saveConsent() {
+  try {
+    localStorage.setItem(CONSENT_KEY, '1')
+  } catch {
+    /* ignore */
+  }
+}
+
 type SwipeDirection = 'left' | 'right'
-export type RankedCandidate = MatchCandidate & { personalityFit: number | null }
+type RequestStatus = 'matched' | 'pending'
+
+export type RankedCandidate = MatchCandidate & {
+  personalityFit: number | null
+  score: MatchScore
+}
+
+interface RequestEntry {
+  id: number
+  status: RequestStatus
+}
 
 export default function MatchingView() {
+  const [consented, setConsented] = useState<boolean>(() => loadConsent())
+  const [panel, setPanel] = useState<'queue' | 'requests'>('queue')
   const [qIndex, setQIndex] = useState(0)
   const [dragging, setDragging] = useState(false)
   const [start, setStart] = useState({ x: 0, y: 0 })
   const [drag, setDrag] = useState({ x: 0, y: 0 })
   const [exiting, setExiting] = useState<SwipeDirection | null>(null)
-  const [matchedNames, setMatchedNames] = useState<string[]>([])
+  const [requests, setRequests] = useState<RequestEntry[]>([])
   const [passedCount, setPassedCount] = useState(0)
+  const [notice, setNotice] = useState<string | null>(null)
   const [modalCard, setModalCard] = useState<RankedCandidate | null>(null)
   const [profile, setProfile] = useState<PersonalityProfile | null>(() => loadProfile())
   const [showQuiz, setShowQuiz] = useState<boolean>(() => !loadProfile() && !loadSkipped())
 
+  // Ranked by the Circuit match score, so the strongest partnership is offered
+  // first rather than whichever candidate happens to sit first in the data.
   const rankedCandidates = useMemo<RankedCandidate[]>(() => {
-    const withFit = MATCH_CANDIDATES.map((c) => ({
-      ...c,
-      personalityFit: profile ? computePersonalityFit(c.personalityTags, profile) : null,
-    }))
-    if (!profile) return withFit
-    return [...withFit].sort(
-      (a, b) =>
-        computeBlendedScore(b.overlapPct, b.personalityFit) - computeBlendedScore(a.overlapPct, a.personalityFit),
-    )
+    const scored = MATCH_CANDIDATES.map((c) => {
+      const personalityFit = profile ? computePersonalityFit(c.personalityTags, profile) : null
+      return { ...c, personalityFit, score: scoreCandidate(c, personalityFit) }
+    })
+    return scored.sort((a, b) => b.score.total - a.score.total)
   }, [profile])
 
   const total = rankedCandidates.length
   const current = rankedCandidates[qIndex] ?? null
   const peek1 = rankedCandidates[qIndex + 1] ?? null
   const peek2 = rankedCandidates[qIndex + 2] ?? null
-  const matchDone = qIndex >= total
-  const matchedCount = matchedNames.length
+  const queueDone = qIndex >= total
+  const matchedCount = requests.filter((r) => r.status === 'matched').length
+  const byId = useMemo(
+    () => new Map(rankedCandidates.map((c) => [c.id, c])),
+    [rankedCandidates],
+  )
 
   function onDown(e: ReactPointerEvent<HTMLDivElement>) {
     e.currentTarget.setPointerCapture?.(e.pointerId)
@@ -112,16 +152,37 @@ export default function MatchingView() {
       setQIndex((i) => i + 1)
       setExiting(null)
       setDrag({ x: 0, y: 0 })
-      if (dir === 'right') {
-        setMatchedNames((names) => [...names, card.name])
-        setModalCard(card)
-      } else {
+      if (dir === 'right') connect(card)
+      else {
+        setNotice(null)
         setPassedCount((n) => n + 1)
       }
     }, EXIT_DURATION_MS)
   }
 
-  const activeDx = dragging ? drag.x : exiting === 'right' ? EXIT_DISTANCE : exiting === 'left' ? -EXIT_DISTANCE : 0
+  /**
+   * Connecting sends a request. It becomes a match only if the other merchant
+   * had already connected with Basin, which is the point: neither side's
+   * contact details move until both have agreed.
+   */
+  function connect(card: RankedCandidate) {
+    const mutual = card.alreadyConnected
+    setRequests((r) => [...r, { id: card.id, status: mutual ? 'matched' : 'pending' }])
+    if (mutual) {
+      setNotice(null)
+      setModalCard(card)
+    } else {
+      setNotice(`Request sent to ${card.name}. Waiting for them to connect back.`)
+    }
+  }
+
+  const activeDx = dragging
+    ? drag.x
+    : exiting === 'right'
+      ? EXIT_DISTANCE
+      : exiting === 'left'
+        ? -EXIT_DISTANCE
+        : 0
   const activeDy = dragging ? drag.y : exiting ? -40 : 0
   const rot = activeDx / 18
   const cardStyle: CSSProperties = {
@@ -135,15 +196,11 @@ export default function MatchingView() {
 
   function resetQueue() {
     setQIndex(0)
-    setMatchedNames([])
     setPassedCount(0)
     setDragging(false)
     setDrag({ x: 0, y: 0 })
     setExiting(null)
-  }
-
-  function restart() {
-    resetQueue()
+    setNotice(null)
   }
 
   function handleQuizComplete(newProfile: PersonalityProfile) {
@@ -158,17 +215,69 @@ export default function MatchingView() {
     setShowQuiz(false)
   }
 
+  function acceptConsent() {
+    saveConsent()
+    setConsented(true)
+  }
+
+  if (!consented) {
+    return (
+      <main className="matching-main matching-main-gated">
+        <div className="matching-column">
+          <div className="matching-header">
+            <h1>Matching queue</h1>
+            <p>
+              Merchants already on Amex, ranked by a match score built from
+              closed-loop transaction data.
+            </p>
+          </div>
+          <ConsentGate onAccept={acceptConsent} />
+        </div>
+      </main>
+    )
+  }
+
+  const showQueue = panel === 'queue'
+
   return (
     <main className="matching-main">
       <div className="matching-column">
         <div className="matching-header">
-          <h1>Matching queue — Basin Coffee Roasters</h1>
-          <p>Candidates already on Amex, ranked by graph signal strength. Swipe or use the controls below.</p>
+          <h1>Matching queue, Basin Coffee Roasters</h1>
+          <p>
+            Candidates already on Amex, ranked by Circuit match score. Swipe or use
+            the controls below. Connecting sends a request; contact details are
+            released only if they connect back.
+          </p>
         </div>
 
-        {showQuiz && <PersonalityQuiz onComplete={handleQuizComplete} onSkip={handleQuizSkip} />}
+        <div className="panel-tabs">
+          <button
+            className={`panel-tab ${showQueue ? 'is-active' : ''}`}
+            onClick={() => setPanel('queue')}
+          >
+            Discover
+          </button>
+          <button
+            className={`panel-tab ${!showQueue ? 'is-active' : ''}`}
+            onClick={() => setPanel('requests')}
+          >
+            Requests
+            {requests.length > 0 && <span className="panel-tab-count">{requests.length}</span>}
+          </button>
+        </div>
 
-        {!showQuiz && !matchDone && (
+        {showQuiz && showQueue && (
+          <PersonalityQuiz onComplete={handleQuizComplete} onSkip={handleQuizSkip} />
+        )}
+
+        {!showQueue && (
+          <RequestList requests={requests} byId={byId} onBrowse={() => setPanel('queue')} />
+        )}
+
+        {showQueue && !showQuiz && notice && <div className="queue-notice">{notice}</div>}
+
+        {showQueue && !showQuiz && !queueDone && (
           <>
             <div className="card-stack">
               {peek2 && <div className="stack-card peek-2" />}
@@ -185,16 +294,30 @@ export default function MatchingView() {
                   <CornerBrackets />
 
                   <div className="swipe-badge swipe-badge-match" style={{ opacity: likeOpacity }}>
-                    MATCH
+                    CONNECT
                   </div>
                   <div className="swipe-badge swipe-badge-pass" style={{ opacity: nopeOpacity }}>
                     PASS
                   </div>
 
+                  <div className="swipe-card-score">
+                    <div className="score-ring">
+                      <span className="score-ring-value">{current.score.total.toFixed(1)}</span>
+                      <span className="score-ring-unit">OUT OF 10</span>
+                    </div>
+                    <div>
+                      <div className="score-ring-label">Circuit match score</div>
+                      <div className="score-ring-note">
+                        You see the score, not the other merchant's figures.
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="swipe-card-top">
-                    <div className="swipe-card-logo">LOGO</div>
                     <div className="swipe-card-name">{current.name}</div>
-                    <div className="swipe-card-category">{current.category}</div>
+                    <div className="swipe-card-category">
+                      {current.category} · {current.region}
+                    </div>
                   </div>
 
                   <div className="swipe-card-overlap">
@@ -220,21 +343,6 @@ export default function MatchingView() {
                       <div className="swipe-card-overlap-pct">{current.overlapPct}%</div>
                       <div className="swipe-card-overlap-label">Customer overlap</div>
                     </div>
-                  </div>
-
-                  {current.personalityFit !== null && (
-                    <div className="swipe-card-vibe">
-                      <span className="swipe-card-vibe-label">Partnership fit (secondary, self-reported)</span>
-                      <span className="swipe-card-vibe-value">{current.personalityFit}%</span>
-                    </div>
-                  )}
-
-                  <div className="swipe-card-sequential">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#006fcf" strokeWidth="1.5">
-                      <circle cx="12" cy="12" r="10" />
-                      <polyline points="12 6 12 12 16 14" />
-                    </svg>
-                    <p>{current.sequential}</p>
                   </div>
 
                   <div className="swipe-card-symmetry">
@@ -272,9 +380,15 @@ export default function MatchingView() {
                     </div>
                   </div>
 
-                  <div className="swipe-card-terms">
-                    <div className="swipe-card-terms-label">Suggested terms</div>
-                    <p>{current.terms}</p>
+                  <div className="swipe-card-reasons">
+                    <div className="swipe-card-reasons-label">What drove this score</div>
+                    <div className="reason-chips">
+                      {current.score.tags.map((tag) => (
+                        <span className="reason-chip" key={tag}>
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
@@ -287,7 +401,7 @@ export default function MatchingView() {
                   <path d="m6 6 12 12" />
                 </svg>
               </button>
-              <button className="swipe-btn swipe-btn-match" onClick={() => swipeAway('right')} aria-label="Match">
+              <button className="swipe-btn swipe-btn-match" onClick={() => swipeAway('right')} aria-label="Connect">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                 </svg>
@@ -296,15 +410,21 @@ export default function MatchingView() {
           </>
         )}
 
-        {!showQuiz && matchDone && (
+        {showQueue && !showQuiz && queueDone && (
           <div className="queue-done">
             <div className="queue-done-title">Queue cleared</div>
             <p>
-              Reviewed all {total} candidates in this cluster — {matchedCount} matched, {passedCount} passed.
+              Reviewed all {total} candidates in this cluster. You sent {requests.length}{' '}
+              requests, {matchedCount} of which connected back, and passed on {passedCount}.
             </p>
-            <button className="btn btn-ghost" onClick={restart}>
-              Restart session
-            </button>
+            <div className="queue-done-actions">
+              <button className="btn btn-ghost" onClick={resetQueue}>
+                Restart session
+              </button>
+              <button className="btn btn-primary" onClick={() => setPanel('requests')}>
+                See your requests
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -320,31 +440,53 @@ export default function MatchingView() {
               </span>
             </div>
             <div className="sidebar-row">
-              <span>Matched</span>
+              <span>Connected</span>
               <span className="sidebar-value-accent">{matchedCount}</span>
+            </div>
+            <div className="sidebar-row">
+              <span>Awaiting reply</span>
+              <span>{requests.length - matchedCount}</span>
             </div>
             <div className="sidebar-row sidebar-row-last">
               <span>Passed</span>
               <span>{passedCount}</span>
             </div>
           </div>
-          <div className="sidebar-card">
-            <div className="sidebar-label">Matched this session</div>
-            <div className="sidebar-chips">
-              {matchedNames.map((n) => (
-                <span className="sidebar-chip" key={n}>
-                  {n}
-                </span>
-              ))}
-              {matchedNames.length === 0 && <span className="sidebar-empty">None yet — swipe right to match.</span>}
+
+          {showQueue && current && (
+            <div className="sidebar-card">
+              <div className="sidebar-label">How this score was built</div>
+              <div className="score-breakdown">
+                {current.score.components.map((c) => (
+                  <div className="score-component" key={c.key}>
+                    <div className="score-component-head">
+                      <span className="score-component-label">
+                        {c.label}
+                        <span className="score-component-weight">
+                          weight {displayWeight(current.score.components, c)}%
+                        </span>
+                      </span>
+                      <span className="score-component-value">{c.score.toFixed(1)}</span>
+                    </div>
+                    <div className="score-component-track">
+                      <div
+                        className="score-component-fill"
+                        style={{ width: `${c.score * 10}%` }}
+                      />
+                    </div>
+                    <p className="score-component-detail">{c.detail}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
+
           <div className="sidebar-card">
             <div className="sidebar-label">Partnership profile</div>
             <p className="sidebar-personality-status">
               {profile
-                ? 'Profile answered — nudging rank up to 30%, transaction data still leads.'
-                : 'Not answered — ranked by transaction data only.'}
+                ? 'Profile answered, weighted lightest of the five components. Transaction data still leads.'
+                : 'Not answered. Scored on transaction data only.'}
             </p>
             <button className="btn btn-ghost sidebar-vibe-btn" onClick={() => setShowQuiz(true)}>
               {profile ? 'Retake questionnaire' : 'Complete questionnaire'}
@@ -354,8 +496,117 @@ export default function MatchingView() {
       )}
 
       {modalCard && (
-        <MatchModal candidate={modalCard} personalityProfile={profile} onClose={() => setModalCard(null)} />
+        <MatchModal
+          candidate={modalCard}
+          personalityProfile={profile}
+          score={modalCard.score}
+          onClose={() => setModalCard(null)}
+        />
       )}
     </main>
+  )
+}
+
+interface RequestListProps {
+  requests: RequestEntry[]
+  byId: Map<number, RankedCandidate>
+  onBrowse: () => void
+}
+
+function RequestList({ requests, byId, onBrowse }: RequestListProps) {
+  const rows = requests
+    .map((r) => ({ ...r, candidate: byId.get(r.id) }))
+    .filter((r): r is RequestEntry & { candidate: RankedCandidate } => Boolean(r.candidate))
+  const matched = rows.filter((r) => r.status === 'matched')
+  const pending = rows.filter((r) => r.status === 'pending')
+
+  if (rows.length === 0) {
+    return (
+      <div className="queue-done">
+        <div className="queue-done-title">No requests yet</div>
+        <p>
+          Every merchant you connect with lands here, whether or not they have
+          answered.
+        </p>
+        <button className="btn btn-ghost" onClick={onBrowse}>
+          Browse the queue
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="request-list">
+      <section>
+        <div className="request-section-label">Connected ({matched.length})</div>
+        <p className="request-section-note">
+          Both sides agreed, so contact details are released and Circuit has drafted
+          your introduction.
+        </p>
+        {matched.length === 0 ? (
+          <div className="request-empty">
+            Nothing here yet. A merchant appears once they connect back.
+          </div>
+        ) : (
+          matched.map((r) => (
+            <RequestRow key={r.id} candidate={r.candidate} status="matched" />
+          ))
+        )}
+      </section>
+
+      <section>
+        <div className="request-section-label">
+          Waiting on the other merchant ({pending.length})
+        </div>
+        <p className="request-section-note">
+          Your request is in. Neither side gets the other's contact details until they
+          connect back.
+        </p>
+        {pending.length === 0 ? (
+          <div className="request-empty">No requests waiting.</div>
+        ) : (
+          pending.map((r) => (
+            <RequestRow key={r.id} candidate={r.candidate} status="pending" />
+          ))
+        )}
+      </section>
+    </div>
+  )
+}
+
+interface RequestRowProps {
+  candidate: RankedCandidate
+  status: RequestStatus
+}
+
+function RequestRow({ candidate, status }: RequestRowProps) {
+  const [open, setOpen] = useState(false)
+  const matched = status === 'matched'
+
+  return (
+    <div className="request-item">
+      <div className="request-row">
+        <div className={`request-score ${matched ? 'is-matched' : ''}`}>
+          {candidate.score.total.toFixed(1)}
+        </div>
+        <div className="request-identity">
+          <div className="request-name">{candidate.name}</div>
+          <div className="request-meta">
+            {candidate.category} · {candidate.region}
+          </div>
+        </div>
+        <div className="request-actions">
+          <span className={`request-status ${matched ? 'is-matched' : ''}`}>
+            {matched ? 'Connected' : 'Waiting for their reply'}
+          </span>
+          {matched && (
+            <button className="btn btn-ghost" onClick={() => setOpen((o) => !o)}>
+              {open ? 'Hide draft' : 'Intro draft'}
+            </button>
+          )}
+        </div>
+      </div>
+      {matched && open && <IntroDraft candidate={candidate} score={candidate.score} />}
+    </div>
   )
 }
