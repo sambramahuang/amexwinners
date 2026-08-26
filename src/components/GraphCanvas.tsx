@@ -41,26 +41,23 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
     labelRenderer.domElement.style.top = '0'
     labelRenderer.domElement.style.left = '0'
     labelRenderer.domElement.style.pointerEvents = 'none'
+    // three.js sets overflow: hidden on this element internally, which clips any node
+    // label whose anchor lands near the canvas edge — override it so labels can spill
+    // into the (visible-overflow) card padding instead of getting cut off.
+    labelRenderer.domElement.style.overflow = 'visible'
     container.appendChild(labelRenderer.domElement)
 
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(40, width / startHeight, 0.1, 100)
     camera.position.set(...config.cameraPosition)
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.75))
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.7)
-    directionalLight.position.set(3, 4, 2)
-    scene.add(directionalLight)
-
     const disposables: { geometry?: THREE.BufferGeometry; material?: THREE.Material }[] = []
 
     const nodeGeometry = new THREE.SphereGeometry(0.14, 24, 24)
     disposables.push({ geometry: nodeGeometry })
     for (const node of config.nodes) {
-      const material = new THREE.MeshStandardMaterial({
+      const material = new THREE.MeshBasicMaterial({
         color: node.color ?? DEFAULT_NODE_COLOR,
-        roughness: 0.5,
-        metalness: 0.1,
       })
       disposables.push({ material })
       const mesh = new THREE.Mesh(nodeGeometry, material)

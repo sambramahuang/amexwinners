@@ -44,7 +44,7 @@ const CLUSTER_TRIANGLE_EDGES: [number, number][] = [
 ]
 
 export const DOWNTOWN_LOOP_GRAPH: GraphSceneConfig = {
-  cameraPosition: [0, 0.7, 3.6],
+  cameraPosition: [0, 0.7, 4.1],
   nodes: [
     { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x006fcf, name: 'Basin Coffee' },
     { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x4fa3e8, name: 'Spinebound' },
@@ -55,7 +55,7 @@ export const DOWNTOWN_LOOP_GRAPH: GraphSceneConfig = {
 }
 
 export const RIVERSIDE_ROW_GRAPH: GraphSceneConfig = {
-  cameraPosition: [0, 0.7, 3.6],
+  cameraPosition: [0, 0.7, 4.1],
   nodes: [
     { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0xe8b54d, name: 'Ridgeline Yoga' },
     { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0xd97757, name: 'Loom Bicycle' },

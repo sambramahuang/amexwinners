@@ -57,9 +57,6 @@ export default function HexagonBackground({
   }, [gridDimensions, hexagonSize, hexagonMargin])
 
   useEffect(() => {
-    const container = containerRef.current
-    if (!container) return
-
     const radiusPx = hexagonSize * glowRadius
     let raf = 0
     let pendingPoint: { x: number; y: number } | null = null
@@ -74,6 +71,11 @@ export default function HexagonBackground({
       }
     }
 
+    // Listens on window rather than the hexagon layer itself: pointermove
+    // bubbles to window no matter what element it actually landed on (a
+    // card, a button, plain text), so the glow reads the cursor position
+    // everywhere on the page without needing any pointer-events overrides
+    // on the app's content — and without any risk of blocking clicks.
     function onMove(e: PointerEvent) {
       pendingPoint = { x: e.clientX, y: e.clientY }
       if (!raf) {
@@ -90,11 +92,11 @@ export default function HexagonBackground({
       }
     }
 
-    container.addEventListener('pointermove', onMove)
-    container.addEventListener('pointerleave', onLeave)
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerleave', onLeave)
     return () => {
-      container.removeEventListener('pointermove', onMove)
-      container.removeEventListener('pointerleave', onLeave)
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerleave', onLeave)
       if (raf) cancelAnimationFrame(raf)
     }
   }, [hexagonSize, glowRadius])
