@@ -96,7 +96,7 @@ export const GAP_LEGEND: GapLegendEntry[] = [
 ]
 
 export const FULL_GRAPH: GraphSceneConfig = {
-  cameraPosition: [0, 3.6, 10.6],
+  cameraPosition: [0, 2.3, 6.8],
   nodes: [
     { position: [-1.6, 0, 0.9], color: 0x006fcf, name: 'Basin Coffee' },
     { position: [-0.82, 0, -0.45], color: 0x4fa3e8, name: 'Spinebound' },

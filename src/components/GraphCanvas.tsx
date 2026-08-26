@@ -48,8 +48,47 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
     container.appendChild(labelRenderer.domElement)
 
     const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(40, width / startHeight, 0.1, 100)
+    // Orthographic, not perspective: with rotation around the target, a perspective camera
+    // lets nodes swing close to the lens as the graph turns, blowing their projected
+    // size/position up ("shooting out" of the frame). Orthographic projection has no
+    // near/far size falloff, so rotation stays uniform regardless of angle.
+    let currentAspect = width / startHeight
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100)
     camera.position.set(...config.cameraPosition)
+
+    // Rotation is unrestricted, so a single fixed zoom can't work: whatever's sized to
+    // look good face-on will overflow once rotation puts the graph's long axis on the
+    // screen's short one, and whatever's sized to survive every angle looks sparse and
+    // lets labels crowd each other face-on. Instead, refit the frustum every frame to
+    // whatever's actually facing the camera right now — always tight, never clipped.
+    const anchors = [
+      ...config.nodes.map(({ position: [x, y, z] }) => new THREE.Vector3(x, y + 0.24, z)),
+      ...(config.gaps ?? []).map(({ position: [x, y, z] }) => new THREE.Vector3(x, y + 0.22, z)),
+    ]
+    // Labels are fixed-pixel-size DOM boxes anchored to that point, so they still extend
+    // a bit past it on screen no matter how tightly the anchors themselves are framed.
+    const LABEL_MARGIN = 1.18
+    const viewMatrix = new THREE.Matrix4()
+    const viewSpacePoint = new THREE.Vector3()
+
+    function fitCameraToAnchors() {
+      camera.updateMatrixWorld(true)
+      viewMatrix.copy(camera.matrixWorld).invert()
+      let maxAbsX = 0.001
+      let maxAbsY = 0.001
+      for (const anchor of anchors) {
+        viewSpacePoint.copy(anchor).applyMatrix4(viewMatrix)
+        maxAbsX = Math.max(maxAbsX, Math.abs(viewSpacePoint.x))
+        maxAbsY = Math.max(maxAbsY, Math.abs(viewSpacePoint.y))
+      }
+      const halfHeight = Math.max(maxAbsY, maxAbsX / currentAspect) * LABEL_MARGIN
+      camera.left = -halfHeight * currentAspect
+      camera.right = halfHeight * currentAspect
+      camera.top = halfHeight
+      camera.bottom = -halfHeight
+      camera.updateProjectionMatrix()
+    }
+    fitCameraToAnchors()
 
     const disposables: { geometry?: THREE.BufferGeometry; material?: THREE.Material }[] = []
 
@@ -163,6 +202,7 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
     function animate() {
       if (disposed) return
       controls.update()
+      fitCameraToAnchors()
       renderer.render(scene, camera)
       labelRenderer.render(scene, camera)
       raf = requestAnimationFrame(animate)
@@ -173,8 +213,7 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
       if (!container) return
       const w = container.clientWidth || width
       const h = container.clientHeight || startHeight
-      camera.aspect = w / h
-      camera.updateProjectionMatrix()
+      currentAspect = w / h
       renderer.setSize(w, h)
       labelRenderer.setSize(w, h)
     }
