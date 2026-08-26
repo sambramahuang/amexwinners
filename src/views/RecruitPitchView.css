@@ -24,6 +24,7 @@
   border: 1px solid var(--border);
   margin-bottom: 26px;
   flex-wrap: wrap;
+  animation: fadeUp 0.35s ease both;
 }
 
 .pitch-selector-item {
@@ -55,7 +56,10 @@
 
 .pitch-card {
   border: 1px solid var(--border);
+  background: var(--bg);
   padding: 28px;
+  animation: fadeUp 0.4s ease both;
+  animation-delay: 0.08s;
 }
 
 .pitch-badge {
@@ -142,7 +146,21 @@
 
 .pitch-waiting-card {
   border: 1px solid var(--border);
+  background: var(--bg);
   padding: 12px;
+  animation: fadeUp 0.4s ease both;
+}
+
+.pitch-waiting-card:nth-child(1) {
+  animation-delay: 0.16s;
+}
+
+.pitch-waiting-card:nth-child(2) {
+  animation-delay: 0.24s;
+}
+
+.pitch-waiting-card:nth-child(3) {
+  animation-delay: 0.32s;
 }
 
 .pitch-waiting-name {

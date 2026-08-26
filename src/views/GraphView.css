@@ -23,12 +23,26 @@
   border: 1px solid var(--border);
   background: var(--bg);
   margin-bottom: 24px;
+  animation: fadeUp 0.4s ease both;
+  animation-delay: 0.1s;
 }
 
 .graph-legend-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px;
+}
+
+.graph-legend-grid > div {
+  animation: fadeUp 0.4s ease both;
+}
+
+.graph-legend-grid > div:nth-child(1) {
+  animation-delay: 0.3s;
+}
+
+.graph-legend-grid > div:nth-child(2) {
+  animation-delay: 0.38s;
 }
 
 @media (max-width: 700px) {

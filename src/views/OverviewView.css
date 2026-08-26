@@ -34,12 +34,21 @@
 
 .overview-diagram {
   border: 1px solid var(--border);
+  background: var(--bg);
   padding: 28px;
   margin-bottom: 40px;
   display: flex;
   align-items: center;
   gap: 36px;
   flex-wrap: wrap;
+  animation: fadeUp 0.4s ease both;
+  animation-delay: 0.35s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.overview-diagram:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 3px 10px rgba(2, 5, 12, 0.4);
 }
 
 .overview-diagram-copy {
@@ -91,11 +100,25 @@
 .prong-card {
   position: relative;
   border: 1px solid var(--border);
+  background: var(--bg);
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  animation: fadeUp 0.4s ease both;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.prong-card:nth-child(1) {
+  animation-delay: 0.55s;
+}
+
+.prong-card:nth-child(2) {
+  animation-delay: 0.63s;
+}
+
+.prong-card:nth-child(3) {
+  animation-delay: 0.71s;
 }
 
 .prong-card:hover {
