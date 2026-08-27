@@ -1,7 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { TIER_LABELS, type MatchCandidate } from '../data/graphEngineData'
 import { redactCandidateName } from '../utils/redactCandidateName'
+import EmailComposer from './EmailComposer'
+import { buildMatchIntroEmail } from '../utils/outreachEmails'
 import CornerBrackets from './CornerBrackets'
 import { BenefitBarChart, UpliftTrendChart } from './BenefitCharts'
 import './MatchModal.css'
@@ -28,6 +30,7 @@ export default function MatchModal({
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [onClose])
 
+  const [compose, setCompose] = useState(false)
   const displayName = hideIdentity ? candidate.category : candidate.name
   const displayShortName = hideIdentity ? candidate.category : candidate.shortName
   const redact = (text: string) => (hideIdentity ? redactCandidateName(text, candidate) : text)
@@ -93,6 +96,26 @@ export default function MatchModal({
         </div>
 
         <div className="match-modal-terms">Suggested terms: {redact(candidate.terms)}</div>
+        {mode !== 'preview' && (
+          <div className="match-modal-outreach">
+            {compose ? (
+              <EmailComposer
+                email={buildMatchIntroEmail(candidate)}
+                sendLabel={`Send to ${candidate.contact.name.split(' ')[0]}`}
+                sentLabel="Sent"
+              />
+            ) : (
+              <button className="btn btn-primary match-modal-compose" onClick={() => setCompose(true)}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+                  <rect x="2" y="4" width="20" height="16" rx="2" />
+                  <path d="m2 7 10 6 10-6" />
+                </svg>
+                Write the introduction
+              </button>
+            )}
+          </div>
+        )}
+
         <div className="match-modal-actions">
           {mode === 'preview' ? (
             <button className="btn btn-primary" onClick={onClose}>

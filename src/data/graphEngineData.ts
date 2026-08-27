@@ -12,6 +12,21 @@
  */
 export type RelationshipTier = 1 | 2 | 3
 
+export interface MerchantContact {
+  name: string
+  role: string
+  /** Reserved .example domain, so no illustrative address can reach a real inbox. */
+  email: string
+}
+
+/** The relationship manager outreach is sent as. */
+export const AMEX_REP = {
+  name: 'Dana Whitfield',
+  role: 'Merchant Partnerships, American Express',
+  email: 'dana.whitfield@amex.example',
+  phone: '+1 212 555 0148',
+}
+
 /** Prong 1: a merchant already accepting Amex, queued for matching against Basin Coffee Roasters. */
 export interface MatchCandidate {
   id: number
@@ -39,6 +54,8 @@ export interface MatchCandidate {
   tierRationale: string
   /** Tier-3 only: a non-binding starter benchmark for a structural relationship. */
   tier3Suggestion?: string
+  /** Released to the other side only once both merchants match. */
+  contact: MerchantContact
 }
 
 export const MATCH_CANDIDATES: MatchCandidate[] = [
@@ -55,6 +72,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Balanced · Δ3pts — value flows both ways.',
     terms: 'In-store QR at Spinebound: book club members get their first coffee free at Basin.',
     personalityTags: ['slow-browse', 'community', 'ritual'],
+    contact: { name: 'Maya Rehn', role: 'Owner', email: 'maya@spineboundbooks.example' },
     tier: 3,
     monthsActive: 8,
     tierRationale:
@@ -75,6 +93,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Balanced · Δ3pts — value flows both ways.',
     terms: 'Joint loyalty stamp: every 5th coffee unlocks 10% off any stationery item.',
     personalityTags: ['occasion', 'brand-aesthetic', 'shared-regulars'],
+    contact: { name: 'Owen Marsh', role: 'Founder', email: 'owen@fernfoldstationery.example' },
     tier: 2,
     monthsActive: 5,
     tierRationale: '5 months and 3 offer cycles of steady redemption support repeating this on an ongoing cadence instead of renegotiating each time.',
@@ -92,6 +111,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Balanced · Δ2pts — value flows both ways.',
     terms: 'Shared window display plus cross-tagged social posts each Friday.',
     personalityTags: ['occasion', 'brand-aesthetic', 'shared-events'],
+    contact: { name: 'Priya Raman', role: 'Owner', email: 'priya@nettlebloomflorist.example' },
     tier: 2,
     monthsActive: 4,
     tierRationale: '4 months and 2 offer cycles of consistent redemption support repeating this on an ongoing cadence instead of renegotiating each time.',
@@ -109,6 +129,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Auto-rebalanced: added a Basin gift-card bonus for Loom Bicycle referrals to close an 18pt gap.',
     terms: 'Referral card: bike tune-up customers get a free drip coffee at Basin.',
     personalityTags: ['fast-paced', 'convenience', 'shared-regulars'],
+    contact: { name: 'Theo Vance', role: 'Managing Director', email: 'theo@loombicycleco.example' },
     tier: 1,
     monthsActive: 1,
     tierRationale: 'A new, single-offer proposal — sequencing signal is still forming, so it starts here rather than at a recurring cadence.',
@@ -126,6 +147,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Auto-rebalanced: added a post-class coffee voucher to close a 12pt gap.',
     terms: 'Post-class voucher: first coffee free after any studio class.',
     personalityTags: ['ritual', 'community', 'shared-events'],
+    contact: { name: 'Dana Okafor', role: 'Founder', email: 'dana@ridgelineyogastudio.example' },
     tier: 1,
     monthsActive: 2,
     tierRationale: 'A new, single-offer proposal — sequencing signal is still sparse, so it starts here rather than at a recurring cadence.',
@@ -143,6 +165,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     balanceNote: 'Low confidence · thin signal — hold until more data accrues.',
     terms: 'No proposal yet — insufficient signal to suggest terms.',
     personalityTags: ['low-maintenance', 'occasion'],
+    contact: { name: 'Sam Idris', role: 'Owner', email: 'sam@anchorawltailor.example' },
     tier: 1,
     monthsActive: 1,
     tierRationale: 'Signal is too thin to propose anything beyond a single trial offer yet.',
@@ -170,6 +193,7 @@ export interface ProspectTarget {
   upliftRange: string
   pitchCopy: string
   waiting: WaitingMerchant[]
+  contact: MerchantContact
 }
 
 export const PROSPECT_TARGETS: ProspectTarget[] = [
@@ -183,6 +207,7 @@ export const PROSPECT_TARGETS: ProspectTarget[] = [
     upliftRange: '+15–24%',
     pitchCopy:
       'Gift shops paired with café-and-books clusters like Downtown Loop typically see a lift in repeat visits within the first two quarters, driven by customers who already cross-shop nearby.',
+    contact: { name: 'Elena Moss', role: 'Owner', email: 'elena@juniperferngiftco.example' },
     waiting: [
       { name: 'Basin Coffee Roasters', why: '38% of its customers already cross-shop gift and stationery nearby.' },
       { name: 'Spinebound Books', why: 'Book buyers over-index on gift purchases the same week.' },
@@ -199,6 +224,7 @@ export const PROSPECT_TARGETS: ProspectTarget[] = [
     upliftRange: '+12–20%',
     pitchCopy:
       'Stationery merchants near café-and-books clusters see steady cross-visit lift, especially from bookstore customers already primed for paper goods.',
+    contact: { name: 'Ruth Calder', role: 'Founder', email: 'ruth@marlowepapergoods.example' },
     waiting: [
       { name: 'Basin Coffee Roasters', why: '38% of its customers already cross-shop gift and stationery nearby.' },
       { name: 'Spinebound Books', why: 'Book buyers over-index on stationery purchases the same week.' },
@@ -215,6 +241,7 @@ export const PROSPECT_TARGETS: ProspectTarget[] = [
     upliftRange: '+14–23%',
     pitchCopy:
       'Home-and-gift merchants entering clusters like Downtown Loop typically capture spend that’s currently leaking to shops outside the cluster.',
+    contact: { name: 'Noor Haddad', role: 'Owner', email: 'noor@sablestonegifts.example' },
     waiting: [
       { name: 'Basin Coffee Roasters', why: '38% of its customers already cross-shop gift and stationery nearby.' },
       { name: 'Spinebound Books', why: 'Book buyers over-index on gift purchases the same week.' },
@@ -231,6 +258,7 @@ export const PROSPECT_TARGETS: ProspectTarget[] = [
     upliftRange: '+18–27%',
     pitchCopy:
       'Recovery and wellness merchants placed near active-lifestyle clusters like Riverside Row typically see fast adoption from customers already moving through the cluster.',
+    contact: { name: 'Felix Arden', role: 'Managing Director', email: 'felix@cedarrecoveryco.example' },
     waiting: [
       { name: 'Ridgeline Yoga Studio', why: 'Early cross-visit signal with active-recovery seekers.' },
       { name: 'Loom Bicycle Co.', why: 'Cyclists show strong intent for post-ride recovery services.' },

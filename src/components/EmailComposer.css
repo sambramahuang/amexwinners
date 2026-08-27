@@ -1,0 +1,132 @@
+.composer {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  padding: 18px 20px;
+  animation: fadeUp 0.28s ease both;
+}
+
+.composer-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.composer-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-55);
+}
+
+.composer-from {
+  margin-top: 3px;
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.composer-fields {
+  margin-top: 14px;
+  border-top: 1px solid var(--border-soft);
+  border-bottom: 1px solid var(--border-soft);
+  padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.composer-field {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  font-size: 12.5px;
+}
+
+.composer-key {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-55);
+}
+
+.composer-val { color: var(--text-75); }
+.composer-subject { font-weight: 600; color: var(--text); }
+
+.composer-recipients {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.recipient-chip {
+  padding: 2px 8px;
+  background: var(--accent-dim);
+  color: var(--accent-active);
+  font-size: 11.5px;
+  animation: chipDrop 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.4) both;
+}
+
+.recipient-chip:nth-child(2) { animation-delay: 50ms; }
+.recipient-chip:nth-child(3) { animation-delay: 100ms; }
+.recipient-chip:nth-child(4) { animation-delay: 150ms; }
+
+@keyframes chipDrop {
+  from { opacity: 0; transform: translateY(-4px) scale(0.94); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.composer-body {
+  margin: 14px 0 0;
+  padding: 16px 18px;
+  background: var(--bg-panel);
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.62;
+  color: var(--text-80);
+  white-space: pre-wrap;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.composer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.composer-send {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.composer-send.is-sent {
+  background: #1c8877;
+  border-color: #1c8877;
+  opacity: 1;
+  animation: sentPop 0.4s cubic-bezier(0.2, 0.9, 0.3, 1.5);
+}
+
+@keyframes sentPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.composer-note {
+  flex: 1 1 220px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .composer, .recipient-chip, .composer-send.is-sent { animation: none; }
+}
