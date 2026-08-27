@@ -53,7 +53,12 @@ function saveSkipFlag() {
 type SwipeDirection = 'left' | 'right'
 export type RankedCandidate = MatchCandidate & { personalityFit: number | null }
 
-export default function MatchingView() {
+interface MatchingViewProps {
+  role: Role
+}
+
+export default function MatchingView({ role }: MatchingViewProps) {
+  const hideIdentity = role === 'sme'
   const [qIndex, setQIndex] = useState(0)
   const [dragging, setDragging] = useState(false)
   const [start, setStart] = useState({ x: 0, y: 0 })
@@ -202,8 +207,10 @@ export default function MatchingView() {
 
                   <div className="swipe-card-top">
                     <div className="swipe-card-logo">LOGO</div>
-                    <div className="swipe-card-name">{current.name}</div>
-                    <div className="swipe-card-category">{current.category}</div>
+                    <div className="swipe-card-name">{hideIdentity ? current.category : current.name}</div>
+                    <div className="swipe-card-category">
+                      {hideIdentity ? 'Identity revealed once you match' : current.category}
+                    </div>
                   </div>
 
                   <div className="swipe-card-overlap">
