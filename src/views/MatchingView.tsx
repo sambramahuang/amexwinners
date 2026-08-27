@@ -229,7 +229,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
                         Basin
                       </text>
                       <text x="130" y="46" fontSize="8" fill="#0b1c33" opacity="0.65" textAnchor="middle" fontFamily="IBM Plex Sans">
-                        {current.shortName}
+                        {hideIdentity ? current.category : current.shortName}
                       </text>
                     </svg>
                     <div>
@@ -250,7 +250,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
                       <circle cx="12" cy="12" r="10" />
                       <polyline points="12 6 12 12 16 14" />
                     </svg>
-                    <p>{current.sequential}</p>
+                    <p>{hideIdentity ? redactCandidateName(current.sequential, current) : current.sequential}</p>
                   </div>
 
                   <div className="swipe-card-symmetry">
@@ -274,7 +274,9 @@ export default function MatchingView({ role }: MatchingViewProps) {
                         <span className="symmetry-bar-value">+{current.upliftYou}%</span>
                       </div>
                       <div className="symmetry-bar-row">
-                        <span className="symmetry-bar-name">{current.shortName}</span>
+                        <span className="symmetry-bar-name">
+                          {hideIdentity ? current.category : current.shortName}
+                        </span>
                         <div className="symmetry-bar-track">
                           <div
                             className="symmetry-bar-fill symmetry-bar-fill-them"
@@ -285,13 +287,13 @@ export default function MatchingView({ role }: MatchingViewProps) {
                       </div>
                     </div>
                     <div className="symmetry-note" style={{ color: current.balanceColor }}>
-                      {current.balanceNote}
+                      {hideIdentity ? redactCandidateName(current.balanceNote, current) : current.balanceNote}
                     </div>
                   </div>
 
                   <div className="swipe-card-terms">
                     <div className="swipe-card-terms-label">Suggested terms</div>
-                    <p>{current.terms}</p>
+                    <p>{hideIdentity ? redactCandidateName(current.terms, current) : current.terms}</p>
                   </div>
 
                   <button
@@ -391,6 +393,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
           candidate={previewCard}
           personalityProfile={profile}
           mode="preview"
+          hideIdentity={hideIdentity}
           onClose={() => setPreviewCard(null)}
         />
       )}

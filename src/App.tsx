@@ -123,7 +123,7 @@ export default function App() {
           <GraphView />
         </Suspense>
       )}
-      {effectiveView === 'match' && <MatchingView />}
+      {effectiveView === 'match' && <MatchingView role={role} />}
       {role === 'amex' && view === 'gaps' && (
         <Suspense fallback={null}>
           <GapRadarView onGeneratePitch={generatePitch} />

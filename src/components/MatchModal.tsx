@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { TIER_LABELS, type MatchCandidate } from '../data/graphEngineData'
 import type { PersonalityProfile } from '../data/personalityQuiz'
+import { redactCandidateName } from '../utils/redactCandidateName'
 import CornerBrackets from './CornerBrackets'
 import { BenefitBarChart, UpliftTrendChart } from './BenefitCharts'
 import './MatchModal.css'
@@ -11,9 +12,17 @@ interface MatchModalProps {
   personalityProfile: PersonalityProfile | null
   onClose: () => void
   mode?: 'match' | 'preview'
+  /** True pre-match — hides the counterpart's identity from another SME, keeping only its category. */
+  hideIdentity?: boolean
 }
 
-export default function MatchModal({ candidate, personalityProfile, onClose, mode = 'match' }: MatchModalProps) {
+export default function MatchModal({
+  candidate,
+  personalityProfile,
+  onClose,
+  mode = 'match',
+  hideIdentity = false,
+}: MatchModalProps) {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
@@ -21,6 +30,10 @@ export default function MatchModal({ candidate, personalityProfile, onClose, mod
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [onClose])
+
+  const displayName = hideIdentity ? candidate.category : candidate.name
+  const displayShortName = hideIdentity ? candidate.category : candidate.shortName
+  const redact = (text: string) => (hideIdentity ? redactCandidateName(text, candidate) : text)
 
   return createPortal(
     <div className="match-modal-backdrop" onClick={onClose}>
@@ -35,21 +48,21 @@ export default function MatchModal({ candidate, personalityProfile, onClose, mod
 
         <div className="match-modal-eyebrow">{mode === 'preview' ? "Amex's proposal" : "It's a match"}</div>
         <div className="match-modal-title">
-          Basin Coffee Roasters × {candidate.name}
+          Basin Coffee Roasters × {displayName}
         </div>
-        <p className="match-modal-note">{candidate.balanceNote}</p>
+        <p className="match-modal-note">{redact(candidate.balanceNote)}</p>
 
         <div className="match-modal-tier">
           <span className={`tier-badge tier-badge-${candidate.tier}`}>{TIER_LABELS[candidate.tier]}</span>
           <span className="match-modal-tier-months">{candidate.monthsActive} mo. active</span>
         </div>
-        <p className="match-modal-tier-rationale">{candidate.tierRationale}</p>
+        <p className="match-modal-tier-rationale">{redact(candidate.tierRationale)}</p>
 
         <div className="match-modal-section">
           <div className="match-modal-section-label">Predicted benefits</div>
           <BenefitBarChart
             youLabel="Basin"
-            themLabel={candidate.shortName}
+            themLabel={displayShortName}
             youValue={candidate.upliftYou}
             themValue={candidate.upliftThem}
           />
@@ -59,7 +72,7 @@ export default function MatchModal({ candidate, personalityProfile, onClose, mod
           <div className="match-modal-section-label">Projected ramp, first 6 months</div>
           <UpliftTrendChart
             youLabel="Basin"
-            themLabel={candidate.shortName}
+            themLabel={displayShortName}
             youValue={candidate.upliftYou}
             themValue={candidate.upliftThem}
           />
@@ -68,7 +81,7 @@ export default function MatchModal({ candidate, personalityProfile, onClose, mod
         {candidate.tier === 3 && candidate.tier3Suggestion && (
           <div className="match-modal-tier3">
             <div className="match-modal-tier3-label">Structural relationship — starter suggestion</div>
-            <p>{candidate.tier3Suggestion}</p>
+            <p>{redact(candidate.tier3Suggestion)}</p>
             <p className="match-modal-tier3-disclaimer">
               A non-binding starting point — the merchants handle the actual arrangement themselves.
             </p>
@@ -79,10 +92,10 @@ export default function MatchModal({ candidate, personalityProfile, onClose, mod
           <div className="match-modal-ai-label">
             AI explainability layer{personalityProfile && ' · transaction data + Basin’s partnership profile'}
           </div>
-          <p>{candidate.sequential}</p>
+          <p>{redact(candidate.sequential)}</p>
         </div>
 
-        <div className="match-modal-terms">Suggested terms: {candidate.terms}</div>
+        <div className="match-modal-terms">Suggested terms: {redact(candidate.terms)}</div>
         <div className="match-modal-actions">
           {mode === 'preview' ? (
             <button className="btn btn-primary" onClick={onClose}>
