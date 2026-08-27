@@ -1,57 +1,36 @@
 import { useMemo, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import type { Role } from '../App'
 import { MATCH_CANDIDATES, TIER_LABELS, type MatchCandidate } from '../data/graphEngineData'
-import type { PersonalityProfile } from '../data/personalityQuiz'
-import { computeBlendedScore, computePersonalityFit } from '../utils/personalityFit'
 import { redactCandidateName } from '../utils/redactCandidateName'
 import CornerBrackets from '../components/CornerBrackets'
 import MatchModal from '../components/MatchModal'
-import PersonalityQuiz from '../components/PersonalityQuiz'
+import ConsentGate from '../components/ConsentGate'
 import './MatchingView.css'
 
 const SWIPE_THRESHOLD = 120
 const EXIT_DISTANCE = 700
 const EXIT_DURATION_MS = 320
 
-const PROFILE_KEY = 'circuit.personalityProfile.v1'
-const SKIP_KEY = 'circuit.personalitySkipped.v1'
+const CONSENT_KEY = 'circuit.matchingConsent.v1'
 
-function loadProfile(): PersonalityProfile | null {
+function loadConsent(): boolean {
   try {
-    const raw = localStorage.getItem(PROFILE_KEY)
-    return raw ? (JSON.parse(raw) as PersonalityProfile) : null
-  } catch {
-    return null
-  }
-}
-
-function loadSkipped(): boolean {
-  try {
-    return localStorage.getItem(SKIP_KEY) === '1'
+    return localStorage.getItem(CONSENT_KEY) === '1'
   } catch {
     return false
   }
 }
 
-function savePersonalityProfile(profile: PersonalityProfile) {
+function saveConsent() {
   try {
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(profile))
-    localStorage.removeItem(SKIP_KEY)
+    localStorage.setItem(CONSENT_KEY, '1')
   } catch {
-    /* localStorage unavailable — quiz just won't persist across visits */
-  }
-}
-
-function saveSkipFlag() {
-  try {
-    localStorage.setItem(SKIP_KEY, '1')
-  } catch {
-    /* ignore */
+    /* localStorage unavailable, so consent just will not persist across visits */
   }
 }
 
 type SwipeDirection = 'left' | 'right'
-export type RankedCandidate = MatchCandidate & { personalityFit: number | null }
+export type RankedCandidate = MatchCandidate
 
 interface MatchingViewProps {
   role: Role
@@ -68,20 +47,13 @@ export default function MatchingView({ role }: MatchingViewProps) {
   const [passedCount, setPassedCount] = useState(0)
   const [modalCard, setModalCard] = useState<RankedCandidate | null>(null)
   const [previewCard, setPreviewCard] = useState<RankedCandidate | null>(null)
-  const [profile, setProfile] = useState<PersonalityProfile | null>(() => loadProfile())
-  const [showQuiz, setShowQuiz] = useState<boolean>(() => !loadProfile() && !loadSkipped())
+  const [consented, setConsented] = useState<boolean>(() => loadConsent())
 
-  const rankedCandidates = useMemo<RankedCandidate[]>(() => {
-    const withFit = MATCH_CANDIDATES.map((c) => ({
-      ...c,
-      personalityFit: profile ? computePersonalityFit(c.personalityTags, profile) : null,
-    }))
-    if (!profile) return withFit
-    return [...withFit].sort(
-      (a, b) =>
-        computeBlendedScore(b.overlapPct, b.personalityFit) - computeBlendedScore(a.overlapPct, a.personalityFit),
-    )
-  }, [profile])
+  // Ranked on the closed-loop transaction signal alone.
+  const rankedCandidates = useMemo<RankedCandidate[]>(
+    () => [...MATCH_CANDIDATES].sort((a, b) => b.overlapPct - a.overlapPct),
+    [],
+  )
 
   const total = rankedCandidates.length
   const current = rankedCandidates[qIndex] ?? null
@@ -155,16 +127,9 @@ export default function MatchingView({ role }: MatchingViewProps) {
     resetQueue()
   }
 
-  function handleQuizComplete(newProfile: PersonalityProfile) {
-    savePersonalityProfile(newProfile)
-    setProfile(newProfile)
-    setShowQuiz(false)
-    resetQueue()
-  }
-
-  function handleQuizSkip() {
-    saveSkipFlag()
-    setShowQuiz(false)
+  function acceptConsent() {
+    saveConsent()
+    setConsented(true)
   }
 
   return (
@@ -179,9 +144,9 @@ export default function MatchingView({ role }: MatchingViewProps) {
           </p>
         </div>
 
-        {showQuiz && <PersonalityQuiz onComplete={handleQuizComplete} onSkip={handleQuizSkip} />}
+        {!consented && <ConsentGate onAccept={acceptConsent} hideIdentity={hideIdentity} />}
 
-        {!showQuiz && !matchDone && (
+        {consented && !matchDone && (
           <>
             <div className="card-stack">
               {peek2 && <div className="stack-card peek-2" />}
@@ -237,13 +202,6 @@ export default function MatchingView({ role }: MatchingViewProps) {
                       <div className="swipe-card-overlap-label">Customer overlap</div>
                     </div>
                   </div>
-
-                  {current.personalityFit !== null && (
-                    <div className="swipe-card-vibe">
-                      <span className="swipe-card-vibe-label">Partnership fit (secondary, self-reported)</span>
-                      <span className="swipe-card-vibe-value">{current.personalityFit}%</span>
-                    </div>
-                  )}
 
                   <div className="swipe-card-sequential">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#006fcf" strokeWidth="1.5">
@@ -327,7 +285,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
           </>
         )}
 
-        {!showQuiz && matchDone && (
+        {consented && matchDone && (
           <div className="queue-done">
             <div className="queue-done-title">Queue cleared</div>
             <p>
@@ -340,7 +298,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
         )}
       </div>
 
-      {!showQuiz && (
+      {consented && (
         <aside className="matching-sidebar">
           <div className="sidebar-card">
             <div className="sidebar-label">Session</div>
@@ -370,28 +328,21 @@ export default function MatchingView({ role }: MatchingViewProps) {
               {matchedNames.length === 0 && <span className="sidebar-empty">None yet — swipe right to match.</span>}
             </div>
           </div>
-          <div className="sidebar-card">
-            <div className="sidebar-label">Brand words</div>
-            <p className="sidebar-personality-status">
-              {profile
-                ? `Words picked: ${profile.words.join(', ')}. Nudges rank up to 30%, transaction data still leads.`
-                : 'No words picked. Ranked by transaction data only.'}
-            </p>
-            <button className="btn btn-ghost sidebar-vibe-btn" onClick={() => setShowQuiz(true)}>
-              {profile ? 'Pick different words' : 'Pick three words'}
-            </button>
-          </div>
         </aside>
       )}
 
       {modalCard && (
-        <MatchModal candidate={modalCard} personalityProfile={profile} onClose={() => setModalCard(null)} />
+        <MatchModal
+          candidate={modalCard}
+          mode={hideIdentity ? 'preview' : 'match'}
+          hideIdentity={hideIdentity}
+          onClose={() => setModalCard(null)}
+        />
       )}
 
       {previewCard && (
         <MatchModal
           candidate={previewCard}
-          personalityProfile={profile}
           mode="preview"
           hideIdentity={hideIdentity}
           onClose={() => setPreviewCard(null)}

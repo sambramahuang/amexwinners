@@ -1,4 +1,5 @@
 import type { Role } from '../App'
+import AmexCard3D from '../components/AmexCard3D'
 import CornerBrackets from '../components/CornerBrackets'
 import './RoleSelectView.css'
 
@@ -9,6 +10,10 @@ interface RoleSelectViewProps {
 export default function RoleSelectView({ onSelect }: RoleSelectViewProps) {
   return (
     <main className="role-select-main">
+      <div className="role-select-card">
+        <AmexCard3D height={300} rpm={4.2} holder="Basin Coffee Roasters" />
+      </div>
+
       <div className="role-select-intro">
         <div className="eyebrow">Circuit / Merchant Graph</div>
         <h1>Who's viewing?</h1>

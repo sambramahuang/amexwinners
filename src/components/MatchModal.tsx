@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { TIER_LABELS, type MatchCandidate } from '../data/graphEngineData'
-import type { PersonalityProfile } from '../data/personalityQuiz'
 import { redactCandidateName } from '../utils/redactCandidateName'
 import CornerBrackets from './CornerBrackets'
 import { BenefitBarChart, UpliftTrendChart } from './BenefitCharts'
@@ -9,7 +8,6 @@ import './MatchModal.css'
 
 interface MatchModalProps {
   candidate: MatchCandidate
-  personalityProfile: PersonalityProfile | null
   onClose: () => void
   mode?: 'match' | 'preview'
   /** True pre-match — hides the counterpart's identity from another SME, keeping only its category. */
@@ -18,7 +16,6 @@ interface MatchModalProps {
 
 export default function MatchModal({
   candidate,
-  personalityProfile,
   onClose,
   mode = 'match',
   hideIdentity = false,
@@ -90,7 +87,7 @@ export default function MatchModal({
 
         <div className="match-modal-ai">
           <div className="match-modal-ai-label">
-            AI explainability layer{personalityProfile && ' · transaction data + Basin’s partnership profile'}
+            AI explainability layer
           </div>
           <p>{redact(candidate.sequential)}</p>
         </div>

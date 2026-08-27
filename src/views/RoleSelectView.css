@@ -102,3 +102,10 @@
   color: var(--accent-active);
   text-decoration: underline;
 }
+
+/* The card turns on the first screen, so the product is the first thing
+   anyone sees rather than a pair of buttons. */
+.role-select-card {
+  width: min(520px, 100%);
+  margin: 0 auto -8px;
+}
