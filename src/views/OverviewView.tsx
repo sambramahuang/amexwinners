@@ -56,7 +56,7 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
           </p>
         </div>
         <div className="overview-hero-card">
-          <AmexCard3D height={330} rpm={3.6} holder="Basin Coffee Roasters" />
+          <AmexCard3D height={330} rpm={3.6} holder="American Express" />
         </div>
       </div>
 

@@ -153,15 +153,15 @@ function frontTexture(holder: string) {
 
   ctx.fillStyle = 'rgba(255,255,255,0.94)'
   ctx.font = '700 78px "Space Grotesk", system-ui, sans-serif'
-  ctx.fillText('Circuit', 96, 150)
+  ctx.fillText('American Express', 96, 150)
 
   ctx.fillStyle = BLUE
-  ctx.fillRect(96, 176, 132, 5)
+  ctx.fillRect(96, 176, 300, 5)
 
   ctx.fillStyle = 'rgba(255,255,255,0.5)'
   ctx.font = '500 26px "IBM Plex Mono", ui-monospace, monospace'
   ctx.letterSpacing = '4px'
-  ctx.fillText('MERCHANT GRAPH', 96, 224)
+  ctx.fillText('CIRCUIT / MERCHANT GRAPH', 96, 224)
   ctx.letterSpacing = '0px'
 
   drawChip(ctx, 96, H * 0.40, 268, 206)
@@ -257,7 +257,7 @@ function shadowTexture() {
 export default function AmexCard3D({
   height = 520,
   rpm = 4.5,
-  holder = 'Basin Coffee Roasters',
+  holder = 'American Express',
   className = '',
 }: AmexCard3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)

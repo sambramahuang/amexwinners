@@ -161,3 +161,80 @@ button {
 .btn-primary:disabled:hover {
   background: var(--accent);
 }
+
+/* Buttons answer the press. A click should feel like it landed, so every
+   button lifts on hover, compresses on press, and releases with a short
+   overshoot. Applied at the base .btn so it reaches every screen at once. */
+.btn {
+  position: relative;
+  overflow: hidden;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.16s cubic-bezier(0.2, 0.9, 0.3, 1.5),
+    box-shadow 0.16s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn-primary:hover:not(:disabled) {
+  box-shadow: 0 6px 16px -8px rgba(0, 111, 207, 0.85);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.972);
+  transition-duration: 0.06s;
+}
+
+/* The ripple starts at the button's edge and expands past it on press. */
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0;
+  transform: scale(1);
+  pointer-events: none;
+}
+
+.btn:active:not(:disabled)::after {
+  animation: btnRipple 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+@keyframes btnRipple {
+  0%   { opacity: 0.26; transform: scale(1); }
+  100% { opacity: 0; transform: scale(34); }
+}
+
+.btn:disabled {
+  transform: none;
+}
+
+/* Same treatment for the nav, which is a row of buttons in all but name. */
+.nav-link {
+  transition:
+    color 0.15s ease,
+    transform 0.16s cubic-bezier(0.2, 0.9, 0.3, 1.5);
+}
+
+.nav-link:hover { transform: translateY(-1px); }
+.nav-link:active { transform: translateY(0) scale(0.97); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn:hover:not(:disabled),
+  .btn:active:not(:disabled),
+  .nav-link,
+  .nav-link:hover,
+  .nav-link:active {
+    transform: none;
+  }
+  .btn:active:not(:disabled)::after { animation: none; }
+}

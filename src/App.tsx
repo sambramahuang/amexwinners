@@ -1,7 +1,9 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import Nav from './components/Nav'
 import HexagonBackground from './components/HexagonBackground'
+import GrowthRadarView from './views/GrowthRadarView'
 import OverviewView from './views/OverviewView'
+import StandingView from './views/StandingView'
 import MatchingView from './views/MatchingView'
 import RecruitPitchView from './views/RecruitPitchView'
 import RoleSelectView from './views/RoleSelectView'
@@ -12,26 +14,30 @@ import './App.css'
 const GraphView = lazy(() => import('./views/GraphView'))
 const GapRadarView = lazy(() => import('./views/GapRadarView'))
 
-export type View = 'overview' | 'graph' | 'match' | 'gaps' | 'pitch'
+export type View = 'growth' | 'overview' | 'graph' | 'match' | 'gaps' | 'pitch' | 'standing'
 export type Role = 'amex' | 'sme'
 
-const VIEWS: View[] = ['overview', 'graph', 'match', 'gaps', 'pitch']
+const VIEWS: View[] = ['growth', 'overview', 'graph', 'match', 'gaps', 'pitch', 'standing']
 const ROLE_KEY = 'circuit.role.v1'
 
 const NAV_ITEMS_BY_ROLE: Record<Role, { id: View; label: string }[]> = {
   amex: [
+    { id: 'growth', label: 'Growth Radar' },
     { id: 'overview', label: 'Overview' },
     { id: 'graph', label: 'Graph' },
     { id: 'match', label: 'Matching' },
     { id: 'gaps', label: 'Gap Radar' },
     { id: 'pitch', label: 'Recruit Pitch' },
   ],
-  sme: [{ id: 'match', label: 'Matching' }],
+  sme: [
+    { id: 'standing', label: 'Your standing' },
+    { id: 'match', label: 'Matching' },
+  ],
 }
 
 function readViewFromHash(): View {
   const hash = window.location.hash.slice(1)
-  return (VIEWS as string[]).includes(hash) ? (hash as View) : 'overview'
+  return (VIEWS as string[]).includes(hash) ? (hash as View) : 'growth'
 }
 
 function loadRole(): Role | null {
@@ -82,7 +88,7 @@ export default function App() {
   function chooseRole(nextRole: Role) {
     saveRole(nextRole)
     setRole(nextRole)
-    setView(nextRole === 'sme' ? 'match' : 'overview')
+    setView(nextRole === 'sme' ? 'standing' : 'growth')
   }
 
   function switchRole() {
@@ -104,7 +110,9 @@ export default function App() {
     )
   }
 
-  const effectiveView = role === 'sme' ? 'match' : view
+  const SME_VIEWS: View[] = ['standing', 'match']
+  const effectiveView =
+    role === 'sme' && !SME_VIEWS.includes(view) ? 'standing' : view
 
   return (
     <div className="app-shell">
@@ -117,6 +125,8 @@ export default function App() {
         onSwitchRole={switchRole}
       />
 
+      {role === 'amex' && effectiveView === 'growth' && <GrowthRadarView onNavigate={setView} />}
+      {role === 'sme' && effectiveView === 'standing' && <StandingView />}
       {role === 'amex' && view === 'overview' && <OverviewView onNavigate={setView} />}
       {role === 'amex' && view === 'graph' && (
         <Suspense fallback={null}>
