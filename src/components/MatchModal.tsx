@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { TIER_LABELS, type MatchCandidate } from '../data/graphEngineData'
 import type { PersonalityProfile } from '../data/personalityQuiz'
@@ -13,45 +13,7 @@ interface MatchModalProps {
   mode?: 'match' | 'preview'
 }
 
-const ANCHOR = { name: 'Basin Coffee Roasters', category: 'Café' }
-
 export default function MatchModal({ candidate, personalityProfile, onClose, mode = 'match' }: MatchModalProps) {
-  const [explanation, setExplanation] = useState<string | null>(null)
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
-
-  useEffect(() => {
-    let cancelled = false
-    setStatus('loading')
-    setExplanation(null)
-
-    const personality = personalityProfile
-      ? personalityProfile.answers.map((a) => ({ question: a.prompt, answer: a.label }))
-      : null
-
-    fetch('/api/explain-match', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ anchor: ANCHOR, candidate, personality }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error('request failed')
-        return res.json()
-      })
-      .then((data) => {
-        if (cancelled) return
-        setExplanation(data.explanation)
-        setStatus('ready')
-      })
-      .catch(() => {
-        if (cancelled) return
-        setStatus('error')
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [candidate, personalityProfile])
-
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
@@ -117,9 +79,7 @@ export default function MatchModal({ candidate, personalityProfile, onClose, mod
           <div className="match-modal-ai-label">
             AI explainability layer{personalityProfile && ' · transaction data + Basin’s partnership profile'}
           </div>
-          {status === 'loading' && <p className="match-modal-ai-loading">Generating explanation…</p>}
-          {status === 'ready' && <p>{explanation}</p>}
-          {status === 'error' && <p>{candidate.sequential}</p>}
+          <p>{candidate.sequential}</p>
         </div>
 
         <div className="match-modal-terms">Suggested terms: {candidate.terms}</div>

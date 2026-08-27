@@ -31,9 +31,9 @@ prospect data, `src/data/graphSceneConfigs.ts` for the 3D graph layout):
   where value flows mostly one way is flagged, even if the raw customer
   overlap looks strong. Swipe right (or click the check button) to match
   and add to the pipeline; swipe left to pass. The "It's a match" dialog's
-  AI explainability layer calls a small Express backend (`server/`) which
-  asks OpenAI to explain the match in plain language, grounded in the
-  card's own numbers — see "Running it" below for the extra setup step.
+  AI explainability layer shows a static, pre-written explanation grounded
+  in the card's own numbers — a real build would generate this with a
+  model call, but this frontend-only round ships fixed copy instead.
   Before the queue, an optional four-question partnership-preferences
   questionnaire adds a secondary, self-reported signal: it can nudge
   ranking by up to 30% and color the AI explanation, but the real
@@ -54,16 +54,13 @@ prospect data, `src/data/graphSceneConfigs.ts` for the 3D graph layout):
 
 ```bash
 npm install
-cp .env.example .env   # then fill in OPENAI_API_KEY
 npm run dev
 ```
 
-`npm run dev` runs the Vite dev server and the AI backend together
-(`vite` + `node server/index.js`, via `concurrently`); the frontend
-proxies `/api/*` to the backend on port 8787. To run either alone, use
-`npm run dev:web` or `npm run dev:server`. Without a valid
-`OPENAI_API_KEY`, the AI backend refuses to start, and the "It's a
-match" dialog falls back to the card's static sequential-signal text.
+This is a frontend-only build for the first-round submission — no
+backend or API keys required. The AI explainability layer and the
+recruit pitch copy are static, pre-written text rather than live model
+calls.
 
 Then open the local URL Vite prints (usually `http://localhost:5173`).
 
@@ -107,10 +104,6 @@ src/
     RecruitPitchView.tsx      Prong 2 — projected pitch for a prospect
   App.tsx                    view state + routing; Graph and Gap Radar are
                               lazy-loaded so three.js only ships when opened
-server/
-  index.js                   Express backend; POST /api/explain-match
-                              calls OpenAI to generate the match
-                              explanation shown in MatchModal
 ```
 
 ## What would change for a real build
@@ -129,3 +122,9 @@ server/
   would be computed automatically from real offer-redemption and
   transaction data over time, not simulated with a static `monthsActive`
   field as in this prototype.
+- The AI explainability layer (MatchModal) and recruit pitch copy
+  (RecruitPitchView) are static, pre-written text here; a real build
+  would generate both live via a model call grounded in each card's
+  numbers, as the first version of this prototype did with a small
+  Express + OpenAI backend before it was cut for this frontend-only
+  submission.

@@ -1,21 +1,16 @@
 import { useState } from 'react'
-import type { View } from '../App'
+import type { Role, View } from '../App'
 import './Nav.css'
-
-const NAV_ITEMS: { id: View; label: string }[] = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'graph', label: 'Graph' },
-  { id: 'match', label: 'Matching' },
-  { id: 'gaps', label: 'Gap Radar' },
-  { id: 'pitch', label: 'Recruit Pitch' },
-]
 
 interface NavProps {
   view: View
   onChange: (view: View) => void
+  items: { id: View; label: string }[]
+  role: Role
+  onSwitchRole: () => void
 }
 
-export default function Nav({ view, onChange }: NavProps) {
+export default function Nav({ view, onChange, items, role, onSwitchRole }: NavProps) {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   function select(id: View) {
@@ -23,41 +18,55 @@ export default function Nav({ view, onChange }: NavProps) {
     setMobileOpen(false)
   }
 
+  function switchRole() {
+    setMobileOpen(false)
+    onSwitchRole()
+  }
+
   return (
     <div className="nav-wrap">
       <nav className="top-nav">
         <span className="brand">
           Circuit <span className="brand-slash">/</span> Merchant Graph
+          <span className="brand-role-badge">{role === 'amex' ? 'Amex Admin' : 'SME'}</span>
         </span>
 
-        <div className="nav-links">
-          {NAV_ITEMS.map((item) => (
-            <span
-              key={item.id}
-              className={`nav-link ${view === item.id ? 'is-active' : ''}`}
-              onClick={() => select(item.id)}
-            >
-              {item.label}
-            </span>
-          ))}
-        </div>
+        {items.length > 1 && (
+          <div className="nav-links">
+            {items.map((item) => (
+              <span
+                key={item.id}
+                className={`nav-link ${view === item.id ? 'is-active' : ''}`}
+                onClick={() => select(item.id)}
+              >
+                {item.label}
+              </span>
+            ))}
+          </div>
+        )}
 
-        <button
-          className={`nav-toggle ${mobileOpen ? 'is-open' : ''}`}
-          type="button"
-          aria-label="Toggle menu"
-          aria-expanded={mobileOpen}
-          onClick={() => setMobileOpen((v) => !v)}
-        >
-          <span />
-          <span />
-          <span />
-        </button>
+        <span className="nav-switch-role" onClick={switchRole}>
+          Switch view
+        </span>
+
+        {items.length > 1 && (
+          <button
+            className={`nav-toggle ${mobileOpen ? 'is-open' : ''}`}
+            type="button"
+            aria-label="Toggle menu"
+            aria-expanded={mobileOpen}
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
+        )}
       </nav>
 
-      {mobileOpen && (
+      {mobileOpen && items.length > 1 && (
         <div className="nav-mobile-menu">
-          {NAV_ITEMS.map((item) => (
+          {items.map((item) => (
             <span
               key={item.id}
               className={`nav-mobile-link ${view === item.id ? 'is-active' : ''}`}
@@ -66,6 +75,9 @@ export default function Nav({ view, onChange }: NavProps) {
               {item.label}
             </span>
           ))}
+          <span className="nav-mobile-link" onClick={switchRole}>
+            Switch view
+          </span>
         </div>
       )}
     </div>

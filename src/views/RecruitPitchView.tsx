@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import { PROSPECT_TARGETS } from '../data/graphEngineData'
 import './RecruitPitchView.css'
 
@@ -11,38 +10,6 @@ interface RecruitPitchViewProps {
 
 export default function RecruitPitchView({ selectedIdx, onSelect }: RecruitPitchViewProps) {
   const selected = PROSPECT_TARGETS[selectedIdx] ?? PROSPECT_TARGETS[0]
-
-  const [pitch, setPitch] = useState<string | null>(null)
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
-
-  useEffect(() => {
-    let cancelled = false
-    setStatus('loading')
-    setPitch(null)
-
-    fetch('/api/pitch-copy', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prospect: selected }),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error('request failed')
-        return res.json()
-      })
-      .then((data) => {
-        if (cancelled) return
-        setPitch(data.pitch)
-        setStatus('ready')
-      })
-      .catch(() => {
-        if (cancelled) return
-        setStatus('error')
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [selected])
 
   return (
     <main className="pitch-main">
@@ -78,9 +45,7 @@ export default function RecruitPitchView({ selectedIdx, onSelect }: RecruitPitch
           {selected.category} · {selected.cluster}
         </div>
 
-        <p className={`pitch-copy ${status === 'loading' ? 'pitch-copy-loading' : ''}`}>
-          {status === 'loading' ? 'Generating pitch…' : status === 'ready' ? pitch : selected.pitchCopy}
-        </p>
+        <p className="pitch-copy">{selected.pitchCopy}</p>
 
         <div className="pitch-uplift">
           <span className="pitch-uplift-value">{selected.upliftRange}</span>
