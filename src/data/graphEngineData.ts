@@ -106,7 +106,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     upliftYou: 9,
     upliftThem: 27,
     balanceColor: '#e8b54d',
-    balanceNote: 'Auto-rebalanced: added a Basin gift-card bonus for Loom referrals to close an 18pt gap.',
+    balanceNote: 'Auto-rebalanced: added a Basin gift-card bonus for Loom Bicycle referrals to close an 18pt gap.',
     terms: 'Referral card: bike tune-up customers get a free drip coffee at Basin.',
     personalityTags: ['fast-paced', 'convenience', 'shared-regulars'],
     tier: 1,
