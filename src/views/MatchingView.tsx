@@ -371,14 +371,14 @@ export default function MatchingView({ role }: MatchingViewProps) {
             </div>
           </div>
           <div className="sidebar-card">
-            <div className="sidebar-label">Partnership profile</div>
+            <div className="sidebar-label">Brand words</div>
             <p className="sidebar-personality-status">
               {profile
-                ? 'Profile answered — nudging rank up to 30%, transaction data still leads.'
-                : 'Not answered — ranked by transaction data only.'}
+                ? `Words picked: ${profile.words.join(', ')}. Nudges rank up to 30%, transaction data still leads.`
+                : 'No words picked. Ranked by transaction data only.'}
             </p>
             <button className="btn btn-ghost sidebar-vibe-btn" onClick={() => setShowQuiz(true)}>
-              {profile ? 'Retake questionnaire' : 'Complete questionnaire'}
+              {profile ? 'Pick different words' : 'Pick three words'}
             </button>
           </div>
         </aside>

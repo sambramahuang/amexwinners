@@ -1,70 +1,39 @@
 // -----------------------------------------------------------------------
-// Merchant partnership-preferences questionnaire — a short, self-reported
-// qualitative layer that sits ON TOP OF the real closed-loop transaction
-// signal (overlapPct, sequential, upliftYou/upliftThem). It never replaces
-// that data; it only nudges ranking and adds color to the AI explanation.
-// See computePersonalityFit in personalityFit.ts for how it's blended in.
+// Brand words — a short, self-reported qualitative layer that sits ON TOP OF
+// the real closed-loop transaction signal (overlapPct, sequential,
+// upliftYou/upliftThem). It never replaces that data; it only nudges ranking
+// and adds colour to the AI explanation. A merchant picks three words for
+// their own business, which is faster and truer than answering four multiple
+// choice questions about themselves.
+// See computePersonalityFit in personalityFit.ts for how it is blended in.
 // -----------------------------------------------------------------------
 
-export interface PersonalityOption {
-  label: string
+export interface BrandWord {
+  word: string
+  /** What the word implies about how this merchant trades. */
+  meaning: string
   tags: string[]
 }
 
-export interface PersonalityQuestion {
-  id: string
-  prompt: string
-  /** 'avoid' questions capture disqualifiers — matching tags penalize fit instead of boosting it. */
-  kind: 'like' | 'avoid'
-  options: PersonalityOption[]
-}
-
-export const PERSONALITY_QUESTIONS: PersonalityQuestion[] = [
-  {
-    id: 'customer-vibe',
-    prompt: 'How would you describe a typical Basin visit?',
-    kind: 'like',
-    options: [
-      { label: 'Extended stay — customers linger with a book or laptop', tags: ['slow-browse', 'community'] },
-      { label: 'Quick and convenience-driven — most visits are on the go', tags: ['fast-paced', 'convenience'] },
-      { label: 'Occasion-driven — customers treat it as a deliberate outing', tags: ['occasion', 'brand-aesthetic'] },
-      { label: 'Habitual — regulars who visit on a near-daily cadence', tags: ['community', 'ritual'] },
-    ],
-  },
-  {
-    id: 'green-flag',
-    prompt: 'What matters most when evaluating a potential partner?',
-    kind: 'like',
-    options: [
-      { label: 'Overlapping customer base — their regulars resemble ours', tags: ['community', 'shared-regulars'] },
-      { label: 'Brand and aesthetic alignment — the pairing reads as coherent', tags: ['brand-aesthetic', 'occasion'] },
-      { label: "Demonstrated follow-through — they'll actively promote the partnership", tags: ['low-maintenance', 'shared-events'] },
-      { label: 'Operational compatibility — similar pace, low coordination overhead', tags: ['low-maintenance', 'ritual'] },
-    ],
-  },
-  {
-    id: 'love-language',
-    prompt: 'Which partnership structure works best for Basin?',
-    kind: 'like',
-    options: [
-      { label: 'Bundled discount or joint loyalty program', tags: ['convenience', 'shared-regulars'] },
-      { label: 'Co-hosted events or cross-promotions', tags: ['shared-events', 'occasion'] },
-      { label: 'Referral-based — warm handoffs between customer bases', tags: ['community', 'shared-regulars'] },
-      { label: 'Co-branded product or menu collaboration', tags: ['brand-aesthetic', 'occasion'] },
-    ],
-  },
-  {
-    id: 'dealbreaker',
-    prompt: 'What would disqualify a potential partner?',
-    kind: 'avoid',
-    options: [
-      { label: 'Purely transactional — no shared brand narrative', tags: ['community', 'ritual'] },
-      { label: 'Inconsistent hours or unreliable follow-through', tags: ['low-maintenance'] },
-      { label: 'Aesthetic mismatch that customers would notice', tags: ['brand-aesthetic'] },
-      { label: 'One-sided benefit — they gain traffic without reciprocating', tags: ['shared-regulars', 'shared-events'] },
-    ],
-  },
+export const BRAND_WORDS: BrandWord[] = [
+  { word: 'Unhurried', meaning: 'People stay a while', tags: ['slow-browse', 'ritual'] },
+  { word: 'Neighbourly', meaning: 'Regulars from nearby', tags: ['community', 'shared-regulars'] },
+  { word: 'Crafted', meaning: 'Made with care, and it shows', tags: ['brand-aesthetic', 'occasion'] },
+  { word: 'Dependable', meaning: 'Same standard every visit', tags: ['low-maintenance', 'ritual'] },
+  { word: 'Quick', meaning: 'In, out, on with the day', tags: ['fast-paced', 'convenience'] },
+  { word: 'Social', meaning: 'People come to meet people', tags: ['shared-events', 'community'] },
+  { word: 'Considered', meaning: 'Nothing here is accidental', tags: ['brand-aesthetic', 'slow-browse'] },
+  { word: 'Everyday', meaning: 'Part of the routine', tags: ['ritual', 'convenience'] },
+  { word: 'Celebratory', meaning: 'Marks an occasion', tags: ['occasion', 'shared-events'] },
+  { word: 'Warm', meaning: 'Known by name', tags: ['community', 'shared-regulars'] },
+  { word: 'Precise', meaning: 'Runs like clockwork', tags: ['low-maintenance', 'brand-aesthetic'] },
+  { word: 'Independent', meaning: 'Nobody else does it this way', tags: ['brand-aesthetic', 'community'] },
+  { word: 'Generous', meaning: 'Gives more than expected', tags: ['shared-regulars', 'shared-events'] },
+  { word: 'Understated', meaning: 'Quiet quality, no shouting', tags: ['slow-browse', 'low-maintenance'] },
+  { word: 'Energetic', meaning: 'Fast, loud, alive', tags: ['fast-paced', 'shared-events'] },
 ]
+
+export const WORDS_REQUIRED = 3
 
 export interface PersonalityAnswer {
   questionId: string
@@ -78,10 +47,22 @@ export interface PersonalityProfile {
   answers: PersonalityAnswer[]
   likedTags: string[]
   avoidTags: string[]
+  /** The three words as picked, in order, for display. */
+  words: string[]
 }
 
-export function buildPersonalityProfile(answers: PersonalityAnswer[]): PersonalityProfile {
-  const likedTags = [...new Set(answers.filter((a) => a.kind === 'like').flatMap((a) => a.tags))]
-  const avoidTags = [...new Set(answers.filter((a) => a.kind === 'avoid').flatMap((a) => a.tags))]
-  return { answers, likedTags, avoidTags }
+export function buildProfileFromWords(picked: BrandWord[]): PersonalityProfile {
+  const answers: PersonalityAnswer[] = picked.map((w) => ({
+    questionId: `brand-word-${w.word.toLowerCase()}`,
+    prompt: 'Three words for this business',
+    label: w.word,
+    kind: 'like',
+    tags: w.tags,
+  }))
+  return {
+    answers,
+    likedTags: [...new Set(picked.flatMap((w) => w.tags))],
+    avoidTags: [],
+    words: picked.map((w) => w.word),
+  }
 }

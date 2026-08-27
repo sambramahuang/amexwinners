@@ -92,6 +92,14 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
 
     const disposables: { geometry?: THREE.BufferGeometry; material?: THREE.Material }[] = []
 
+    // The graph builds itself in rather than cutting in fully formed: nodes
+    // land one after another, then the edges draw between them. It reads as a
+    // network being assembled from evidence, which is what it is.
+    const introNodes: THREE.Mesh[] = []
+    const introEdges: { geometry: THREE.BufferGeometry; a: THREE.Vector3; b: THREE.Vector3 }[] = []
+    const introFades: THREE.Material[] = []
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
     const nodeGeometry = new THREE.SphereGeometry(0.14, 24, 24)
     disposables.push({ geometry: nodeGeometry })
     for (const node of config.nodes) {
@@ -101,6 +109,8 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
       disposables.push({ material })
       const mesh = new THREE.Mesh(nodeGeometry, material)
       mesh.position.set(...node.position)
+      if (!reduceMotion) mesh.scale.setScalar(0.001)
+      introNodes.push(mesh)
       scene.add(mesh)
 
       if (node.name) {
@@ -116,11 +126,14 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
     const edgeMaterial = new THREE.LineBasicMaterial({ color: EDGE_COLOR })
     disposables.push({ material: edgeMaterial })
     for (const [a, b] of config.edges) {
+      const pointA = new THREE.Vector3(...config.nodes[a].position)
+      const pointB = new THREE.Vector3(...config.nodes[b].position)
       const geometry = new THREE.BufferGeometry().setFromPoints([
-        new THREE.Vector3(...config.nodes[a].position),
-        new THREE.Vector3(...config.nodes[b].position),
+        pointA.clone(),
+        reduceMotion ? pointB.clone() : pointA.clone(),
       ])
       disposables.push({ geometry })
+      introEdges.push({ geometry, a: pointA, b: pointB })
       scene.add(new THREE.Line(geometry, edgeMaterial))
     }
 
@@ -131,6 +144,11 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
         gapSize: 0.05,
       })
       disposables.push({ material: dashedEdgeMaterial })
+      if (!reduceMotion) {
+        dashedEdgeMaterial.transparent = true
+        dashedEdgeMaterial.opacity = 0
+        introFades.push(dashedEdgeMaterial)
+      }
       for (const [a, b] of config.dashedEdges) {
         const geometry = new THREE.BufferGeometry().setFromPoints([
           new THREE.Vector3(...config.nodes[a].position),
@@ -146,6 +164,11 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
     if (config.tier3Edges) {
       const tier3Material = new THREE.LineBasicMaterial({ color: TIER3_EDGE_COLOR })
       disposables.push({ material: tier3Material })
+      if (!reduceMotion) {
+        tier3Material.transparent = true
+        tier3Material.opacity = 0
+        introFades.push(tier3Material)
+      }
       for (const [a, b] of config.tier3Edges) {
         const pointA = new THREE.Vector3(...config.nodes[a].position)
         const pointB = new THREE.Vector3(...config.nodes[b].position)
@@ -163,6 +186,11 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
       for (const gap of config.gaps) {
         const gapMaterial = new THREE.MeshBasicMaterial({ color: gap.color, wireframe: true })
         disposables.push({ material: gapMaterial })
+        if (!reduceMotion) {
+          gapMaterial.transparent = true
+          gapMaterial.opacity = 0
+          introFades.push(gapMaterial)
+        }
         const gapMesh = new THREE.Mesh(gapBoxGeometry, gapMaterial)
         gapMesh.position.set(...gap.position)
         scene.add(gapMesh)
@@ -178,6 +206,11 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
 
         const dashMaterial = new THREE.LineDashedMaterial({ color: gap.color, dashSize: 0.08, gapSize: 0.06 })
         disposables.push({ material: dashMaterial })
+        if (!reduceMotion) {
+          dashMaterial.transparent = true
+          dashMaterial.opacity = 0
+          introFades.push(dashMaterial)
+        }
         for (const idx of gap.connectedNodeIndexes) {
           const geometry = new THREE.BufferGeometry().setFromPoints([
             new THREE.Vector3(...config.nodes[idx].position),
@@ -199,8 +232,52 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
     controls.autoRotate = true
     controls.autoRotateSpeed = 0.6
 
+    const NODE_IN = 0.42
+    const NODE_STAGGER = 0.075
+    const EDGE_START = 0.34
+    const EDGE_IN = 0.5
+    const EDGE_STAGGER = 0.055
+    const clock = new THREE.Clock()
+    const easeOut = (t: number) => 1 - Math.pow(1 - t, 3)
+    const clamp01 = (t: number) => Math.max(0, Math.min(1, t))
+    let introDone = reduceMotion
+
+    function runIntro(elapsed: number) {
+      let finished = true
+
+      introNodes.forEach((mesh, i) => {
+        const t = clamp01((elapsed - i * NODE_STAGGER) / NODE_IN)
+        // Slight overshoot, so each node lands rather than merely arrives.
+        const eased = easeOut(t)
+        mesh.scale.setScalar(eased * (1 + 0.16 * Math.sin(Math.PI * t)))
+        if (t < 1) finished = false
+      })
+
+      introEdges.forEach((edge, i) => {
+        const t = clamp01((elapsed - EDGE_START - i * EDGE_STAGGER) / EDGE_IN)
+        const eased = easeOut(t)
+        const tip = edge.a.clone().lerp(edge.b, eased)
+        const pos = edge.geometry.attributes.position
+        pos.setXYZ(1, tip.x, tip.y, tip.z)
+        pos.needsUpdate = true
+        if (t < 1) finished = false
+      })
+
+      const fade = clamp01((elapsed - 1.15) / 0.7)
+      for (const material of introFades) {
+        material.opacity = fade
+      }
+      if (fade < 1) finished = false
+
+      if (finished) {
+        for (const material of introFades) material.transparent = false
+        introDone = true
+      }
+    }
+
     function animate() {
       if (disposed) return
+      if (!introDone) runIntro(clock.getElapsedTime())
       controls.update()
       fitCameraToAnchors()
       renderer.render(scene, camera)
