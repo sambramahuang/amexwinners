@@ -1,4 +1,5 @@
 import type { View } from '../App'
+import AmexCard3D from '../components/AmexCard3D'
 import CornerBrackets from '../components/CornerBrackets'
 import './OverviewView.css'
 
@@ -44,14 +45,19 @@ interface OverviewViewProps {
 export default function OverviewView({ onNavigate }: OverviewViewProps) {
   return (
     <main className="overview-main">
-      <div className="overview-intro">
-        <div className="eyebrow">One engine, three outputs</div>
-        <h1>A merchant graph feeds every prong</h1>
-        <p>
-          Merchants are nodes. Edges are complementary relationships inferred from real
-          transaction data — customer overlap, and sequential spend patterns like
-          "visits A then B within two weeks." Everything below reads from that one graph.
-        </p>
+      <div className="overview-hero">
+        <div className="overview-intro">
+          <div className="eyebrow">One engine, three outputs</div>
+          <h1>A merchant graph feeds every prong</h1>
+          <p>
+            Merchants are nodes. Edges are complementary relationships inferred from real
+            transaction data — customer overlap, and sequential spend patterns like
+            "visits A then B within two weeks." Everything below reads from that one graph.
+          </p>
+        </div>
+        <div className="overview-hero-card">
+          <AmexCard3D height={330} rpm={3.6} holder="Basin Coffee Roasters" />
+        </div>
       </div>
 
       <div className="overview-diagram">

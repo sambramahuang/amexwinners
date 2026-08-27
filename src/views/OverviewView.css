@@ -161,3 +161,31 @@
   color: var(--accent-active);
   text-decoration: underline;
 }
+
+/* Hero: the intro copy sits beside a slowly turning card, so the overview
+   opens on the product rather than on a wall of text. */
+.overview-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 460px);
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 44px;
+}
+
+.overview-hero .overview-intro {
+  margin-bottom: 0;
+}
+
+.overview-hero-card {
+  position: relative;
+}
+
+@media (max-width: 900px) {
+  .overview-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-hero-card {
+    order: -1;
+  }
+}
