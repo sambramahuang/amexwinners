@@ -155,33 +155,102 @@
 
 .chart-point.is-on { opacity: 1; }
 
-.sales-readout {
+.sales-plot {
+  position: relative;
+}
+
+/* The readout sits on the point it describes, above the line, with a stem
+   down to the marker so there is no doubt which month it belongs to. */
+.sales-tip {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 18px));
+  z-index: 3;
+  pointer-events: none;
   display: flex;
-  align-items: baseline;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-  padding-top: 14px;
-  border-top: 1px solid var(--border-soft);
-  font-size: 14px;
-  color: var(--text-80);
+  flex-direction: column;
+  gap: 1px;
+  padding: 10px 14px 11px;
+  min-width: 148px;
+  background: var(--text);
+  color: #fff;
+  box-shadow: 0 16px 30px -18px rgba(11, 28, 51, 0.9);
+  animation: tipIn 0.16s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+
+@keyframes tipIn {
+  from { opacity: 0; transform: translate(-50%, calc(-100% - 10px)); }
+  to   { opacity: 1; transform: translate(-50%, calc(-100% - 18px)); }
+}
+
+/* Stem from the card down to the point. */
+.sales-tip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 1px;
+  height: 14px;
+  background: var(--text);
+  opacity: 0.42;
+}
+
+.sales-tip-month {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sales-tip-value {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.15;
   font-variant-numeric: tabular-nums;
 }
 
-.sales-readout strong {
-  font-family: var(--font-display);
-  color: var(--text);
+.sales-tip-peer {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.66);
+  font-variant-numeric: tabular-nums;
 }
 
-.sales-readout-peer { color: var(--text-55); font-size: 13px; }
+.sales-tip-gap {
+  margin-top: 5px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+}
 
-.sales-readout-hint {
-  margin-left: auto;
+.sales-tip-gap.is-behind { color: #f0c46a; }
+.sales-tip-gap.is-ahead { color: #6fd6c4; }
+
+.sales-guide {
+  position: absolute;
+  top: 8px;
+  bottom: 10px;
+  width: 1px;
+  background: rgba(0, 111, 207, 0.22);
+  pointer-events: none;
+}
+
+.sales-months {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
   font-family: var(--font-mono);
   font-size: 10.5px;
+  color: var(--text-55);
+}
+
+.sales-months-hint {
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-55);
 }
 
 .standing-action {

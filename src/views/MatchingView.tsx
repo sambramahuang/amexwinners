@@ -12,21 +12,30 @@ const SWIPE_THRESHOLD = 120
 const EXIT_DISTANCE = 700
 const EXIT_DURATION_MS = 320
 
-const CONSENT_KEY = 'circuit.matchingConsent.v1'
+const CONSENT_KEY = 'circuit.matchingConsent.v2'
 
-function loadConsent(): boolean {
+/** The date consent was given, or null if it has not been. */
+function loadConsent(): string | null {
   try {
-    return localStorage.getItem(CONSENT_KEY) === '1'
+    return localStorage.getItem(CONSENT_KEY)
   } catch {
-    return false
+    return null
   }
 }
 
-function saveConsent() {
+function saveConsent(date: string) {
   try {
-    localStorage.setItem(CONSENT_KEY, '1')
+    localStorage.setItem(CONSENT_KEY, date)
   } catch {
     /* localStorage unavailable, so consent just will not persist across visits */
+  }
+}
+
+function clearConsent() {
+  try {
+    localStorage.removeItem(CONSENT_KEY)
+  } catch {
+    /* ignore */
   }
 }
 
@@ -47,7 +56,9 @@ export default function MatchingView({ role }: MatchingViewProps) {
   const [panel, setPanel] = useState<'discover' | 'requests'>('discover')
   const [modalCard, setModalCard] = useState<RankedCandidate | null>(null)
   const [previewCard, setPreviewCard] = useState<RankedCandidate | null>(null)
-  const [consented, setConsented] = useState<boolean>(() => loadConsent())
+  const [consentedOn, setConsentedOn] = useState<string | null>(() => loadConsent())
+  const [reviewingConsent, setReviewingConsent] = useState(false)
+  const consented = consentedOn !== null
 
   // Ranked on the closed-loop transaction signal alone.
   const rankedCandidates = useMemo<RankedCandidate[]>(
@@ -146,8 +157,20 @@ export default function MatchingView({ role }: MatchingViewProps) {
   }
 
   function acceptConsent() {
-    saveConsent()
-    setConsented(true)
+    const today = new Date().toLocaleDateString('en-US', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    })
+    saveConsent(today)
+    setConsentedOn(today)
+    setReviewingConsent(false)
+  }
+
+  function withdrawConsent() {
+    clearConsent()
+    setConsentedOn(null)
+    setReviewingConsent(false)
   }
 
   return (
@@ -164,7 +187,16 @@ export default function MatchingView({ role }: MatchingViewProps) {
 
         {!consented && <ConsentGate onAccept={acceptConsent} />}
 
-        {consented && (
+        {consented && reviewingConsent && (
+          <ConsentGate
+            onAccept={acceptConsent}
+            onCancel={() => setReviewingConsent(false)}
+            grantedOn={consentedOn}
+            onWithdraw={withdrawConsent}
+          />
+        )}
+
+        {consented && !reviewingConsent && (
           <div className="panel-tabs">
             <button
               className={`panel-tab ${panel === 'discover' ? 'is-active' : ''}`}
@@ -182,7 +214,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
           </div>
         )}
 
-        {consented && panel === 'requests' && (
+        {consented && !reviewingConsent && panel === 'requests' && (
           <RequestPanel
             mutual={mutual}
             waiting={waiting}
@@ -191,7 +223,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
           />
         )}
 
-        {consented && panel === 'discover' && !matchDone && (
+        {consented && !reviewingConsent && panel === 'discover' && !matchDone && (
           <>
             <div className="card-stack">
               {peek2 && <div className="stack-card peek-2" />}
@@ -346,7 +378,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
           </>
         )}
 
-        {consented && panel === 'discover' && matchDone && (
+        {consented && !reviewingConsent && panel === 'discover' && matchDone && (
           <div className="queue-done">
             <div className="queue-done-title">Queue cleared</div>
             <p>
@@ -365,7 +397,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
         )}
       </div>
 
-      {consented && (
+      {consented && !reviewingConsent && (
         <aside className="matching-sidebar">
           <div className="sidebar-card">
             <div className="sidebar-label">This session</div>
@@ -378,6 +410,20 @@ export default function MatchingView({ role }: MatchingViewProps) {
               <span className="sidebar-value-accent">{mutual.length}</span>
             </div>
           </div>
+          <div className="sidebar-card">
+            <div className="sidebar-label">Data sharing</div>
+            <p className="sidebar-consent-status">
+              Consent given on {consentedOn}. Your name, logo and match score are
+              visible to merchants in your queue.
+            </p>
+            <button
+              className="btn btn-ghost sidebar-consent-btn"
+              onClick={() => setReviewingConsent(true)}
+            >
+              Review or withdraw
+            </button>
+          </div>
+
           <div className="sidebar-card">
             <div className="sidebar-label">Liked this session</div>
             <div className="sidebar-chips">

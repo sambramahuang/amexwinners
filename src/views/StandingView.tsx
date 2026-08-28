@@ -48,7 +48,6 @@ export default function StandingView({
   const path = (vals: number[]) =>
     vals.map((v, i) => `${i === 0 ? 'M' : 'L'}${point(v, i).map((n) => n.toFixed(1)).join(',')}`).join(' ')
 
-  const shown = hover ?? SALES.length - 1
 
   return (
     <main className="standing-main">
@@ -84,7 +83,35 @@ export default function StandingView({
           <span><i className="swatch swatch-peers" /> Median café nearby</span>
         </div>
 
-        <svg className="sales-chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+        <div className="sales-plot">
+          {hover !== null && (
+            <div
+              className="sales-tip"
+              style={{
+                left: `${(point(SALES[hover], hover)[0] / W) * 100}%`,
+                top: `${(point(SALES[hover], hover)[1] / H) * 100}%`,
+              }}
+            >
+              <span className="sales-tip-month">{MONTHS[hover]}</span>
+              <span className="sales-tip-value">{money(SALES[hover])}</span>
+              <span className="sales-tip-peer">
+                median {money(PEER_SALES[hover])}
+              </span>
+              <span
+                className={`sales-tip-gap ${
+                  SALES[hover] >= PEER_SALES[hover] ? 'is-ahead' : 'is-behind'
+                }`}
+              >
+                {Math.abs(
+                  Math.round(
+                    ((SALES[hover] - PEER_SALES[hover]) / PEER_SALES[hover]) * 100,
+                  ),
+                )}
+                % {SALES[hover] >= PEER_SALES[hover] ? 'ahead' : 'behind'}
+              </span>
+            </div>
+          )}
+          <svg className="sales-chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
           <path className="chart-line chart-line-peers" d={path(PEER_SALES)} fill="none" />
           <path className="chart-line chart-line-you" d={path(SALES)} fill="none" />
           {SALES.map((v, i) => {
@@ -104,15 +131,21 @@ export default function StandingView({
               </g>
             )
           })}
-        </svg>
+          </svg>
 
-        <div className="sales-readout">
-          <strong>{MONTHS[shown]}</strong>
-          <span>{money(SALES[shown])}</span>
-          <span className="sales-readout-peer">
-            median {money(PEER_SALES[shown])}
-          </span>
-          {hover === null && <span className="sales-readout-hint">Hover any month</span>}
+          {/* A guide line, so the hovered month is unmistakable. */}
+          {hover !== null && (
+            <div
+              className="sales-guide"
+              style={{ left: `${(point(SALES[hover], hover)[0] / W) * 100}%` }}
+            />
+          )}
+        </div>
+
+        <div className="sales-months">
+          <span>{MONTHS[0]}</span>
+          {hover === null && <span className="sales-months-hint">Hover any month</span>}
+          <span>{MONTHS[MONTHS.length - 1]}</span>
         </div>
       </div>
 
