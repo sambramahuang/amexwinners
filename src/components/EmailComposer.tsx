@@ -42,7 +42,7 @@ export default function EmailComposer({
     <div className="composer">
       <div className="composer-head">
         <div>
-          <div className="composer-label">Drafted by Circuit</div>
+          <div className="composer-label">Drafted by Connexion</div>
           <div className="composer-from">
             {email.fromName}, {email.fromRole}
           </div>

@@ -19,8 +19,8 @@ const SWIPE_THRESHOLD = 120
 const EXIT_DISTANCE = 700
 const EXIT_DURATION_MS = 320
 
-const CONSENT_KEY = 'circuit.matchingConsent.v2'
-const SWIPE_HINT_KEY = 'circuit.swipeHintSeen.v1'
+const CONSENT_KEY = 'connexion.matchingConsent.v2'
+const SWIPE_HINT_KEY = 'connexion.swipeHintSeen.v1'
 
 /** The date consent was given, or null if it has not been. */
 function loadConsent(): string | null {

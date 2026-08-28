@@ -18,7 +18,7 @@ export type View = 'growth' | 'overview' | 'graph' | 'match' | 'gaps' | 'pitch' 
 export type Role = 'amex' | 'sme'
 
 const VIEWS: View[] = ['growth', 'overview', 'graph', 'match', 'gaps', 'pitch', 'standing']
-const ROLE_KEY = 'circuit.role.v1'
+const ROLE_KEY = 'connexion.role.v1'
 
 const NAV_ITEMS_BY_ROLE: Record<Role, { id: View; label: string }[]> = {
   amex: [

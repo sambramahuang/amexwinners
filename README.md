@@ -1,54 +1,77 @@
-# Circuit — Amex AI Hackathon 2026, Round 1 prototype
+# Connexion
 
-Built with React + TypeScript + Vite.
+**American Express AI Innovation Hackathon 2026, Round 1 prototype.**
+React + TypeScript + Vite, frontend only.
 
-A working prototype of the three-pronged SME growth idea: one merchant
-graph built from Amex's closed-loop transaction data, powering merchant
-matching, gap-driven outreach, and prospect acquisition previews.
+Connexion is a merchant data layer built on American Express's closed loop.
+Merchants are nodes. Edges are complementary relationships inferred from card
+transactions Amex already processes: customer overlap, and sequential spend
+patterns such as "visits A, then B within two weeks." Everything in the product
+reads from that one graph.
 
-**This is a demo, not a production build.** All merchants, customers,
-scores, and uplift figures are synthetic — invented for the purpose of
-showing the system's reasoning, not real Amex data.
+> **This is a demo, not a production build.** Every merchant, figure and score
+> is synthetic, invented to show the system's reasoning. No American Express
+> data is used, and nothing here is an American Express product. Business names
+> are invented; the US cities and neighbourhoods are real, because attaching
+> fabricated financials to real named companies would be a false claim about
+> somebody's actual business.
 
-## What it shows
+## Two roles, two products
 
-The app has five views, reachable from the top nav, all reading from the
-same underlying merchant graph (`src/data/graphEngineData.ts` for match/
-prospect data, `src/data/graphSceneConfigs.ts` for the 3D graph layout):
+The app opens on a role chooser, because Connexion is two interfaces over one
+graph.
 
-- **Overview** — a one-page explanation of the graph model and links into
-  the graph and the three prongs below.
-- **Graph** — the full merchant graph as an interactive, self-rotating
-  three.js scene (drag to rotate manually). Node shade indicates industry;
-  dashed nodes are structural gaps; the faint dashed bridge between the
-  two clusters is a cross-cluster signal too weak for Prong 1 to act on
-  yet, kept visible rather than discarded.
-- **Matching (Prong 1)** — a swipe-card queue of merchants already
-  accepting Amex, ranked by graph signal strength. Each card shows the
-  transaction-based reasoning behind the match and a value-symmetry
-  check. The symmetry score exists specifically to avoid the failure mode
-  that sank Amex's earlier Plenti coalition-loyalty program: a match
-  where value flows mostly one way is flagged, even if the raw customer
-  overlap looks strong. Swipe right (or click the check button) to match
-  and add to the pipeline; swipe left to pass. The "It's a match" dialog's
-  AI explainability layer shows a static, pre-written explanation grounded
-  in the card's own numbers — a real build would generate this with a
-  model call, but this frontend-only round ships fixed copy instead.
-  Before the queue, an optional four-question partnership-preferences
-  questionnaire adds a secondary, self-reported signal: it can nudge
-  ranking by up to 30% and color the AI explanation, but the real
-  closed-loop transaction data — customer overlap, sequential-visit
-  signal, uplift — stays the dominant 70% weight, and the questionnaire is
-  fully skippable, so the app works the same without it.
-- **Gap Radar (Prong 3)** — a 3D graph per cluster showing a tight,
-  mutually overlapping merchant group with a structural hole (a category
-  that's clearly missing), plus a ranked table of recruit targets that
-  would fill each gap and why.
-- **Recruit Pitch (Prong 2)** — pick a prospect from the Gap Radar table
-  (or the pill selector) to see the pitch a not-yet-Amex business would
-  be shown. Since prospects have no Amex transaction history, this is a
-  category-level projection drawn from patterns in the existing graph,
-  honestly labeled as predictive rather than a live computed match.
+### Amex admin
+
+| View | What it does |
+| --- | --- |
+| **Growth Radar** | The fastest growing small businesses in the region, ranked on 12 month card volume across 50 merchants in 28 US cities. Some are not on Amex, which is the point: the radar sees a business before it is a customer, so the same screen is a portfolio view and an acquisition list. |
+| **Overview** | The graph model, and the way into the three prongs. |
+| **Graph** | The full merchant graph as a three.js scene that builds itself in and rotates. Node colour is industry, dashed edges are weak cross cluster signal, a gold line marks a Tier 3 structural relationship, and red wireframe markers are structural gaps. |
+| **Matching** | The matching queue as the merchant sees it. |
+| **Gap Radar** | Clusters with strong mutual overlap but a missing category, plus who to recruit to fill each one. |
+| **Recruit Pitch** | The pitch a not yet Amex business is shown, and a recruitment email that can be dispatched to a selected list of prospects. |
+
+### SME
+
+| View | What it does |
+| --- | --- |
+| **Your standing** | Where the merchant sits against comparable merchants nearby, ranked on card sales. Position first, revenue underneath, a hoverable month by month chart, and a recommended action when they trail the median. |
+| **Matching** | Consent, then the queue, then requests. |
+
+## How matching works
+
+**Consent first.** Matching is off until the merchant agrees to three things
+separately: showing their name and logo to other participating merchants, using
+their card data to compute a match score, and releasing contact details on a
+mutual match. All three are required, the button says so, and consent is dated,
+reviewable and revocable from the sidebar afterwards. This is what authorises
+the brand reveal on the cards.
+
+**A match score out of 100**, weighted across four stated factors:
+
+| Factor | Weight | What it protects against |
+| --- | --- | --- |
+| Customer profile | 35% | A partnership nobody crosses between |
+| Industry overlap | 25% | Partnering with a competitor |
+| Business value | 25% | Lopsided value, the failure mode that sank Plenti |
+| Openness to collaborate | 15% | A merchant who never opens the app or replies |
+
+Business value prices lopsidedness into the score rather than reporting it
+beside the score. Openness reads how recently the merchant opened Connexion and
+how often they reply, so a dormant merchant is marked down.
+
+**A like is not a match.** Swiping right sends a like, which stays private. It
+becomes a match only when the other merchant likes back, and only then does the
+dialog open, contact details move, and the introduction email unlock. Requests
+is a second tab splitting matches from likes still waiting.
+
+**Connexion writes the first message.** After a mutual match, one button drafts
+the introduction: for the SME, in their own voice, opening with who they are and
+what they run; for the Amex admin, as a relationship manager. On the recruit
+side the same mechanism dispatches a per prospect email built from that
+prospect's own cluster evidence. Sending is simulated and says so, and every
+address uses the reserved .example domain.
 
 ## Running it
 
@@ -57,74 +80,53 @@ npm install
 npm run dev
 ```
 
-This is a frontend-only build for the first-round submission — no
-backend or API keys required. The AI explainability layer and the
-recruit pitch copy are static, pre-written text rather than live model
-calls.
-
-Then open the local URL Vite prints (usually `http://localhost:5173`).
-
-To produce a production build:
+No backend and no API keys. Open the URL Vite prints, usually
+`http://localhost:5173`.
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## Project structure
+## Where things live
 
 ```
 src/
   data/
-    graphEngineData.ts       synthetic match candidates + recruit prospects
-                              (typed: MatchCandidate, ProspectTarget)
-    graphSceneConfigs.ts      node/edge/gap layout for the three.js graphs
-                              (typed: GraphSceneConfig)
-    personalityQuiz.ts        the four partnership-preference questions +
-                              profile builder (typed: PersonalityQuestion,
-                              PersonalityProfile)
+    graphEngineData.ts     16 match candidates and 4 recruit prospects
+    graphSceneConfigs.ts   node and edge layout for the three.js graphs
+    usMerchants.ts         50 US merchants behind Growth Radar
   utils/
-    personalityFit.ts         local heuristic blending questionnaire answers
-                              with the transaction overlap score — no model call
+    matchScore.ts          the weighted 100 point match score
+    outreachEmails.ts      the drafted introduction and recruitment emails
+    interaction3d.ts       the pointer driven 3D behaviour on every control
+    projectedInsight.ts    projections for prospects with no history
   components/
-    Nav.tsx                 top navigation between the five views
-    CornerBrackets.tsx       shared corner-crosshair card decoration
-    MatchModal.tsx           "it's a match" confirmation dialog + AI
-                              explainability layer
-    PersonalityQuiz.tsx       optional partnership-preferences questionnaire
-                              shown before the matching queue
-    GraphCanvas.tsx           reusable three.js node-link graph (mount/
-                              rotate/dispose lifecycle), used by both
-                              Graph and Gap Radar
+    AmexCard3D.tsx         the card, drawn procedurally, grabbable
+    ConsentGate.tsx        the three clause consent form
+    EmailComposer.tsx      composed outreach, copyable, never sent
+    MerchantMark.tsx       each merchant's own brand mark
+    GraphCanvas.tsx        the three.js graph, shared by Graph and Gap Radar
+    MatchModal.tsx         Amex's proposal and the match dialog
   views/
-    OverviewView.tsx         landing page, links into the graph + prongs
-    GraphView.tsx             full interactive 3D merchant graph
-    MatchingView.tsx          Prong 1 — swipe-card matching queue
-    GapRadarView.tsx          Prong 3 — 3D cluster graphs + target table
-    RecruitPitchView.tsx      Prong 2 — projected pitch for a prospect
-  App.tsx                    view state + routing; Graph and Gap Radar are
-                              lazy-loaded so three.js only ships when opened
+    GrowthRadarView.tsx    Amex admin landing
+    StandingView.tsx       SME landing
+    MatchingView.tsx       the queue, requests and consent
+    GapRadarView.tsx       clusters and recruit targets
+    RecruitPitchView.tsx   prospect pitch and recruitment dispatch
 ```
 
 ## What would change for a real build
 
-- `graphEngineData.ts` would be replaced by real, anonymised, aggregated
-  transaction data, subject to Amex's PDPA-compliant aggregation
-  thresholds and per-merchant consent for matching.
-- The matching, symmetry-scoring, and gap-detection logic here is
-  simplified/illustrative — a production version would need a real
-  collaborative-filtering model for Prong 1 and a real graph-completion
-  approach for Prong 3.
-- The graph and gap-radar node positions in `graphSceneConfigs.ts` are
-  hand-placed for a stable, legible demo rather than computed from a live
-  force-directed graph-layout algorithm over the full merchant network.
-- Relationship-tier progression (Tier 1 → 2 → 3 in `graphEngineData.ts`)
-  would be computed automatically from real offer-redemption and
-  transaction data over time, not simulated with a static `monthsActive`
-  field as in this prototype.
-- The AI explainability layer (MatchModal) and recruit pitch copy
-  (RecruitPitchView) are static, pre-written text here; a real build
-  would generate both live via a model call grounded in each card's
-  numbers, as the first version of this prototype did with a small
-  Express + OpenAI backend before it was cut for this frontend-only
-  submission.
+- The synthetic data files would be replaced by real anonymised, aggregated
+  transaction data, subject to Amex's aggregation thresholds and per merchant
+  consent.
+- The match score here is a stated weighted model. A production version would
+  need a real collaborative filtering approach, and gap detection would need
+  real graph completion.
+- Graph node positions are hand placed for a stable demo rather than computed
+  from a force directed layout over the full network.
+- Relationship tiers are simulated with a static months active field rather than
+  computed from redemption data over time.
+- The drafted emails are composed locally from each card's own numbers. A real
+  build would generate them with a model call grounded in the same figures.

@@ -30,7 +30,7 @@ const CLAUSES: Clause[] = [
     id: 'identity',
     title: 'Show my business to other participating merchants',
     detail:
-      'My business name, logo, category and trading area are shown to merchants Circuit puts me in front of, and theirs are shown to me. This is what lets either side recognise the other.',
+      'My business name, logo, category and trading area are shown to merchants Connexion puts me in front of, and theirs are shown to me. This is what lets either side recognise the other.',
   },
   {
     id: 'signals',
@@ -49,7 +49,7 @@ const CLAUSES: Clause[] = [
 const NEVER = [
   'Individual transactions, customers, or card numbers',
   'My revenue figures, margins, or customer lists',
-  'Anything at all with merchants outside Circuit',
+  'Anything at all with merchants outside Connexion',
 ]
 
 export default function ConsentGate({
@@ -72,7 +72,7 @@ export default function ConsentGate({
         {grantedOn ? 'Your data sharing consent' : 'Consent required'}
       </div>
       <h2 className="consent-title">
-        {grantedOn ? 'What you agreed to share' : 'Before Circuit can match you'}
+        {grantedOn ? 'What you agreed to share' : 'Before Connexion can match you'}
       </h2>
       <p className="consent-intro">
         Matching means showing your business to merchants you have not met, and

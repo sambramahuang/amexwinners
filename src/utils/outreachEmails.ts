@@ -100,7 +100,7 @@ export function buildRecruitEmail(prospect: ProspectTarget): OutreachEmail {
   }
 }
 
-/** The merchant sending it: who Circuit is acting for in the SME view. */
+/** The merchant sending it: who Connexion is acting for in the SME view. */
 export const SELF_MERCHANT = {
   name: 'Basin Coffee Roasters',
   category: 'café',
@@ -126,7 +126,7 @@ export function buildMerchantIntroEmail(candidate: MatchCandidate): OutreachEmai
     '',
     `I am ${me.contact.name}, I own ${me.name}, the ${me.category} on ${me.neighbourhood}. We opened in ${me.opened} and serve around ${me.weeklyCustomers.toLocaleString('en-US')} customers a week, mostly regulars, and we are known for ${me.known}.`,
     '',
-    `American Express matched our two businesses through Circuit, which reads how customers move between merchants in the area. What it found: ${candidate.sequential.charAt(0).toLowerCase()}${candidate.sequential.slice(1)} I had no idea the overlap was that high, and it seems like a waste not to do something with it.`,
+    `American Express matched our two businesses through Connexion, which reads how customers move between merchants in the area. What it found: ${candidate.sequential.charAt(0).toLowerCase()}${candidate.sequential.slice(1)} I had no idea the overlap was that high, and it seems like a waste not to do something with it.`,
     '',
     `What I have in mind is small to start: ${candidate.terms.charAt(0).toLowerCase()}${candidate.terms.slice(1)} No exclusivity, no cost to either of us, and we can stop it at any point if it is not pulling its weight.`,
     '',

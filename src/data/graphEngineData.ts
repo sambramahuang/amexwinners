@@ -6,7 +6,7 @@
 // -----------------------------------------------------------------------
 
 /**
- * Relationship tier. Circuit's own suggested framing for a match, not
+ * Relationship tier. Connexion's own suggested framing for a match, not
  * something merchants configure. Tier 1 is every match's starting point;
  * Tier 2/3 are suggested once performance and symmetry hold up over time.
  */
@@ -42,7 +42,7 @@ export interface MatchCandidate {
   /** Projected uplift for the candidate, in percentage points */
   upliftThem: number
   terms: string
-  /** Circuit's suggested relationship tier for this match. */
+  /** Connexion's suggested relationship tier for this match. */
   tier: RelationshipTier
   /** Simulated. How long this match has been live, in months. */
   monthsActive: number
@@ -58,7 +58,7 @@ export interface MatchCandidate {
    * Fixed in data rather than rolled at runtime, so a demo repeats exactly.
    */
   likedYouBack: boolean
-  /** Days since this merchant last opened Circuit. Feeds openness to collaborate. */
+  /** Days since this merchant last opened Connexion. Feeds openness to collaborate. */
   lastActiveDays: number
   /** Share of partnership approaches this merchant has replied to, percent. */
   responseRate: number

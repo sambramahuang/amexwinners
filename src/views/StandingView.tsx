@@ -183,7 +183,7 @@ export default function StandingView({
           <p className="standing-action-rec">
             <strong>Recommended:</strong> cafés that closed a gap like this did it by
             partnering with a business whose customers arrive when they are quiet.
-            Circuit has <span className="standing-action-count">8</span> nearby that fit.
+            Connexion has <span className="standing-action-count">8</span> nearby that fit.
           </p>
           <button className="btn btn-primary" onClick={() => onNavigate?.('match')}>
             Open matching

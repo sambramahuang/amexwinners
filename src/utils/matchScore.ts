@@ -1,7 +1,7 @@
 import type { MatchCandidate } from '../data/graphEngineData'
 
 /**
- * Circuit match score, out of 100.
+ * Connexion match score, out of 100.
  *
  * Four factors, each scored 0 to 100 and then weighted. Every one is a pure
  * function of data the graph already holds, so a pair always scores the same,
@@ -48,7 +48,7 @@ export function scoreMatch(candidate: MatchCandidate): MatchScore {
   const lopsided = Math.abs(candidate.upliftYou - candidate.upliftThem)
   const value = clamp(jointUplift * 3.4 - lopsided * 2.6)
 
-  // Openness: a merchant who has not opened Circuit in a month, or who ignores
+  // Openness: a merchant who has not opened Connexion in a month, or who ignores
   // approaches, is a worse bet than the raw data suggests.
   const recency = clamp(100 - candidate.lastActiveDays * 2.6)
   const openness = clamp(recency * 0.45 + candidate.responseRate * 0.55)

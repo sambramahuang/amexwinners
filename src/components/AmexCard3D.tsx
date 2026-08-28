@@ -72,7 +72,7 @@ function drawGuilloche(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.restore()
 }
 
-/** Hexagon lattice, echoing the backdrop used across the Circuit interface. */
+/** Hexagon lattice, echoing the backdrop used across the Connexion interface. */
 function drawHexes(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.save()
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.055)'
@@ -160,8 +160,8 @@ function frontTexture(holder: string) {
 
   ctx.fillStyle = 'rgba(255,255,255,0.5)'
   ctx.font = '500 26px "IBM Plex Mono", ui-monospace, monospace'
-  ctx.letterSpacing = '4px'
-  ctx.fillText('CIRCUIT / MERCHANT GRAPH', 96, 224)
+  ctx.letterSpacing = '9px'
+  ctx.fillText('CONNEXION', 96, 224)
   ctx.letterSpacing = '0px'
 
   drawChip(ctx, 96, H * 0.40, 268, 206)
