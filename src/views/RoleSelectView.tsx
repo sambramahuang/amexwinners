@@ -15,9 +15,9 @@ export default function RoleSelectView({ onSelect }: RoleSelectViewProps) {
       </div>
 
       <div className="role-select-intro">
-        <div className="eyebrow">Circuit / Merchant Graph</div>
+        <div className="eyebrow">Circuit</div>
         <h1>Who's viewing?</h1>
-        <p>Pick the interface for this session — you can switch back from the nav bar at any time.</p>
+        <p>Pick the interface for this session. You can switch back from the nav bar at any time.</p>
       </div>
 
       <div className="role-grid">

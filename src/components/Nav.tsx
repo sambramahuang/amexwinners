@@ -27,7 +27,7 @@ export default function Nav({ view, onChange, items, role, onSwitchRole }: NavPr
     <div className="nav-wrap">
       <nav className="top-nav">
         <span className="brand">
-          Circuit <span className="brand-slash">/</span> Merchant Graph
+          Circuit
           <span className="brand-role-badge">{role === 'amex' ? 'Amex Admin' : 'SME'}</span>
         </span>
 

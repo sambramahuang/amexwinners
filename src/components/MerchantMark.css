@@ -1,0 +1,11 @@
+.merchant-mark {
+  flex: 0 0 auto;
+  display: block;
+  line-height: 0;
+  border-radius: 13px;
+  box-shadow: 0 6px 16px -10px var(--mark, rgba(11, 28, 51, 0.6));
+}
+
+.merchant-mark svg {
+  display: block;
+}

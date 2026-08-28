@@ -4,8 +4,6 @@ import './ConsentGate.css'
 
 interface ConsentGateProps {
   onAccept: () => void
-  /** SME view: the merchant is consenting for their own business. */
-  hideIdentity?: boolean
 }
 
 function ShareRow({ shared = false, children }: { shared?: boolean; children: React.ReactNode }) {
@@ -26,7 +24,7 @@ function ShareRow({ shared = false, children }: { shared?: boolean; children: Re
  * is that a merchant can see exactly which signals leave their business before
  * any of them do.
  */
-export default function ConsentGate({ onAccept, hideIdentity = false }: ConsentGateProps) {
+export default function ConsentGate({ onAccept }: ConsentGateProps) {
   const [checked, setChecked] = useState(false)
 
   return (
@@ -35,22 +33,21 @@ export default function ConsentGate({ onAccept, hideIdentity = false }: ConsentG
       <div className="consent-eyebrow">Opt in required</div>
       <h2 className="consent-title">Turn on matching for Basin Coffee Roasters</h2>
       <p className="consent-intro">
-        Matching is off by default. Switching it on places Basin in the graph
-        alongside complementary merchants, and shows those merchants to Basin,
-        using signals derived from card transactions Amex already processes.
+        Matching is off by default. Switching it on shows your business name and
+        logo to complementary merchants, and shows theirs to you, alongside a
+        match score built from card transactions Amex already processes. Liking
+        someone is private until they like you back.
       </p>
 
       <ul className="consent-list">
-        <ShareRow shared>Your category, trading area and hours</ShareRow>
+        <ShareRow shared>Your business name, logo, category and trading area</ShareRow>
         <ShareRow shared>
           Customer overlap and sequential visit patterns, aggregated across your
           whole customer base
         </ShareRow>
         <ShareRow shared>A projected uplift range and a value symmetry check</ShareRow>
         <ShareRow>
-          {hideIdentity
-            ? 'Your business name, released to a candidate only once you both match'
-            : 'Your business name, released only once both merchants match'}
+          Your contact details, released only once a merchant likes you back
         </ShareRow>
         <ShareRow>Individual transactions, customers, or card numbers: never</ShareRow>
       </ul>

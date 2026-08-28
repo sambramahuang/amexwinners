@@ -1,9 +1,10 @@
 import { useMemo, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import type { Role } from '../App'
 import { MATCH_CANDIDATES, TIER_LABELS, type MatchCandidate } from '../data/graphEngineData'
-import { redactCandidateName } from '../utils/redactCandidateName'
 import CornerBrackets from '../components/CornerBrackets'
 import MatchModal from '../components/MatchModal'
+import MerchantMark from '../components/MerchantMark'
+import { scoreBand, scoreMatch } from '../utils/matchScore'
 import ConsentGate from '../components/ConsentGate'
 import './MatchingView.css'
 
@@ -37,30 +38,35 @@ interface MatchingViewProps {
 }
 
 export default function MatchingView({ role }: MatchingViewProps) {
-  const hideIdentity = role === 'sme'
   const [qIndex, setQIndex] = useState(0)
   const [dragging, setDragging] = useState(false)
   const [start, setStart] = useState({ x: 0, y: 0 })
   const [drag, setDrag] = useState({ x: 0, y: 0 })
   const [exiting, setExiting] = useState<SwipeDirection | null>(null)
-  const [matchedNames, setMatchedNames] = useState<string[]>([])
-  const [passedCount, setPassedCount] = useState(0)
+  const [likedIds, setLikedIds] = useState<number[]>([])
+  const [panel, setPanel] = useState<'discover' | 'requests'>('discover')
   const [modalCard, setModalCard] = useState<RankedCandidate | null>(null)
   const [previewCard, setPreviewCard] = useState<RankedCandidate | null>(null)
   const [consented, setConsented] = useState<boolean>(() => loadConsent())
 
   // Ranked on the closed-loop transaction signal alone.
   const rankedCandidates = useMemo<RankedCandidate[]>(
-    () => [...MATCH_CANDIDATES].sort((a, b) => b.overlapPct - a.overlapPct),
+    () =>
+      [...MATCH_CANDIDATES].sort(
+        (a, b) => scoreMatch(b).total - scoreMatch(a).total,
+      ),
     [],
   )
+
+  const liked = MATCH_CANDIDATES.filter((c) => likedIds.includes(c.id))
+  const mutual = liked.filter((c) => c.likedYouBack)
+  const waiting = liked.filter((c) => !c.likedYouBack)
 
   const total = rankedCandidates.length
   const current = rankedCandidates[qIndex] ?? null
   const peek1 = rankedCandidates[qIndex + 1] ?? null
   const peek2 = rankedCandidates[qIndex + 2] ?? null
   const matchDone = qIndex >= total
-  const matchedCount = matchedNames.length
 
   function onDown(e: ReactPointerEvent<HTMLDivElement>) {
     e.currentTarget.setPointerCapture?.(e.pointerId)
@@ -93,12 +99,11 @@ export default function MatchingView({ role }: MatchingViewProps) {
       setQIndex((i) => i + 1)
       setExiting(null)
       setDrag({ x: 0, y: 0 })
-      if (dir === 'right') {
-        setMatchedNames((names) => [...names, card.name])
-        setModalCard(card)
-      } else {
-        setPassedCount((n) => n + 1)
-      }
+      if (dir !== 'right') return
+      setLikedIds((ids) => (ids.includes(card.id) ? ids : [...ids, card.id]))
+      // A like on its own goes into Requests. Only a like that runs both ways
+      // is a match, and only a match opens the dialog and releases the email.
+      if (card.likedYouBack) setModalCard(card)
     }, EXIT_DURATION_MS)
   }
 
@@ -130,8 +135,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
 
   function resetQueue() {
     setQIndex(0)
-    setMatchedNames([])
-    setPassedCount(0)
+    setLikedIds([])
     setDragging(false)
     setDrag({ x: 0, y: 0 })
     setExiting(null)
@@ -150,7 +154,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
     <main className="matching-main">
       <div className="matching-column">
         <div className="matching-header">
-          <h1>Matching queue — Basin Coffee Roasters</h1>
+          <h1>Matching queue</h1>
           <p>Candidates already on Amex, ranked by graph signal strength. Swipe or use the controls below.</p>
           <p className="matching-tier-blurb">
             Matches start as a single linked offer and can grow into a recurring or longer-term relationship as
@@ -158,9 +162,36 @@ export default function MatchingView({ role }: MatchingViewProps) {
           </p>
         </div>
 
-        {!consented && <ConsentGate onAccept={acceptConsent} hideIdentity={hideIdentity} />}
+        {!consented && <ConsentGate onAccept={acceptConsent} />}
 
-        {consented && !matchDone && (
+        {consented && (
+          <div className="panel-tabs">
+            <button
+              className={`panel-tab ${panel === 'discover' ? 'is-active' : ''}`}
+              onClick={() => setPanel('discover')}
+            >
+              Discover
+            </button>
+            <button
+              className={`panel-tab ${panel === 'requests' ? 'is-active' : ''}`}
+              onClick={() => setPanel('requests')}
+            >
+              Requests
+              {liked.length > 0 && <span className="panel-tab-count">{liked.length}</span>}
+            </button>
+          </div>
+        )}
+
+        {consented && panel === 'requests' && (
+          <RequestPanel
+            mutual={mutual}
+            waiting={waiting}
+            onBrowse={() => setPanel('discover')}
+            onOpen={setModalCard}
+          />
+        )}
+
+        {consented && panel === 'discover' && !matchDone && (
           <>
             <div className="card-stack">
               {peek2 && <div className="stack-card peek-2" />}
@@ -185,10 +216,37 @@ export default function MatchingView({ role }: MatchingViewProps) {
                   </div>
 
                   <div className="swipe-card-top">
-                    <div className="swipe-card-logo">LOGO</div>
-                    <div className="swipe-card-name">{hideIdentity ? current.category : current.name}</div>
-                    <div className="swipe-card-category">
-                      {hideIdentity ? 'Identity revealed once you match' : current.category}
+                    <MerchantMark candidate={current} size={54} />
+                    <div className="swipe-card-name">{current.name}</div>
+                    <div className="swipe-card-category">{current.category}</div>
+                  </div>
+
+                  <div className="swipe-card-score">
+                    <div className="score-dial">
+                      <svg viewBox="0 0 64 64" width="64" height="64">
+                        <circle cx="32" cy="32" r="27" fill="none" stroke="rgba(11,28,51,0.10)" strokeWidth="6" />
+                        <circle
+                          cx="32"
+                          cy="32"
+                          r="27"
+                          fill="none"
+                          stroke="var(--accent)"
+                          strokeWidth="6"
+                          strokeLinecap="round"
+                          strokeDasharray={`${(scoreMatch(current).total / 100) * 169.6} 169.6`}
+                          transform="rotate(-90 32 32)"
+                        />
+                      </svg>
+                      <span className="score-dial-value">{scoreMatch(current).total}</span>
+                    </div>
+                    <div>
+                      <div className="score-dial-label">
+                        {scoreBand(scoreMatch(current).total)}
+                      </div>
+                      <div className="score-dial-note">
+                        Match score out of 100, from customer profile, industry
+                        overlap, business value and openness to collaborate.
+                      </div>
                     </div>
                   </div>
 
@@ -208,7 +266,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
                         Basin
                       </text>
                       <text x="130" y="46" fontSize="8" fill="#0b1c33" opacity="0.65" textAnchor="middle" fontFamily="IBM Plex Sans">
-                        {hideIdentity ? current.category : current.shortName}
+                        {current.shortName}
                       </text>
                     </svg>
                     <div>
@@ -222,7 +280,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
                       <circle cx="12" cy="12" r="10" />
                       <polyline points="12 6 12 12 16 14" />
                     </svg>
-                    <p>{hideIdentity ? redactCandidateName(current.sequential, current) : current.sequential}</p>
+                    <p>{current.sequential}</p>
                   </div>
 
                   <div className="swipe-card-symmetry">
@@ -247,7 +305,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
                       </div>
                       <div className="symmetry-bar-row">
                         <span className="symmetry-bar-name">
-                          {hideIdentity ? current.category : current.shortName}
+                          {current.shortName}
                         </span>
                         <div className="symmetry-bar-track">
                           <div
@@ -258,14 +316,11 @@ export default function MatchingView({ role }: MatchingViewProps) {
                         <span className="symmetry-bar-value">+{current.upliftThem}%</span>
                       </div>
                     </div>
-                    <div className="symmetry-note" style={{ color: current.balanceColor }}>
-                      {hideIdentity ? redactCandidateName(current.balanceNote, current) : current.balanceNote}
-                    </div>
                   </div>
 
                   <div className="swipe-card-terms">
                     <div className="swipe-card-terms-label">Suggested terms</div>
-                    <p>{hideIdentity ? redactCandidateName(current.terms, current) : current.terms}</p>
+                    <p>{current.terms}</p>
                   </div>
 
                   <button
@@ -284,13 +339,13 @@ export default function MatchingView({ role }: MatchingViewProps) {
             </div>
 
             <div className="swipe-controls">
-              <button className="swipe-btn swipe-btn-pass" onClick={() => swipeAway('left')} aria-label="Pass">
+              <button className="swipe-btn swipe-btn-pass" onClick={() => swipeAway('left')} aria-label="Skip">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M18 6 6 18" />
                   <path d="m6 6 12 12" />
                 </svg>
               </button>
-              <button className="swipe-btn swipe-btn-match" onClick={() => swipeAway('right')} aria-label="Match">
+              <button className="swipe-btn swipe-btn-match" onClick={() => swipeAway('right')} aria-label="Like">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
                 </svg>
@@ -299,15 +354,21 @@ export default function MatchingView({ role }: MatchingViewProps) {
           </>
         )}
 
-        {consented && matchDone && (
+        {consented && panel === 'discover' && matchDone && (
           <div className="queue-done">
             <div className="queue-done-title">Queue cleared</div>
             <p>
-              Reviewed all {total} candidates in this cluster — {matchedCount} matched, {passedCount} passed.
+              You liked {liked.length} of them. {mutual.length} liked you back, so
+              those are matches you can write to now.
             </p>
-            <button className="btn btn-ghost" onClick={restart}>
-              Restart session
-            </button>
+            <div className="queue-done-actions">
+              <button className="btn btn-ghost" onClick={restart}>
+                Start again
+              </button>
+              <button className="btn btn-primary" onClick={() => setPanel('requests')}>
+                Open requests
+              </button>
+            </div>
           </div>
         )}
       </div>
@@ -315,31 +376,27 @@ export default function MatchingView({ role }: MatchingViewProps) {
       {consented && (
         <aside className="matching-sidebar">
           <div className="sidebar-card">
-            <div className="sidebar-label">Session</div>
+            <div className="sidebar-label">This session</div>
             <div className="sidebar-row">
-              <span>Reviewed</span>
-              <span>
-                {Math.min(qIndex, total)} / {total}
-              </span>
-            </div>
-            <div className="sidebar-row">
-              <span>Matched</span>
-              <span className="sidebar-value-accent">{matchedCount}</span>
+              <span>Liked</span>
+              <span className="sidebar-value-accent">{liked.length}</span>
             </div>
             <div className="sidebar-row sidebar-row-last">
-              <span>Passed</span>
-              <span>{passedCount}</span>
+              <span>Matched</span>
+              <span className="sidebar-value-accent">{mutual.length}</span>
             </div>
           </div>
           <div className="sidebar-card">
-            <div className="sidebar-label">Matched this session</div>
+            <div className="sidebar-label">Liked this session</div>
             <div className="sidebar-chips">
-              {matchedNames.map((n) => (
-                <span className="sidebar-chip" key={n}>
-                  {n}
+              {liked.map((c) => (
+                <span className="sidebar-chip" key={c.id}>
+                  {c.name}
                 </span>
               ))}
-              {matchedNames.length === 0 && <span className="sidebar-empty">None yet — swipe right to match.</span>}
+              {liked.length === 0 && (
+                <span className="sidebar-empty">None yet. Tap the heart to like one.</span>
+              )}
             </div>
           </div>
         </aside>
@@ -351,8 +408,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
           mode="match"
           /* The card promises identity is revealed once you match, so this is
              the moment it is. The preview below stays anonymous. */
-          hideIdentity={false}
-          smeVoice={hideIdentity}
+          smeVoice={role === 'sme'}
           onClose={() => setModalCard(null)}
         />
       )}
@@ -361,10 +417,94 @@ export default function MatchingView({ role }: MatchingViewProps) {
         <MatchModal
           candidate={previewCard}
           mode="preview"
-          hideIdentity={hideIdentity}
           onClose={() => setPreviewCard(null)}
         />
       )}
     </main>
+  )
+}
+
+interface RequestPanelProps {
+  mutual: MatchCandidate[]
+  waiting: MatchCandidate[]
+  onBrowse: () => void
+  onOpen: (candidate: MatchCandidate) => void
+}
+
+/**
+ * Everything the merchant has liked, split by whether it was returned.
+ * A match is the only state that releases the introduction email.
+ */
+function RequestPanel({ mutual, waiting, onBrowse, onOpen }: RequestPanelProps) {
+  if (mutual.length === 0 && waiting.length === 0) {
+    return (
+      <div className="queue-done">
+        <div className="queue-done-title">Nothing here yet</div>
+        <p>Everyone you like lands here, whether or not they like you back.</p>
+        <button className="btn btn-ghost" onClick={onBrowse}>
+          Browse the queue
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <div className="request-list">
+      <section>
+        <div className="request-section-label">Matches ({mutual.length})</div>
+        <p className="request-section-note">
+          They liked you back, so identities are released and you can write to them.
+        </p>
+        {mutual.length === 0 ? (
+          <div className="request-empty">
+            None yet. A merchant appears here the moment they like you back.
+          </div>
+        ) : (
+          mutual.map((c) => (
+            <div className="request-row" key={c.id}>
+              <MerchantMark candidate={c} size={44} />
+              <div className="request-identity">
+                <div className="request-name">{c.name}</div>
+                <div className="request-meta">
+                  {c.category} · {scoreMatch(c).total} match score
+                </div>
+              </div>
+              <div className="request-actions">
+                <span className="request-status is-matched">Matched</span>
+                <button className="btn btn-ghost" onClick={() => onOpen(c)}>
+                  Write to them
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </section>
+
+      <section>
+        <div className="request-section-label">Liked, waiting ({waiting.length})</div>
+        <p className="request-section-note">
+          They have not opened your like yet. Neither side gets contact details
+          until they do.
+        </p>
+        {waiting.length === 0 ? (
+          <div className="request-empty">Nothing waiting.</div>
+        ) : (
+          waiting.map((c) => (
+            <div className="request-row" key={c.id}>
+              <MerchantMark candidate={c} size={44} />
+              <div className="request-identity">
+                <div className="request-name">{c.name}</div>
+                <div className="request-meta">
+                  {c.category} · {scoreMatch(c).total} match score
+                </div>
+              </div>
+              <div className="request-actions">
+                <span className="request-status">Waiting for their reply</span>
+              </div>
+            </div>
+          ))
+        )}
+      </section>
+    </div>
   )
 }

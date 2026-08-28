@@ -16,7 +16,7 @@ const PRONG_CARDS: ProngCard[] = [
     prong: 'Prong 1',
     title: 'Live matching',
     description:
-      'Real merchants already on Amex, matched with an explainability layer and a value-symmetry check.',
+      'Real merchants already on Amex, matched with an explainability layer and a value symmetry check.',
     linkLabel: 'Open matching',
     view: 'match',
   },
@@ -24,7 +24,7 @@ const PRONG_CARDS: ProngCard[] = [
     prong: 'Prong 3',
     title: 'Gap radar',
     description:
-      'Scans the graph for clusters with strong mutual overlap but a missing category — decides exactly who to recruit.',
+      'Scans the graph for clusters with strong mutual overlap but a missing category, then decides exactly who to recruit.',
     linkLabel: 'Open gap radar',
     view: 'gaps',
   },
@@ -32,7 +32,7 @@ const PRONG_CARDS: ProngCard[] = [
     prong: 'Prong 2',
     title: 'Recruit pitch',
     description:
-      'For prospects with no transaction history yet — a category-level projected preview, honestly labeled as predictive.',
+      'For prospects with no transaction history yet: a category level projected preview, honestly labeled as predictive.',
     linkLabel: 'Open recruit pitch',
     view: 'pitch',
   },
@@ -51,7 +51,7 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
           <h1>A merchant graph feeds every prong</h1>
           <p>
             Merchants are nodes. Edges are complementary relationships inferred from real
-            transaction data — customer overlap, and sequential spend patterns like
+            transaction data: customer overlap, and sequential spend patterns like
             "visits A then B within two weeks." Everything below reads from that one graph.
           </p>
         </div>
@@ -65,7 +65,7 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
           <div className="overview-diagram-title">Merchants on Amex, modeled as a graph</div>
           <p>
             Solid edges are measured relationships between real merchants across industries.
-            Dashed nodes are structural gaps — categories missing from an otherwise tight
+            Dashed nodes are structural gaps: categories missing from an otherwise tight
             cluster. That gap is what Prong 3 hunts for.
           </p>
         </div>

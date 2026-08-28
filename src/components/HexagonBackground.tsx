@@ -75,7 +75,7 @@ export default function HexagonBackground({
     // bubbles to window no matter what element it actually landed on (a
     // card, a button, plain text), so the glow reads the cursor position
     // everywhere on the page without needing any pointer-events overrides
-    // on the app's content — and without any risk of blocking clicks.
+    // on the app's content, and without any risk of blocking clicks.
     function onMove(e: PointerEvent) {
       pendingPoint = { x: e.clientX, y: e.clientY }
       if (!raf) {

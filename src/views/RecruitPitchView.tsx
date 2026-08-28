@@ -28,8 +28,8 @@ export default function RecruitPitchView({ selectedIdx, onSelect }: RecruitPitch
     <main className="pitch-main">
       <h1>Recruit pitch</h1>
       <p className="pitch-intro">
-        No transaction history exists for these prospects yet, so this is a category-level projected
-        preview — not a live match.
+        No transaction history exists for these prospects yet, so this is a category level projected
+        preview rather than a live match.
       </p>
 
       <div className="pitch-selector">
@@ -50,7 +50,7 @@ export default function RecruitPitchView({ selectedIdx, onSelect }: RecruitPitch
             <circle cx="12" cy="12" r="10" />
             <polyline points="12 6 12 12 16 14" />
           </svg>
-          Projected — category benchmark, not computed from live data
+          Projected. A category benchmark, not computed from live data.
         </div>
 
         <div className="pitch-name">{selected.name}</div>

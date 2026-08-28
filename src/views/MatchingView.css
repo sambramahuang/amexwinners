@@ -501,3 +501,164 @@
 .card-stack .peek-2 {
   transform: translateZ(-76px) translateY(18px) scale(0.97);
 }
+
+/* Tabs, the request list, and the score dial on the card. */
+.panel-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 18px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg);
+  width: max-content;
+}
+
+.panel-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border: none;
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-60);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.panel-tab:hover { color: var(--text); }
+.panel-tab.is-active { background: var(--accent); color: var(--bg); }
+
+.panel-tab-count {
+  min-width: 18px;
+  padding: 1px 6px;
+  border-radius: 9px;
+  background: var(--accent-dim-strong);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.panel-tab.is-active .panel-tab-count {
+  background: rgba(255, 255, 255, 0.24);
+  color: var(--bg);
+}
+
+.swipe-card-score {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 4px 0 2px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.score-dial {
+  position: relative;
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+}
+
+.score-dial svg { position: absolute; inset: 0; }
+
+.score-dial-value {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.score-dial-label {
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.score-dial-note {
+  margin-top: 3px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: var(--text-60);
+}
+
+.request-list {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.request-section-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-55);
+}
+
+.request-section-note {
+  margin: 6px 0 14px;
+  font-size: 13px;
+  color: var(--text-65);
+}
+
+.request-empty {
+  padding: 16px 18px;
+  border: 1px dashed var(--border);
+  font-size: 13px;
+  color: var(--text-55);
+}
+
+.request-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 13px 16px;
+  margin-bottom: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.request-identity { flex: 1 1 180px; }
+
+.request-name {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.request-meta {
+  font-size: 12.5px;
+  color: var(--text-60);
+}
+
+.request-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.request-status {
+  padding: 4px 10px;
+  background: var(--border-soft);
+  color: var(--text-60);
+  font-size: 11.5px;
+}
+
+.request-status.is-matched {
+  background: rgba(43, 184, 163, 0.14);
+  color: #1c8877;
+}
+
+.queue-done-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}

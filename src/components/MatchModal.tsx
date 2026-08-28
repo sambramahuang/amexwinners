@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { TIER_LABELS, type MatchCandidate } from '../data/graphEngineData'
-import { redactCandidateName } from '../utils/redactCandidateName'
 import EmailComposer from './EmailComposer'
 import { buildMatchIntroEmail, buildMerchantIntroEmail } from '../utils/outreachEmails'
 import CornerBrackets from './CornerBrackets'
@@ -12,8 +11,6 @@ interface MatchModalProps {
   candidate: MatchCandidate
   onClose: () => void
   mode?: 'match' | 'preview'
-  /** True pre-match — hides the counterpart's identity from another SME, keeping only its category. */
-  hideIdentity?: boolean
   /** SME view: the introduction is written by the merchant, not by Amex. */
   smeVoice?: boolean
 }
@@ -22,7 +19,6 @@ export default function MatchModal({
   candidate,
   onClose,
   mode = 'match',
-  hideIdentity = false,
   smeVoice = false,
 }: MatchModalProps) {
   useEffect(() => {
@@ -34,9 +30,8 @@ export default function MatchModal({
   }, [onClose])
 
   const [compose, setCompose] = useState(false)
-  const displayName = hideIdentity ? candidate.category : candidate.name
-  const displayShortName = hideIdentity ? candidate.category : candidate.shortName
-  const redact = (text: string) => (hideIdentity ? redactCandidateName(text, candidate) : text)
+  const displayName = candidate.name
+  const displayShortName = candidate.shortName
 
   return createPortal(
     <div className="match-modal-backdrop" onClick={onClose}>
@@ -53,13 +48,13 @@ export default function MatchModal({
         <div className="match-modal-title">
           Basin Coffee Roasters × {displayName}
         </div>
-        <p className="match-modal-note">{redact(candidate.balanceNote)}</p>
+        <p className="match-modal-note">{candidate.balanceNote}</p>
 
         <div className="match-modal-tier">
           <span className={`tier-badge tier-badge-${candidate.tier}`}>{TIER_LABELS[candidate.tier]}</span>
           <span className="match-modal-tier-months">{candidate.monthsActive} mo. active</span>
         </div>
-        <p className="match-modal-tier-rationale">{redact(candidate.tierRationale)}</p>
+        <p className="match-modal-tier-rationale">{candidate.tierRationale}</p>
 
         <div className="match-modal-section">
           <div className="match-modal-section-label">Predicted benefits</div>
@@ -83,10 +78,10 @@ export default function MatchModal({
 
         {candidate.tier === 3 && candidate.tier3Suggestion && (
           <div className="match-modal-tier3">
-            <div className="match-modal-tier3-label">Structural relationship — starter suggestion</div>
-            <p>{redact(candidate.tier3Suggestion)}</p>
+            <div className="match-modal-tier3-label">Structural relationship, starter suggestion</div>
+            <p>{candidate.tier3Suggestion}</p>
             <p className="match-modal-tier3-disclaimer">
-              A non-binding starting point — the merchants handle the actual arrangement themselves.
+              A non-binding starting point. The merchants handle the actual arrangement themselves.
             </p>
           </div>
         )}
@@ -95,10 +90,10 @@ export default function MatchModal({
           <div className="match-modal-ai-label">
             AI explainability layer
           </div>
-          <p>{redact(candidate.sequential)}</p>
+          <p>{candidate.sequential}</p>
         </div>
 
-        <div className="match-modal-terms">Suggested terms: {redact(candidate.terms)}</div>
+        <div className="match-modal-terms">Suggested terms: {candidate.terms}</div>
         <div className="match-modal-outreach">
           {compose ? (
             <EmailComposer

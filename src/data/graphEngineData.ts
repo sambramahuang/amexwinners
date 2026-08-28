@@ -6,7 +6,7 @@
 // -----------------------------------------------------------------------
 
 /**
- * Relationship tier — Circuit's own suggested framing for a match, not
+ * Relationship tier. Circuit's own suggested framing for a match, not
  * something merchants configure. Tier 1 is every match's starting point;
  * Tier 2/3 are suggested once performance and symmetry hold up over time.
  */
@@ -48,7 +48,7 @@ export interface MatchCandidate {
   personalityTags: string[]
   /** Circuit's suggested relationship tier for this match. */
   tier: RelationshipTier
-  /** Simulated — how long this match has been live, in months. */
+  /** Simulated. How long this match has been live, in months. */
   monthsActive: number
   /** Why this match sits at its current tier. */
   tierRationale: string
@@ -56,6 +56,18 @@ export interface MatchCandidate {
   tier3Suggestion?: string
   /** Released to the other side only once both merchants match. */
   contact: MerchantContact
+  /**
+   * Whether this merchant has already liked Basin. A like only becomes a match
+   * when it runs both ways, so this decides which of the two the queue produces.
+   * Fixed in data rather than rolled at runtime, so a demo repeats exactly.
+   */
+  likedYouBack: boolean
+  /** Days since this merchant last opened Circuit. Feeds openness to collaborate. */
+  lastActiveDays: number
+  /** Share of partnership approaches this merchant has replied to, percent. */
+  responseRate: number
+  /** Two-letter monogram and brand colour for the card mark. */
+  mark: { initials: string; color: string }
 }
 
 export const MATCH_CANDIDATES: MatchCandidate[] = [
@@ -69,16 +81,20 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     upliftYou: 21,
     upliftThem: 24,
     balanceColor: '#2bb8a3',
-    balanceNote: 'Balanced · Δ3pts — value flows both ways.',
+    balanceNote: 'Balanced. Value flows both ways.',
     terms: 'In-store QR at Spinebound: book club members get their first coffee free at Basin.',
     personalityTags: ['slow-browse', 'community', 'ritual'],
     contact: { name: 'Maya Rehn', role: 'Owner', email: 'maya@spineboundbooks.example' },
+    likedYouBack: true,
+    lastActiveDays: 2,
+    responseRate: 86,
+    mark: { initials: 'SB', color: '#7d5a3c' },
     tier: 3,
     monthsActive: 8,
     tierRationale:
       '8 months of consistent redemption and the tightest value symmetry in the cluster (Δ3pts) make this a candidate for a standing relationship, not just a recurring offer.',
     tier3Suggestion:
-      'Peer café–bookstore pairs of this size typically settle into a shared weekly event slot (one in-store reading or tasting per week) rather than a one-off offer.',
+      'Peer cafe and bookstore pairs of this size typically settle into a shared weekly event slot (one in-store reading or tasting per week) rather than a one-off offer.',
   },
   {
     id: 2,
@@ -90,10 +106,14 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     upliftYou: 16,
     upliftThem: 19,
     balanceColor: '#2bb8a3',
-    balanceNote: 'Balanced · Δ3pts — value flows both ways.',
+    balanceNote: 'Balanced. Value flows both ways.',
     terms: 'Joint loyalty stamp: every 5th coffee unlocks 10% off any stationery item.',
     personalityTags: ['occasion', 'brand-aesthetic', 'shared-regulars'],
     contact: { name: 'Owen Marsh', role: 'Founder', email: 'owen@fernfoldstationery.example' },
+    likedYouBack: false,
+    lastActiveDays: 9,
+    responseRate: 61,
+    mark: { initials: 'FF', color: '#4f7f6a' },
     tier: 2,
     monthsActive: 5,
     tierRationale: '5 months and 3 offer cycles of steady redemption support repeating this on an ongoing cadence instead of renegotiating each time.',
@@ -108,10 +128,14 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     upliftYou: 13,
     upliftThem: 15,
     balanceColor: '#2bb8a3',
-    balanceNote: 'Balanced · Δ2pts — value flows both ways.',
+    balanceNote: 'Balanced. Value flows both ways.',
     terms: 'Shared window display plus cross-tagged social posts each Friday.',
     personalityTags: ['occasion', 'brand-aesthetic', 'shared-events'],
     contact: { name: 'Priya Raman', role: 'Owner', email: 'priya@nettlebloomflorist.example' },
+    likedYouBack: true,
+    lastActiveDays: 4,
+    responseRate: 74,
+    mark: { initials: 'NB', color: '#a35a86' },
     tier: 2,
     monthsActive: 4,
     tierRationale: '4 months and 2 offer cycles of consistent redemption support repeating this on an ongoing cadence instead of renegotiating each time.',
@@ -122,7 +146,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     shortName: 'Loom Bicycle',
     category: 'Bike shop',
     overlapPct: 21,
-    sequential: '21% overlap; sequencing signal is still forming — fewer than 90 days of data.',
+    sequential: '21% overlap, and the sequencing signal is still forming on fewer than 90 days of data.',
     upliftYou: 9,
     upliftThem: 27,
     balanceColor: '#e8b54d',
@@ -130,9 +154,13 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     terms: 'Referral card: bike tune-up customers get a free drip coffee at Basin.',
     personalityTags: ['fast-paced', 'convenience', 'shared-regulars'],
     contact: { name: 'Theo Vance', role: 'Managing Director', email: 'theo@loombicycleco.example' },
+    likedYouBack: false,
+    lastActiveDays: 21,
+    responseRate: 38,
+    mark: { initials: 'LB', color: '#c2683f' },
     tier: 1,
     monthsActive: 1,
-    tierRationale: 'A new, single-offer proposal — sequencing signal is still forming, so it starts here rather than at a recurring cadence.',
+    tierRationale: 'A new, single-offer proposal. The sequencing signal is still forming, so it starts here rather than at a recurring cadence.',
   },
   {
     id: 5,
@@ -140,7 +168,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     shortName: 'Ridgeline',
     category: 'Fitness studio',
     overlapPct: 18,
-    sequential: 'Early signal — 18% overlap, sequencing still sparse.',
+    sequential: 'Early signal. 18% overlap, and sequencing is still sparse.',
     upliftYou: 8,
     upliftThem: 20,
     balanceColor: '#e8b54d',
@@ -148,9 +176,13 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     terms: 'Post-class voucher: first coffee free after any studio class.',
     personalityTags: ['ritual', 'community', 'shared-events'],
     contact: { name: 'Dana Okafor', role: 'Founder', email: 'dana@ridgelineyogastudio.example' },
+    likedYouBack: true,
+    lastActiveDays: 6,
+    responseRate: 69,
+    mark: { initials: 'RY', color: '#5b7fa6' },
     tier: 1,
     monthsActive: 2,
-    tierRationale: 'A new, single-offer proposal — sequencing signal is still sparse, so it starts here rather than at a recurring cadence.',
+    tierRationale: 'A new, single-offer proposal. The sequencing signal is still sparse, so it starts here rather than at a recurring cadence.',
   },
   {
     id: 6,
@@ -158,14 +190,18 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     shortName: 'Anchor & Awl',
     category: 'Tailor',
     overlapPct: 12,
-    sequential: "Low overlap — customers don't yet cross-shop between these two.",
+    sequential: "Low overlap. Customers do not yet cross-shop between these two.",
     upliftYou: 4,
     upliftThem: 6,
     balanceColor: '#96a3c0',
-    balanceNote: 'Low confidence · thin signal — hold until more data accrues.',
-    terms: 'No proposal yet — insufficient signal to suggest terms.',
+    balanceNote: 'Low confidence. Thin signal, so hold until more data accrues.',
+    terms: 'No proposal yet. Not enough signal to suggest terms.',
     personalityTags: ['low-maintenance', 'occasion'],
     contact: { name: 'Sam Idris', role: 'Owner', email: 'sam@anchorawltailor.example' },
+    likedYouBack: false,
+    lastActiveDays: 34,
+    responseRate: 24,
+    mark: { initials: 'AA', color: '#7a6a53' },
     tier: 1,
     monthsActive: 1,
     tierRationale: 'Signal is too thin to propose anything beyond a single trial offer yet.',
@@ -203,8 +239,8 @@ export const PROSPECT_TARGETS: ProspectTarget[] = [
     category: 'Gift shop',
     cluster: 'Downtown Loop',
     reasoning:
-      'Three merchants in Downtown Loop show 30–44% mutual overlap, but none carries a gift line.',
-    upliftRange: '+15–24%',
+      'Three merchants in Downtown Loop show 30 to 44% mutual overlap, but none carries a gift line.',
+    upliftRange: '+15 to 24%',
     pitchCopy:
       'Gift shops paired with café-and-books clusters like Downtown Loop typically see a lift in repeat visits within the first two quarters, driven by customers who already cross-shop nearby.',
     contact: { name: 'Elena Moss', role: 'Owner', email: 'elena@juniperferngiftco.example' },
@@ -220,8 +256,8 @@ export const PROSPECT_TARGETS: ProspectTarget[] = [
     category: 'Stationery',
     cluster: 'Downtown Loop',
     reasoning:
-      'Same structural hole as Juniper & Fern — a stationery line is missing from this tight cluster.',
-    upliftRange: '+12–20%',
+      'The same structural hole as Juniper & Fern: a stationery line is missing from this tight cluster.',
+    upliftRange: '+12 to 20%',
     pitchCopy:
       'Stationery merchants near café-and-books clusters see steady cross-visit lift, especially from bookstore customers already primed for paper goods.',
     contact: { name: 'Ruth Calder', role: 'Founder', email: 'ruth@marlowepapergoods.example' },
@@ -237,8 +273,8 @@ export const PROSPECT_TARGETS: ProspectTarget[] = [
     category: 'Home & gift',
     cluster: 'Downtown Loop',
     reasoning:
-      'Third candidate for the same gap — home-and-gift assortment fits the missing category best.',
-    upliftRange: '+14–23%',
+      'A third candidate for the same gap, where a home and gift assortment fits the missing category best.',
+    upliftRange: '+14 to 23%',
     pitchCopy:
       'Home-and-gift merchants entering clusters like Downtown Loop typically capture spend that’s currently leaking to shops outside the cluster.',
     contact: { name: 'Noor Haddad', role: 'Owner', email: 'noor@sablestonegifts.example' },
@@ -255,7 +291,7 @@ export const PROSPECT_TARGETS: ProspectTarget[] = [
     cluster: 'Riverside Row',
     reasoning:
       'Yoga, cycling and tailoring customers in Riverside Row cross-visit heavily, but no recovery merchant exists.',
-    upliftRange: '+18–27%',
+    upliftRange: '+18 to 27%',
     pitchCopy:
       'Recovery and wellness merchants placed near active-lifestyle clusters like Riverside Row typically see fast adoption from customers already moving through the cluster.',
     contact: { name: 'Felix Arden', role: 'Managing Director', email: 'felix@cedarrecoveryco.example' },

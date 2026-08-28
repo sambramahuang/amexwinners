@@ -9,7 +9,7 @@ import RecruitPitchView from './views/RecruitPitchView'
 import RoleSelectView from './views/RoleSelectView'
 import './App.css'
 
-// The 3D graph views pull in three.js — code-split them so it's only
+// The 3D graph views pull in three.js, so they are code-split and only
 // downloaded when a visitor actually opens Graph or Gap Radar.
 const GraphView = lazy(() => import('./views/GraphView'))
 const GapRadarView = lazy(() => import('./views/GapRadarView'))
@@ -53,7 +53,7 @@ function saveRole(role: Role) {
   try {
     localStorage.setItem(ROLE_KEY, role)
   } catch {
-    /* localStorage unavailable — role just won't persist across visits */
+    /* localStorage unavailable, so the role just will not persist across visits */
   }
 }
 
@@ -126,7 +126,9 @@ export default function App() {
       />
 
       {role === 'amex' && effectiveView === 'growth' && <GrowthRadarView onNavigate={setView} />}
-      {role === 'sme' && effectiveView === 'standing' && <StandingView />}
+      {role === 'sme' && effectiveView === 'standing' && (
+        <StandingView onNavigate={setView} />
+      )}
       {role === 'amex' && view === 'overview' && <OverviewView onNavigate={setView} />}
       {role === 'amex' && view === 'graph' && (
         <Suspense fallback={null}>
@@ -144,7 +146,7 @@ export default function App() {
       )}
 
       <footer className="app-footer">
-        Synthetic demo data — all merchants, customers, scores, and uplift figures are invented
+        Synthetic demo data. All merchants, customers, scores, and uplift figures are invented
         to illustrate the system's reasoning, not real Amex data.
       </footer>
     </div>

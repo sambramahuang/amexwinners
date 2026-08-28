@@ -42,7 +42,7 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
     labelRenderer.domElement.style.left = '0'
     labelRenderer.domElement.style.pointerEvents = 'none'
     // three.js sets overflow: hidden on this element internally, which clips any node
-    // label whose anchor lands near the canvas edge — override it so labels can spill
+    // label whose anchor lands near the canvas edge, so override it so labels can spill
     // into the (visible-overflow) card padding instead of getting cut off.
     labelRenderer.domElement.style.overflow = 'visible'
     container.appendChild(labelRenderer.domElement)
@@ -60,7 +60,7 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
     // look good face-on will overflow once rotation puts the graph's long axis on the
     // screen's short one, and whatever's sized to survive every angle looks sparse and
     // lets labels crowd each other face-on. Instead, refit the frustum every frame to
-    // whatever's actually facing the camera right now — always tight, never clipped.
+    // whatever's actually facing the camera right now: always tight, never clipped.
     const anchors = [
       ...config.nodes.map(({ position: [x, y, z] }) => new THREE.Vector3(x, y + 0.24, z)),
       ...(config.gaps ?? []).map(({ position: [x, y, z] }) => new THREE.Vector3(x, y + 0.22, z)),
