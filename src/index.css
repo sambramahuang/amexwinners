@@ -162,79 +162,149 @@ button {
   background: var(--accent);
 }
 
-/* Buttons answer the press. A click should feel like it landed, so every
-   button lifts on hover, compresses on press, and releases with a short
-   overshoot. Applied at the base .btn so it reaches every screen at once. */
-.btn {
+/* -----------------------------------------------------------------------
+   Controls behave like physical surfaces.
+
+   Each one tilts toward the pointer, carries a specular highlight where the
+   pointer sits, and sinks into the page when pressed. Rotation is small on
+   purpose: at 7 degrees it reads as a solid object catching light, and past
+   about 10 it starts to look like a toy. Driven by --tx/--ty/--px/--py, which
+   interaction3d.ts sets on hover.
+   ----------------------------------------------------------------------- */
+
+.btn,
+.filter-pill,
+.swipe-btn,
+.role-card,
+.prong-card,
+.status-chip.is-off,
+.pitch-selector-item,
+.nav-link {
+  --tx: 0;
+  --ty: 0;
+  --px: 50%;
+  --py: 50%;
   position: relative;
-  overflow: hidden;
+  transform-style: preserve-3d;
+  will-change: transform;
   transition:
-    background 0.15s ease,
-    color 0.15s ease,
-    border-color 0.15s ease,
-    transform 0.16s cubic-bezier(0.2, 0.9, 0.3, 1.5),
-    box-shadow 0.16s ease;
+    transform 0.34s cubic-bezier(0.2, 0.8, 0.3, 1),
+    box-shadow 0.34s cubic-bezier(0.2, 0.8, 0.3, 1),
+    background 0.16s ease,
+    color 0.16s ease,
+    border-color 0.16s ease;
 }
 
-.btn:hover:not(:disabled) {
-  transform: translateY(-1px);
+/* The lift: rise off the page, turn a few degrees toward the pointer. */
+.btn.is-tilting.is-tilting,
+.filter-pill.is-tilting.is-tilting,
+.swipe-btn.is-tilting.is-tilting,
+.status-chip.is-off.is-tilting.is-tilting,
+.pitch-selector-item.is-tilting.is-tilting,
+.nav-link.is-tilting.is-tilting {
+  transform:
+    perspective(520px)
+    rotateX(calc(var(--ty) * -7deg))
+    rotateY(calc(var(--tx) * 7deg))
+    translateZ(7px);
 }
 
-.btn-primary:hover:not(:disabled) {
-  box-shadow: 0 6px 16px -8px rgba(0, 111, 207, 0.85);
+/* Cards are larger, so they need a deeper box and less rotation to read
+   as the same material. */
+.role-card.is-tilting.is-tilting,
+.prong-card.is-tilting.is-tilting {
+  transform:
+    perspective(1100px)
+    rotateX(calc(var(--ty) * -4deg))
+    rotateY(calc(var(--tx) * 4deg))
+    translateZ(10px);
+  box-shadow: 0 26px 50px -30px rgba(11, 28, 51, 0.6);
 }
 
-.btn:active:not(:disabled) {
-  transform: translateY(0) scale(0.972);
-  transition-duration: 0.06s;
+.btn-primary.is-tilting.is-tilting {
+  box-shadow: 0 14px 26px -14px rgba(0, 111, 207, 0.85);
 }
 
-/* The ripple starts at the button's edge and expands past it on press. */
-.btn::after {
+/* The press: the surface goes past flat and sinks, briefly, then springs. */
+.btn.is-pressed-3d.is-pressed-3d,
+.filter-pill.is-pressed-3d.is-pressed-3d,
+.swipe-btn.is-pressed-3d.is-pressed-3d,
+.status-chip.is-off.is-pressed-3d.is-pressed-3d,
+.pitch-selector-item.is-pressed-3d.is-pressed-3d,
+.nav-link.is-pressed-3d.is-pressed-3d {
+  transform:
+    perspective(520px)
+    rotateX(calc(var(--ty) * -2deg))
+    rotateY(calc(var(--tx) * 2deg))
+    translateZ(-5px)
+    scale(0.975);
+  transition-duration: 0.09s;
+}
+
+.role-card.is-pressed-3d.is-pressed-3d,
+.prong-card.is-pressed-3d.is-pressed-3d {
+  transform: perspective(1100px) translateZ(-6px) scale(0.99);
+  transition-duration: 0.09s;
+}
+
+/* The specular: a soft highlight that follows the pointer across the face,
+   which is what sells the surface as something with a finish on it. */
+.btn::before,
+.filter-pill::before,
+.swipe-btn::before,
+.role-card::before,
+.prong-card::before,
+.pitch-selector-item::before {
   content: '';
   position: absolute;
   inset: 0;
-  margin: auto;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0;
-  transform: scale(1);
   pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.28s ease;
+  background: radial-gradient(
+    220px circle at var(--px) var(--py),
+    rgba(255, 255, 255, 0.42),
+    rgba(255, 255, 255, 0) 62%
+  );
 }
 
-.btn:active:not(:disabled)::after {
-  animation: btnRipple 0.5s cubic-bezier(0.2, 0.7, 0.3, 1);
+/* On the light surfaces the highlight has to be the accent, not white,
+   or it does nothing at all. */
+.filter-pill::before,
+.role-card::before,
+.prong-card::before,
+.pitch-selector-item::before,
+.btn-ghost::before {
+  background: radial-gradient(
+    240px circle at var(--px) var(--py),
+    rgba(0, 111, 207, 0.16),
+    rgba(0, 111, 207, 0) 64%
+  );
 }
 
-@keyframes btnRipple {
-  0%   { opacity: 0.26; transform: scale(1); }
-  100% { opacity: 0; transform: scale(34); }
+.is-tilting::before {
+  opacity: 1;
 }
 
 .btn:disabled {
   transform: none;
 }
 
-/* Same treatment for the nav, which is a row of buttons in all but name. */
-.nav-link {
-  transition:
-    color 0.15s ease,
-    transform 0.16s cubic-bezier(0.2, 0.9, 0.3, 1.5);
+.btn:disabled::before {
+  opacity: 0;
 }
-
-.nav-link:hover { transform: translateY(-1px); }
-.nav-link:active { transform: translateY(0) scale(0.97); }
 
 @media (prefers-reduced-motion: reduce) {
   .btn,
-  .btn:hover:not(:disabled),
-  .btn:active:not(:disabled),
-  .nav-link,
-  .nav-link:hover,
-  .nav-link:active {
-    transform: none;
+  .filter-pill,
+  .swipe-btn,
+  .role-card,
+  .prong-card,
+  .status-chip.is-off,
+  .pitch-selector-item,
+  .nav-link {
+    transform: none !important;
+    transition: background 0.16s ease, color 0.16s ease;
   }
-  .btn:active:not(:disabled)::after { animation: none; }
+  .is-tilting::before { opacity: 0; }
 }

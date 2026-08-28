@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
+import { initInteraction3D } from './utils/interaction3d'
 import App from './App'
 
 createRoot(document.getElementById('root')!).render(
@@ -8,3 +9,5 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 )
+
+initInteraction3D()

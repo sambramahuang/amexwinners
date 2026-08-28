@@ -37,6 +37,8 @@
 }
 
 .card-stack {
+  perspective: 1400px;
+  transform-style: preserve-3d;
   position: relative;
   height: 520px;
   display: flex;
@@ -484,4 +486,18 @@
   width: 100%;
   padding: 8px 12px;
   font-size: 12.5px;
+}
+
+/* The two cards waiting behind the top one sit back in space rather than
+   simply lower on the page, so the stack has depth when the front card turns. */
+.stack-card {
+  transform-style: preserve-3d;
+}
+
+.card-stack .peek-1 {
+  transform: translateZ(-38px) translateY(9px) scale(0.985);
+}
+
+.card-stack .peek-2 {
+  transform: translateZ(-76px) translateY(18px) scale(0.97);
 }

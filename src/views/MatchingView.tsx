@@ -105,10 +105,24 @@ export default function MatchingView({ role }: MatchingViewProps) {
   const activeDx = dragging ? drag.x : exiting === 'right' ? EXIT_DISTANCE : exiting === 'left' ? -EXIT_DISTANCE : 0
   const activeDy = dragging ? drag.y : exiting ? -40 : 0
   const rot = activeDx / 18
+  // The card turns in space as it goes, rather than sliding flat across the
+  // page: it yaws away from the drag, pitches slightly with the vertical, and
+  // pulls back toward the viewer so it reads as leaving the stack.
+  const yaw = Math.max(-26, Math.min(26, activeDx / 9))
+  const pitch = Math.max(-10, Math.min(10, -activeDy / 6))
+  const depth = -Math.min(90, Math.abs(activeDx) / 3)
   const cardStyle: CSSProperties = {
-    transform: `translate(${activeDx}px, ${activeDy}px) rotate(${rot}deg)`,
-    transition: dragging ? 'none' : 'transform 0.32s cubic-bezier(.2,.8,.3,1), opacity 0.32s',
-    opacity: exiting ? 0.4 : 1,
+    transform: [
+      'perspective(1200px)',
+      `translate3d(${activeDx}px, ${activeDy}px, ${depth}px)`,
+      `rotateY(${yaw}deg)`,
+      `rotateX(${pitch}deg)`,
+      `rotate(${rot}deg)`,
+    ].join(' '),
+    transition: dragging
+      ? 'none'
+      : 'transform 0.42s cubic-bezier(0.22, 0.8, 0.28, 1), opacity 0.36s',
+    opacity: exiting ? 0 : 1,
     cursor: dragging ? 'grabbing' : 'grab',
   }
   const likeOpacity = Math.min(1, Math.max(0, activeDx / 100))
