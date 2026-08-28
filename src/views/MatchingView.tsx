@@ -243,10 +243,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
                       <div className="score-dial-label">
                         {scoreBand(scoreMatch(current).total)}
                       </div>
-                      <div className="score-dial-note">
-                        Match score out of 100, from customer profile, industry
-                        overlap, business value and openness to collaborate.
-                      </div>
+                      <div className="score-dial-note">Match score out of 100</div>
                     </div>
                   </div>
 
@@ -316,11 +313,6 @@ export default function MatchingView({ role }: MatchingViewProps) {
                         <span className="symmetry-bar-value">+{current.upliftThem}%</span>
                       </div>
                     </div>
-                  </div>
-
-                  <div className="swipe-card-terms">
-                    <div className="swipe-card-terms-label">Suggested terms</div>
-                    <p>{current.terms}</p>
                   </div>
 
                   <button

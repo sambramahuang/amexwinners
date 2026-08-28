@@ -2,217 +2,148 @@ import { useState } from 'react'
 import CornerBrackets from '../components/CornerBrackets'
 import './StandingView.css'
 
-// SYNTHETIC DEMO DATA. Where this merchant sits against comparable merchants,
-// read from the same closed-loop transaction data that drives matching.
+// SYNTHETIC DEMO DATA. Monthly card sales for this merchant against the median
+// café of similar size in the same trading area, read from the closed-loop
+// transaction data. Sales only: growth rate and percentile were two more
+// numbers saying the same thing, and they contradicted each other at a glance.
 const MONTHS = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug']
-const YOU = [100, 102.4, 105.1, 104.6, 108.2, 111.5, 114.8, 116.2, 119.9, 124.4, 128.7, 136.1]
-const PEERS = [100, 100.6, 101.2, 101.5, 102.4, 103.1, 103.6, 104.2, 105.1, 105.8, 106.4, 107.2]
-
-// The index above is card volume rebased to 100. These are the dollar figures
-// it was built from, which is what a merchant actually wants to read.
-const BASE_MONTHLY = 41200
-const MONTHLY_SALES = YOU.map((v) => Math.round((v / 100) * BASE_MONTHLY))
-const PEER_SALES = PEERS.map((v) => Math.round((v / 100) * BASE_MONTHLY * 0.92))
-
-const PERCENTILE = 88
-const COHORT = 46
-
-const BREAKDOWN = [
-  { label: 'Repeat visit rate', you: 34, peers: 22, unit: '%' },
-  { label: 'Average basket', you: 18.4, peers: 16.1, unit: '' , prefix: '$' },
-  { label: 'New customers per month', you: 112, peers: 78, unit: '' },
-  { label: 'Weekday share of sales', you: 61, peers: 68, unit: '%' },
+const SALES = [
+  36400, 35100, 37800, 33900, 34600, 36200, 38100, 37400, 39600, 40200, 41800, 42600,
+]
+const PEER_SALES = [
+  41200, 40600, 42300, 39800, 40100, 41500, 43200, 43900, 45100, 45800, 46400, 47300,
 ]
 
+const COHORT = 46
+const AREA = 'Downtown Loop'
+
 const W = 640
-const H = 190
-const PAD = 8
+const H = 210
+const PAD_X = 10
+const PAD_Y = 16
 
-function line(points: number[], min: number, max: number) {
-  const span = max - min || 1
-  return points
-    .map((v, i) => {
-      const x = PAD + (i / (points.length - 1)) * (W - PAD * 2)
-      const y = H - PAD - ((v - min) / span) * (H - PAD * 2)
-      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
-    })
-    .join(' ')
-}
+const money = (n: number) => `$${n.toLocaleString('en-US')}`
 
-interface StandingViewProps {
+export default function StandingView({
+  onNavigate,
+}: {
   onNavigate?: (view: 'match') => void
-}
-
-export default function StandingView({ onNavigate }: StandingViewProps) {
+}) {
   const [hover, setHover] = useState<number | null>(null)
 
-  const all = [...YOU, ...PEERS]
-  const min = Math.min(...all) * 0.99
-  const max = Math.max(...all) * 1.01
-  const growth = Math.round(((YOU[11] - YOU[0]) / YOU[0]) * 100)
-  const peerGrowth = Math.round(((PEERS[11] - PEERS[0]) / PEERS[0]) * 100)
+  const last = SALES[SALES.length - 1]
+  const peerLast = PEER_SALES[PEER_SALES.length - 1]
+  const gapPct = Math.round(((peerLast - last) / peerLast) * 100)
+  const behind = gapPct > 0
+  const monthlyGap = Math.abs(peerLast - last)
+
+  const all = [...SALES, ...PEER_SALES]
+  const min = Math.min(...all) * 0.94
+  const max = Math.max(...all) * 1.03
+  const point = (v: number, i: number) => {
+    const x = PAD_X + (i / (SALES.length - 1)) * (W - PAD_X * 2)
+    const y = H - PAD_Y - ((v - min) / (max - min)) * (H - PAD_Y * 2)
+    return [x, y] as const
+  }
+  const path = (vals: number[]) =>
+    vals.map((v, i) => `${i === 0 ? 'M' : 'L'}${point(v, i).map((n) => n.toFixed(1)).join(',')}`).join(' ')
+
+  const shown = hover ?? SALES.length - 1
 
   return (
     <main className="standing-main">
       <div className="standing-head">
-        <div className="eyebrow">Your standing</div>
-        <h1>You are growing faster than most cafés in Downtown Loop</h1>
+        <div className="eyebrow">Your sales</div>
+        <h1>{money(last)} in card sales last month</h1>
         <p>
-          Read from the card transactions American Express already processes on
-          your sales. No extra reporting from you, and no other merchant sees
-          these figures.
+          The median café of your size in {AREA} took {money(peerLast)}. Read from
+          the transactions American Express already processes on your sales, with
+          no extra reporting from you.
         </p>
       </div>
 
-      <div className="standing-top">
-        <div className="standing-rank-card">
-          <CornerBrackets />
-          <div className="standing-label">Percentile, by 12 month growth</div>
-          <div className="standing-rank">Top {100 - PERCENTILE}%</div>
-          <div className="standing-track">
-            <div className="standing-track-fill" style={{ width: `${PERCENTILE}%` }} />
-            <div className="standing-track-marker" style={{ left: `${PERCENTILE}%` }} />
+      <div className="sales-card">
+        <CornerBrackets />
+
+        <div className="sales-compare">
+          <div className="sales-figure">
+            <span className="sales-figure-label">You</span>
+            <span className="sales-figure-value">{money(last)}</span>
           </div>
-          <p className="standing-rank-note">
-            Against {COHORT} cafés of similar size trading in Downtown Loop.
-          </p>
-          <div className="standing-deltas">
-            <div>
-              <span className="delta-value is-up">+{growth}%</span>
-              <span className="delta-label">You</span>
-            </div>
-            <div>
-              <span className="delta-value">+{peerGrowth}%</span>
-              <span className="delta-label">Peer median</span>
-            </div>
+          <div className="sales-figure is-peer">
+            <span className="sales-figure-label">Median café nearby</span>
+            <span className="sales-figure-value">{money(peerLast)}</span>
+          </div>
+          <div className={`sales-gap ${behind ? 'is-behind' : 'is-ahead'}`}>
+            {Math.abs(gapPct)}% {behind ? 'behind' : 'ahead'}
           </div>
         </div>
 
-        <div className="standing-chart-card">
-          <CornerBrackets />
-          <div className="standing-label">Card volume, indexed to 100</div>
-          <div className="standing-legend">
-            <span><i className="swatch swatch-you" /> Your business</span>
-            <span><i className="swatch swatch-peers" /> Peer median</span>
-          </div>
-          <svg className="standing-chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
-            <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="rgba(11,28,51,0.12)" />
-            <path className="chart-line chart-line-peers" d={line(PEERS, min, max)} fill="none" stroke="#96a3c0" strokeWidth="2" strokeDasharray="5 4" />
-            <path className="chart-line chart-line-you" d={line(YOU, min, max)} fill="none" stroke="#006fcf" strokeWidth="2.6" />
-            {YOU.map((v, i) => {
-              const x = PAD + (i / (YOU.length - 1)) * (W - PAD * 2)
-              const y = H - PAD - ((v - min) / (max - min || 1)) * (H - PAD * 2)
-              return (
-                <g key={MONTHS[i]}>
-                  <circle
-                    className={`chart-point ${hover === i ? 'is-on' : ''}`}
-                    cx={x}
-                    cy={y}
-                    r="4"
-                  />
-                  {/* Generous invisible target, so the point is easy to hit. */}
-                  <rect
-                    x={x - (W - PAD * 2) / 24}
-                    y={0}
-                    width={(W - PAD * 2) / 12}
-                    height={H}
-                    fill="transparent"
-                    onMouseEnter={() => setHover(i)}
-                    onMouseLeave={() => setHover((h) => (h === i ? null : h))}
-                  />
-                </g>
-              )
-            })}
-          </svg>
-
-          <div className={`chart-readout ${hover === null ? 'is-idle' : ''}`}>
-            {hover === null ? (
-              <span>Hover the line for any month</span>
-            ) : (
-              <>
-                <strong>{MONTHS[hover]}</strong>
-                <span>
-                  ${MONTHLY_SALES[hover].toLocaleString('en-US')} in card sales
-                </span>
-                <span className="chart-readout-peer">
-                  peers ${PEER_SALES[hover].toLocaleString('en-US')}
-                </span>
-              </>
-            )}
-          </div>
-          <div className="standing-months">
-            <span>{MONTHS[0]}</span>
-            <span>{MONTHS[11]}</span>
-          </div>
+        <div className="sales-legend">
+          <span><i className="swatch swatch-you" /> Your sales</span>
+          <span><i className="swatch swatch-peers" /> Median café nearby</span>
         </div>
-      </div>
 
-      {BREAKDOWN.filter((r) => r.you < r.peers).map((row) => {
-        const behind = Math.round(((row.peers - row.you) / row.peers) * 100)
-        return (
-          <div className="standing-action" key={row.label}>
-            <CornerBrackets />
-            <div className="standing-action-head">
-              <span className="standing-action-flag">Behind the median</span>
-              <span className="standing-action-figure">{behind}% behind</span>
-            </div>
-            <p className="standing-action-copy">
-              You are <strong>{behind}% behind the average {row.label.toLowerCase()}</strong>{' '}
-              for cafés your size in Downtown Loop: {row.prefix ?? ''}
-              {row.you}
-              {row.unit} against {row.prefix ?? ''}
-              {row.peers}
-              {row.unit}.
-            </p>
-            <p className="standing-action-rec">
-              <strong>Recommended:</strong> merchants who closed this gap did it by
-              partnering with a business whose customers arrive on the days they are
-              quiet. Circuit has {' '}
-              <span className="standing-action-count">4</span> nearby that fit.
-            </p>
-            <button className="btn btn-primary" onClick={() => onNavigate?.('match')}>
-              Open matching
-            </button>
-          </div>
-        )
-      })}
-
-      <div className="standing-breakdown">
-        <div className="standing-label">Where the gap comes from</div>
-        <div className="breakdown-rows">
-          {BREAKDOWN.map((row, i) => {
-            const ahead = row.you >= row.peers
-            const max2 = Math.max(row.you, row.peers)
+        <svg className="sales-chart" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+          <path className="chart-line chart-line-peers" d={path(PEER_SALES)} fill="none" />
+          <path className="chart-line chart-line-you" d={path(SALES)} fill="none" />
+          {SALES.map((v, i) => {
+            const [x, y] = point(v, i)
             return (
-              <div className="breakdown-row" key={row.label} style={{ animationDelay: `${i * 70}ms` }}>
-                <div className="breakdown-label">{row.label}</div>
-                <div className="breakdown-bars">
-                  <div className="breakdown-bar">
-                    <div
-                      className={`breakdown-fill ${ahead ? 'is-ahead' : 'is-behind'}`}
-                      style={{ width: `${(row.you / max2) * 100}%` }}
-                    />
-                    <span className="breakdown-value">
-                      {row.prefix ?? ''}{row.you}{row.unit}
-                    </span>
-                  </div>
-                  <div className="breakdown-bar">
-                    <div className="breakdown-fill is-peer" style={{ width: `${(row.peers / max2) * 100}%` }} />
-                    <span className="breakdown-value is-muted">
-                      {row.prefix ?? ''}{row.peers}{row.unit}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <g key={MONTHS[i]}>
+                <circle className={`chart-point ${hover === i ? 'is-on' : ''}`} cx={x} cy={y} r="4.5" />
+                <rect
+                  x={x - (W - PAD_X * 2) / 24}
+                  y="0"
+                  width={(W - PAD_X * 2) / 12}
+                  height={H}
+                  fill="transparent"
+                  onMouseEnter={() => setHover(i)}
+                  onMouseLeave={() => setHover((h) => (h === i ? null : h))}
+                />
+              </g>
             )
           })}
+        </svg>
+
+        <div className="sales-readout">
+          <strong>{MONTHS[shown]}</strong>
+          <span>{money(SALES[shown])}</span>
+          <span className="sales-readout-peer">
+            median {money(PEER_SALES[shown])}
+          </span>
+          {hover === null && <span className="sales-readout-hint">Hover any month</span>}
         </div>
-        <p className="standing-foot">
-          Benchmarks appear only where at least 15 comparable merchants trade in the
-          area, so no individual business can be identified from them. All figures
-          here are synthetic.
-        </p>
       </div>
+
+      {behind && (
+        <div className="standing-action">
+          <CornerBrackets />
+          <div className="standing-action-head">
+            <span className="standing-action-flag">Behind the median</span>
+            <span className="standing-action-figure">{money(monthlyGap)} a month</span>
+          </div>
+          <p className="standing-action-copy">
+            You are <strong>{gapPct}% behind the median café</strong> of your size in{' '}
+            {AREA}, across {COHORT} comparable merchants. Most of the gap sits on
+            weekday afternoons, when your sales fall furthest below theirs.
+          </p>
+          <p className="standing-action-rec">
+            <strong>Recommended:</strong> cafés that closed a gap like this did it by
+            partnering with a business whose customers arrive when they are quiet.
+            Circuit has <span className="standing-action-count">8</span> nearby that fit.
+          </p>
+          <button className="btn btn-primary" onClick={() => onNavigate?.('match')}>
+            Open matching
+          </button>
+        </div>
+      )}
+
+      <p className="standing-foot">
+        Comparisons appear only where at least 15 comparable merchants trade in the
+        area, so no individual business can be identified from them. All figures
+        here are synthetic.
+      </p>
     </main>
   )
 }

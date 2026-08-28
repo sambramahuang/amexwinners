@@ -1,11 +1,11 @@
 .standing-main {
-  max-width: 1100px;
+  max-width: 940px;
   margin: 0 auto;
-  padding: 40px 32px 56px;
+  padding: 44px 32px 60px;
 }
 
 .standing-head {
-  max-width: 62ch;
+  max-width: 60ch;
   margin-bottom: 26px;
 }
 
@@ -15,254 +15,182 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--accent);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .standing-head h1 {
   margin: 0 0 12px;
   font-family: var(--font-display);
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 600;
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
 .standing-head p {
   margin: 0;
   font-size: 14.5px;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--text-70);
 }
 
-.standing-top {
-  display: grid;
-  grid-template-columns: minmax(0, 340px) minmax(0, 1fr);
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.standing-rank-card,
-.standing-chart-card,
-.standing-breakdown {
+.sales-card {
   position: relative;
-  padding: 22px 24px;
+  padding: 30px 32px 26px;
   border: 1px solid var(--border);
   background: var(--bg);
-  animation: fadeUp 0.4s ease both;
+  animation: fadeUp 0.4s ease backwards;
 }
 
-.standing-chart-card { animation-delay: 80ms; }
-.standing-breakdown { animation-delay: 160ms; }
+.sales-compare {
+  display: flex;
+  align-items: flex-end;
+  gap: 40px;
+  flex-wrap: wrap;
+  padding-bottom: 24px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid var(--border-soft);
+}
 
-.standing-label {
+.sales-figure-label {
+  display: block;
   font-family: var(--font-mono);
   font-size: 10.5px;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   color: var(--text-55);
+  margin-bottom: 6px;
 }
 
-.standing-rank {
-  margin-top: 10px;
+.sales-figure-value {
   font-family: var(--font-display);
-  font-size: 52px;
+  font-size: 34px;
   font-weight: 700;
   line-height: 1;
   color: var(--accent);
+  font-variant-numeric: tabular-nums;
 }
 
-.standing-track {
-  position: relative;
-  height: 6px;
-  margin-top: 18px;
-  background: var(--border-soft);
-}
-
-.standing-track-fill {
-  height: 100%;
-  background: var(--accent);
-  animation: trackGrow 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) both;
-  animation-delay: 220ms;
-}
-
-@keyframes trackGrow {
-  from { transform: scaleX(0); transform-origin: left; }
-  to   { transform: scaleX(1); transform-origin: left; }
-}
-
-.standing-track-marker {
-  position: absolute;
-  top: -4px;
-  width: 2px;
-  height: 14px;
-  background: var(--accent-active);
-}
-
-.standing-rank-note {
-  margin: 12px 0 0;
-  font-size: 12.5px;
-  line-height: 1.5;
+.sales-figure.is-peer .sales-figure-value {
+  font-size: 26px;
   color: var(--text-60);
 }
 
-.standing-deltas {
-  display: flex;
-  gap: 26px;
-  margin-top: 18px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-soft);
-}
-
-.delta-value {
-  display: block;
+.sales-gap {
+  margin-left: auto;
+  padding: 7px 14px;
   font-family: var(--font-display);
-  font-size: 19px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-70);
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.delta-value.is-up { color: #1c8877; }
-
-.delta-label {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-55);
+.sales-gap.is-behind {
+  background: var(--gold-dim);
+  color: var(--gold);
 }
 
-.standing-legend {
+.sales-gap.is-ahead {
+  background: rgba(28, 136, 119, 0.12);
+  color: #12857a;
+}
+
+.sales-legend {
   display: flex;
-  gap: 16px;
-  margin: 10px 0 4px;
+  gap: 18px;
+  margin-bottom: 6px;
   font-size: 11.5px;
   color: var(--text-60);
 }
 
-.standing-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sales-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
 
-.swatch { width: 14px; height: 2px; display: inline-block; }
+.swatch {
+  width: 15px;
+  height: 2px;
+  display: inline-block;
+}
+
 .swatch-you { background: var(--accent); }
-.swatch-peers { background: #96a3c0; }
+.swatch-peers { background: #9fb0c4; }
 
-.standing-chart {
+.sales-chart {
   width: 100%;
-  height: 190px;
+  height: 210px;
   display: block;
 }
 
-/* The lines draw themselves in rather than appearing complete. */
 .chart-line {
-  stroke-dasharray: 1400;
-  stroke-dashoffset: 1400;
+  stroke-dasharray: 1600;
+  stroke-dashoffset: 1600;
   animation: drawLine 1.5s cubic-bezier(0.3, 0.8, 0.3, 1) forwards;
 }
 
-.chart-line-peers { animation-delay: 180ms; }
-.chart-line-you { animation-delay: 380ms; }
+.chart-line-you {
+  stroke: var(--accent);
+  stroke-width: 2.6;
+  animation-delay: 340ms;
+}
+
+.chart-line-peers {
+  stroke: #9fb0c4;
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  animation: none;
+  stroke-dashoffset: 0;
+}
 
 @keyframes drawLine {
   to { stroke-dashoffset: 0; }
 }
 
-.standing-months {
+.chart-point {
+  fill: var(--accent);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.chart-point.is-on { opacity: 1; }
+
+.sales-readout {
   display: flex;
-  justify-content: space-between;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--text-55);
-}
-
-.breakdown-rows {
-  margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.breakdown-row {
-  display: grid;
-  grid-template-columns: minmax(0, 210px) minmax(0, 1fr);
-  gap: 16px;
-  align-items: center;
-  animation: fadeUp 0.4s ease both;
-}
-
-.breakdown-label {
-  font-size: 13.5px;
-  color: var(--text-75);
-}
-
-.breakdown-bars {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.breakdown-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  height: 14px;
-}
-
-.breakdown-fill {
-  height: 10px;
-  background: var(--accent);
-  animation: barGrow 0.8s cubic-bezier(0.2, 0.8, 0.3, 1) both;
-  transform-origin: left;
-}
-
-.breakdown-fill.is-behind { background: var(--gold); }
-.breakdown-fill.is-peer { background: #c3cddb; }
-
-@keyframes barGrow {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
-}
-
-.breakdown-value {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--text-70);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.breakdown-value.is-muted { color: var(--text-55); }
-
-.standing-foot {
-  margin: 20px 0 0;
-  padding-top: 16px;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding-top: 14px;
   border-top: 1px solid var(--border-soft);
-  font-size: 12px;
-  line-height: 1.6;
+  font-size: 14px;
+  color: var(--text-80);
+  font-variant-numeric: tabular-nums;
+}
+
+.sales-readout strong {
+  font-family: var(--font-display);
+  color: var(--text);
+}
+
+.sales-readout-peer { color: var(--text-55); font-size: 13px; }
+
+.sales-readout-hint {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--text-55);
-  max-width: 74ch;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .standing-rank-card,
-  .standing-chart-card,
-  .standing-breakdown,
-  .breakdown-row,
-  .breakdown-fill,
-  .standing-track-fill { animation: none; }
-  .chart-line { stroke-dashoffset: 0; animation: none; }
-}
-
-@media (max-width: 900px) {
-  .standing-top { grid-template-columns: 1fr; }
-  .breakdown-row { grid-template-columns: 1fr; gap: 6px; }
-}
-
-/* Where the merchant is behind, and what to do about it. */
 .standing-action {
   position: relative;
-  margin-bottom: 16px;
-  padding: 22px 24px;
-  border: 1px solid rgba(156, 107, 31, 0.35);
+  margin-top: 16px;
+  padding: 26px 28px;
+  border: 1px solid rgba(156, 107, 31, 0.32);
   background: var(--gold-dim);
-  animation: fadeUp 0.4s ease both;
+  animation: fadeUp 0.4s ease backwards;
   animation-delay: 120ms;
 }
 
@@ -270,7 +198,7 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
 }
 
@@ -284,26 +212,26 @@
 
 .standing-action-figure {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 21px;
   font-weight: 700;
   color: var(--gold);
   font-variant-numeric: tabular-nums;
 }
 
 .standing-action-copy {
-  margin: 10px 0 0;
-  font-size: 14px;
-  line-height: 1.6;
+  margin: 12px 0 0;
+  font-size: 14.5px;
+  line-height: 1.65;
   color: var(--text-80);
-  max-width: 70ch;
+  max-width: 68ch;
 }
 
 .standing-action-rec {
-  margin: 10px 0 16px;
+  margin: 12px 0 18px;
   font-size: 13.5px;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--text-75);
-  max-width: 70ch;
+  max-width: 68ch;
 }
 
 .standing-action-count {
@@ -312,39 +240,21 @@
   font-weight: 500;
 }
 
-/* Hoverable months on the volume chart. */
-.chart-point {
-  fill: var(--accent);
-  opacity: 0;
-  transition: opacity 0.15s ease, r 0.15s ease;
-}
-
-.chart-point.is-on {
-  opacity: 1;
-}
-
-.chart-readout {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  min-height: 22px;
-  margin-top: 4px;
-  font-size: 13px;
-  color: var(--text-75);
-  font-variant-numeric: tabular-nums;
-}
-
-.chart-readout strong {
-  font-family: var(--font-display);
-  color: var(--text);
-}
-
-.chart-readout.is-idle {
-  font-size: 11.5px;
-  color: var(--text-55);
-}
-
-.chart-readout-peer {
-  color: var(--text-55);
+.standing-foot {
+  margin: 24px 0 0;
   font-size: 12px;
+  line-height: 1.65;
+  color: var(--text-55);
+  max-width: 74ch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sales-card,
+  .standing-action { animation: none; }
+  .chart-line { stroke-dashoffset: 0; animation: none; }
+}
+
+@media (max-width: 720px) {
+  .sales-compare { gap: 22px; }
+  .sales-gap { margin-left: 0; }
 }

@@ -48,7 +48,6 @@ export default function MatchModal({
         <div className="match-modal-title">
           Basin Coffee Roasters × {displayName}
         </div>
-        <p className="match-modal-note">{candidate.balanceNote}</p>
 
         <div className="match-modal-tier">
           <span className={`tier-badge tier-badge-${candidate.tier}`}>{TIER_LABELS[candidate.tier]}</span>
