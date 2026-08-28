@@ -40,7 +40,7 @@
   perspective: 1400px;
   transform-style: preserve-3d;
   position: relative;
-  height: 680px;
+  height: 690px;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -548,20 +548,21 @@
   color: var(--bg);
 }
 
+/* The score is what the card is for, so it takes the middle and the room. */
 .swipe-card-score {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 14px;
-  margin: 4px 0 2px;
-  padding-bottom: 14px;
+  gap: 2px;
+  margin: 10px 0 4px;
+  padding-bottom: 20px;
   border-bottom: 1px solid var(--border-soft);
 }
 
 .score-dial {
   position: relative;
-  flex: 0 0 auto;
-  width: 64px;
-  height: 64px;
+  width: 112px;
+  height: 112px;
   display: grid;
   place-items: center;
 }
@@ -570,23 +571,26 @@
 
 .score-dial-value {
   font-family: var(--font-display);
-  font-size: 21px;
+  font-size: 38px;
   font-weight: 700;
+  line-height: 1;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
 }
 
-.score-dial-label {
+.score-dial-band {
+  margin-top: 12px;
   font-family: var(--font-display);
-  font-size: 14.5px;
+  font-size: 17px;
   font-weight: 600;
 }
 
 .score-dial-note {
-  margin-top: 3px;
-  font-size: 11.5px;
-  line-height: 1.45;
-  color: var(--text-60);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-55);
 }
 
 .request-list {

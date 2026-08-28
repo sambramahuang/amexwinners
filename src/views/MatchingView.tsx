@@ -1,6 +1,6 @@
 import { useMemo, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import type { Role } from '../App'
-import { MATCH_CANDIDATES, TIER_LABELS, type MatchCandidate } from '../data/graphEngineData'
+import { MATCH_CANDIDATES, type MatchCandidate } from '../data/graphEngineData'
 import CornerBrackets from '../components/CornerBrackets'
 import MatchModal from '../components/MatchModal'
 import MerchantMark from '../components/MerchantMark'
@@ -255,28 +255,24 @@ export default function MatchingView({ role }: MatchingViewProps) {
 
                   <div className="swipe-card-score">
                     <div className="score-dial">
-                      <svg viewBox="0 0 64 64" width="64" height="64">
-                        <circle cx="32" cy="32" r="27" fill="none" stroke="rgba(11,28,51,0.10)" strokeWidth="6" />
+                      <svg viewBox="0 0 112 112" width="112" height="112">
+                        <circle cx="56" cy="56" r="48" fill="none" stroke="rgba(11,28,51,0.09)" strokeWidth="9" />
                         <circle
-                          cx="32"
-                          cy="32"
-                          r="27"
+                          cx="56"
+                          cy="56"
+                          r="48"
                           fill="none"
                           stroke="var(--accent)"
-                          strokeWidth="6"
+                          strokeWidth="9"
                           strokeLinecap="round"
-                          strokeDasharray={`${(scoreMatch(current).total / 100) * 169.6} 169.6`}
-                          transform="rotate(-90 32 32)"
+                          strokeDasharray={`${(scoreMatch(current).total / 100) * 301.6} 301.6`}
+                          transform="rotate(-90 56 56)"
                         />
                       </svg>
                       <span className="score-dial-value">{scoreMatch(current).total}</span>
                     </div>
-                    <div>
-                      <div className="score-dial-label">
-                        {scoreBand(scoreMatch(current).total)}
-                      </div>
-                      <div className="score-dial-note">Match score out of 100</div>
-                    </div>
+                    <div className="score-dial-band">{scoreBand(scoreMatch(current).total)}</div>
+                    <div className="score-dial-note">Match score out of 100</div>
                   </div>
 
                   <div className="swipe-card-overlap">
@@ -310,41 +306,6 @@ export default function MatchingView({ role }: MatchingViewProps) {
                       <polyline points="12 6 12 12 16 14" />
                     </svg>
                     <p>{current.sequential}</p>
-                  </div>
-
-                  <div className="swipe-card-symmetry">
-                    <div className="swipe-card-symmetry-label">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <line x1="5" y1="9" x2="19" y2="9" />
-                        <line x1="5" y1="15" x2="19" y2="15" />
-                      </svg>
-                      Value symmetry
-                      <span className={`tier-badge tier-badge-${current.tier}`}>{TIER_LABELS[current.tier]}</span>
-                    </div>
-                    <div className="symmetry-bars">
-                      <div className="symmetry-bar-row">
-                        <span className="symmetry-bar-name">Basin</span>
-                        <div className="symmetry-bar-track">
-                          <div
-                            className="symmetry-bar-fill symmetry-bar-fill-you"
-                            style={{ width: `${Math.min(100, (current.upliftYou / 28) * 100)}%` }}
-                          />
-                        </div>
-                        <span className="symmetry-bar-value">+{current.upliftYou}%</span>
-                      </div>
-                      <div className="symmetry-bar-row">
-                        <span className="symmetry-bar-name">
-                          {current.shortName}
-                        </span>
-                        <div className="symmetry-bar-track">
-                          <div
-                            className="symmetry-bar-fill symmetry-bar-fill-them"
-                            style={{ width: `${Math.min(100, (current.upliftThem / 28) * 100)}%` }}
-                          />
-                        </div>
-                        <span className="symmetry-bar-value">+{current.upliftThem}%</span>
-                      </div>
-                    </div>
                   </div>
 
                   <button
