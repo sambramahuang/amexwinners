@@ -81,6 +81,17 @@ export default function ConsentGate({
         time.
       </p>
 
+      <div className="consent-required">
+        <span className="consent-required-count">
+          {agreed.length} of {CLAUSES.length} agreed
+        </span>
+        <span className="consent-required-note">
+          All three are required. Matching cannot run on a partial agreement, so
+          leaving any one unticked means your business is not listed and no
+          merchant is shown to you.
+        </span>
+      </div>
+
       <div className="consent-clauses">
         {CLAUSES.map((c, i) => {
           const on = agreed.includes(c.id)
@@ -129,11 +140,14 @@ export default function ConsentGate({
         ) : (
           <>
             <button className="btn btn-primary" disabled={!complete} onClick={onAccept}>
-              {complete ? 'Agree and start matching' : `Agree to all ${CLAUSES.length} to continue`}
+              {complete
+                ? 'Agree and start matching'
+                : `${CLAUSES.length - agreed.length} left to agree`}
             </button>
             <span className="consent-footnote">
-              Consent is per merchant and revocable. No data leaves American
-              Express's closed loop.
+              {complete
+                ? "Consent is per merchant and revocable. No data leaves American Express's closed loop."
+                : 'You cannot take part in matching until all three are agreed.'}
             </span>
           </>
         )}

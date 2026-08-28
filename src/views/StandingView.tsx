@@ -17,6 +17,11 @@ const PEER_SALES = [
 const COHORT = 46
 const AREA = 'Downtown Loop'
 
+// Position in the cohort by card sales, not by growth. Ranking on the same
+// measure the gap figure uses is the whole point: below the median has to read
+// as below the median everywhere on the screen.
+const PERCENTILE = 38
+
 const W = 640
 const H = 210
 const PAD_X = 10
@@ -52,29 +57,56 @@ export default function StandingView({
   return (
     <main className="standing-main">
       <div className="standing-head">
-        <div className="eyebrow">Your sales</div>
-        <h1>{money(last)} in card sales last month</h1>
+        <div className="eyebrow">Your standing</div>
+        <h1>
+          You are in the top {100 - PERCENTILE}% of cafés your size in {AREA}
+        </h1>
         <p>
-          The median café of your size in {AREA} took {money(peerLast)}. Read from
-          the transactions American Express already processes on your sales, with
-          no extra reporting from you.
+          Ranked on card sales against {COHORT} comparable merchants, read from the
+          transactions American Express already processes on your sales. No extra
+          reporting from you, and no other merchant sees your figures.
         </p>
       </div>
 
       <div className="sales-card">
         <CornerBrackets />
 
+        <div className="standing-rank">
+          <div className="standing-rank-figure">
+            <span className="standing-rank-value">Top {100 - PERCENTILE}%</span>
+            <span className="standing-rank-caption">
+              of {COHORT} cafés your size in {AREA}, by card sales
+            </span>
+          </div>
+          <div className={`sales-gap ${behind ? 'is-behind' : 'is-ahead'}`}>
+            {Math.abs(gapPct)}% {behind ? 'behind the median' : 'ahead of the median'}
+          </div>
+        </div>
+
+        <div className="standing-scale" aria-hidden="true">
+          <div className="standing-scale-track">
+            <div className="standing-scale-median" />
+            <div
+              className="standing-scale-you"
+              style={{ left: `${PERCENTILE}%` }}
+            />
+          </div>
+          <div className="standing-scale-labels">
+            <span>Bottom</span>
+            <span>Median</span>
+            <span>Top</span>
+          </div>
+        </div>
+
+        {/* Revenue sits under the position, as the detail behind it. */}
         <div className="sales-compare">
           <div className="sales-figure">
-            <span className="sales-figure-label">You</span>
+            <span className="sales-figure-label">Your sales last month</span>
             <span className="sales-figure-value">{money(last)}</span>
           </div>
           <div className="sales-figure is-peer">
             <span className="sales-figure-label">Median café nearby</span>
             <span className="sales-figure-value">{money(peerLast)}</span>
-          </div>
-          <div className={`sales-gap ${behind ? 'is-behind' : 'is-ahead'}`}>
-            {Math.abs(gapPct)}% {behind ? 'behind' : 'ahead'}
           </div>
         </div>
 
@@ -96,18 +128,6 @@ export default function StandingView({
               <span className="sales-tip-value">{money(SALES[hover])}</span>
               <span className="sales-tip-peer">
                 median {money(PEER_SALES[hover])}
-              </span>
-              <span
-                className={`sales-tip-gap ${
-                  SALES[hover] >= PEER_SALES[hover] ? 'is-ahead' : 'is-behind'
-                }`}
-              >
-                {Math.abs(
-                  Math.round(
-                    ((SALES[hover] - PEER_SALES[hover]) / PEER_SALES[hover]) * 100,
-                  ),
-                )}
-                % {SALES[hover] >= PEER_SALES[hover] ? 'ahead' : 'behind'}
               </span>
             </div>
           )}
@@ -144,7 +164,6 @@ export default function StandingView({
 
         <div className="sales-months">
           <span>{MONTHS[0]}</span>
-          {hover === null && <span className="sales-months-hint">Hover any month</span>}
           <span>{MONTHS[MONTHS.length - 1]}</span>
         </div>
       </div>

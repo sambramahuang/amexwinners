@@ -42,13 +42,92 @@
   animation: fadeUp 0.4s ease backwards;
 }
 
+.standing-rank {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.standing-rank-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.015em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.standing-rank-caption {
+  display: block;
+  margin-top: 10px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-65);
+  max-width: 42ch;
+}
+
+/* Where the merchant sits on the cohort, with the median marked. */
+.standing-scale {
+  margin: 22px 0 20px;
+}
+
+.standing-scale-track {
+  position: relative;
+  height: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(11, 28, 51, 0.06),
+    rgba(0, 111, 207, 0.22)
+  );
+}
+
+.standing-scale-median {
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  bottom: -4px;
+  width: 1px;
+  background: var(--text-55);
+}
+
+.standing-scale-you {
+  position: absolute;
+  top: -5px;
+  width: 3px;
+  height: 18px;
+  background: var(--accent);
+  transform: translateX(-50%);
+  animation: scaleIn 0.7s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  animation-delay: 260ms;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: translateX(-50%) scaleY(0.2); }
+  to   { opacity: 1; transform: translateX(-50%) scaleY(1); }
+}
+
+.standing-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-55);
+}
+
 .sales-compare {
   display: flex;
   align-items: flex-end;
-  gap: 40px;
+  gap: 36px;
   flex-wrap: wrap;
-  padding-bottom: 24px;
-  margin-bottom: 22px;
+  padding-bottom: 22px;
+  margin-bottom: 20px;
   border-bottom: 1px solid var(--border-soft);
 }
 
@@ -64,20 +143,18 @@
 
 .sales-figure-value {
   font-family: var(--font-display);
-  font-size: 34px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 600;
   line-height: 1;
-  color: var(--accent);
+  color: var(--text);
   font-variant-numeric: tabular-nums;
 }
 
 .sales-figure.is-peer .sales-figure-value {
-  font-size: 26px;
   color: var(--text-60);
 }
 
 .sales-gap {
-  margin-left: auto;
   padding: 7px 14px;
   font-family: var(--font-display);
   font-size: 14px;
@@ -163,14 +240,15 @@
    down to the marker so there is no doubt which month it belongs to. */
 .sales-tip {
   position: absolute;
-  transform: translate(-50%, calc(-100% - 18px));
+  transform: translate(-50%, calc(-100% - 14px));
   z-index: 3;
   pointer-events: none;
   display: flex;
   flex-direction: column;
   gap: 1px;
-  padding: 10px 14px 11px;
-  min-width: 148px;
+  padding: 8px 11px 9px;
+  min-width: 0;
+  white-space: nowrap;
   background: var(--text);
   color: #fff;
   box-shadow: 0 16px 30px -18px rgba(11, 28, 51, 0.9);
@@ -178,8 +256,8 @@
 }
 
 @keyframes tipIn {
-  from { opacity: 0; transform: translate(-50%, calc(-100% - 10px)); }
-  to   { opacity: 1; transform: translate(-50%, calc(-100% - 18px)); }
+  from { opacity: 0; transform: translate(-50%, calc(-100% - 8px)); }
+  to   { opacity: 1; transform: translate(-50%, calc(-100% - 14px)); }
 }
 
 /* Stem from the card down to the point. */
@@ -189,7 +267,7 @@
   top: 100%;
   left: 50%;
   width: 1px;
-  height: 14px;
+  height: 10px;
   background: var(--text);
   opacity: 0.42;
 }
@@ -204,14 +282,14 @@
 
 .sales-tip-value {
   font-family: var(--font-display);
-  font-size: 21px;
-  font-weight: 700;
-  line-height: 1.15;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
   font-variant-numeric: tabular-nums;
 }
 
 .sales-tip-peer {
-  font-size: 12px;
+  font-size: 11px;
   color: rgba(255, 255, 255, 0.66);
   font-variant-numeric: tabular-nums;
 }
