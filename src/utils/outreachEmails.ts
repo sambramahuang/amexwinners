@@ -99,3 +99,51 @@ export function buildRecruitEmail(prospect: ProspectTarget): OutreachEmail {
     body,
   }
 }
+
+/** The merchant sending it: who Circuit is acting for in the SME view. */
+export const SELF_MERCHANT = {
+  name: 'Basin Coffee Roasters',
+  category: 'café',
+  neighbourhood: 'Downtown Loop',
+  opened: 2019,
+  weeklyCustomers: 1400,
+  known: 'single origin filter and a small pastry counter',
+  contact: { name: 'Rae Halloran', role: 'Owner', email: 'rae@basincoffee.example' },
+}
+
+/**
+ * Merchant to merchant, sent by the SME rather than by Amex.
+ *
+ * A different job from the relationship manager's email: the recipient does
+ * not know this business, so it opens with who they are and what they run
+ * before it proposes anything. Short, concrete, and it asks for one small
+ * thing rather than a partnership in principle.
+ */
+export function buildMerchantIntroEmail(candidate: MatchCandidate): OutreachEmail {
+  const me = SELF_MERCHANT
+  const body = [
+    `Hi ${candidate.contact.name.split(' ')[0]},`,
+    '',
+    `I am ${me.contact.name}, I own ${me.name}, the ${me.category} on ${me.neighbourhood}. We opened in ${me.opened} and serve around ${me.weeklyCustomers.toLocaleString('en-US')} customers a week, mostly regulars, and we are known for ${me.known}.`,
+    '',
+    `American Express matched our two businesses through Circuit, which reads how customers move between merchants in the area. What it found: ${candidate.sequential.charAt(0).toLowerCase()}${candidate.sequential.slice(1)} I had no idea the overlap was that high, and it seems like a waste not to do something with it.`,
+    '',
+    `What I have in mind is small to start: ${candidate.terms.charAt(0).toLowerCase()}${candidate.terms.slice(1)} No exclusivity, no cost to either of us, and we can stop it at any point if it is not pulling its weight.`,
+    '',
+    `If you are open to it, could I come by this week and introduce myself properly? I would rather sort it out over a coffee than over email, and the coffee is on me.`,
+    '',
+    'Best,',
+    me.contact.name,
+    `${me.contact.role}, ${me.name}`,
+    me.contact.email,
+  ].join('\n')
+
+  return {
+    fromName: me.contact.name,
+    fromRole: `${me.contact.role}, ${me.name}`,
+    fromEmail: me.contact.email,
+    to: candidate.contact,
+    subject: `${me.name} nearby, an idea worth a coffee`,
+    body,
+  }
+}

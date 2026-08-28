@@ -334,8 +334,11 @@ export default function MatchingView({ role }: MatchingViewProps) {
       {modalCard && (
         <MatchModal
           candidate={modalCard}
-          mode={hideIdentity ? 'preview' : 'match'}
-          hideIdentity={hideIdentity}
+          mode="match"
+          /* The card promises identity is revealed once you match, so this is
+             the moment it is. The preview below stays anonymous. */
+          hideIdentity={false}
+          smeVoice={hideIdentity}
           onClose={() => setModalCard(null)}
         />
       )}

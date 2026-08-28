@@ -356,19 +356,67 @@ export default function AmexCard3D({
     shadow.position.y = -1.25
     scene.add(shadow)
 
-    // Pointer parallax, damped toward a target rather than snapping.
+    // Grab and spin. The card is the one object on the page worth touching,
+    // so it takes a real drag: pointer moves rotate it directly, releasing
+    // hands it the velocity it had, and the idle spin fades back in once that
+    // has bled off.
     const target = { x: 0, y: 0 }
     const eased = { x: 0, y: 0 }
+    let dragging = false
+    let lastPointer = { x: 0, y: 0 }
+    let velocity = { x: 0, y: 0 }
+    let releaseAt = 0
+
+    function onPointerDown(e: PointerEvent) {
+      dragging = true
+      releaseAt = 0
+      velocity = { x: 0, y: 0 }
+      lastPointer = { x: e.clientX, y: e.clientY }
+      container.setPointerCapture?.(e.pointerId)
+      container.classList.add('is-grabbing')
+    }
+
     function onPointerMove(e: PointerEvent) {
+      if (dragging) {
+        const dx = e.clientX - lastPointer.x
+        const dy = e.clientY - lastPointer.y
+        lastPointer = { x: e.clientX, y: e.clientY }
+        // 0.0095 rad per pixel keeps a full turn at roughly two thirds of a
+        // typical drag across the canvas.
+        const spinY = dx * 0.0095
+        const spinX = dy * 0.0065
+        card.rotation.y += spinY
+        dragRotationX += spinX
+        velocity = { x: spinX, y: spinY }
+        return
+      }
       const rect = container.getBoundingClientRect()
       target.x = ((e.clientX - rect.left) / rect.width - 0.5) * 2
       target.y = ((e.clientY - rect.top) / rect.height - 0.5) * 2
     }
+
+    function endDrag(e?: PointerEvent) {
+      if (!dragging) return
+      dragging = false
+      releaseAt = clock.getElapsedTime()
+      if (e) container.releasePointerCapture?.(e.pointerId)
+      container.classList.remove('is-grabbing')
+    }
+
     function onPointerLeave() {
       target.x = 0
       target.y = 0
     }
+
+    // Tilting past vertical reads as a glitch rather than a spin, so the drag
+    // is clamped short of it and springs back toward level.
+    let dragRotationX = 0
+    const MAX_TILT = 0.7
+
+    container.addEventListener('pointerdown', onPointerDown)
     container.addEventListener('pointermove', onPointerMove)
+    container.addEventListener('pointerup', endDrag)
+    container.addEventListener('pointercancel', endDrag)
     container.addEventListener('pointerleave', onPointerLeave)
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -380,15 +428,29 @@ export default function AmexCard3D({
       const dt = clock.getDelta()
       const t = clock.getElapsedTime()
 
-      if (!reduceMotion) card.rotation.y += spin * dt
+      if (dragging) {
+        // Nothing else moves the card while a hand is on it.
+      } else {
+        // Inertia from the throw, decaying, then the idle spin fades back in.
+        const sinceRelease = releaseAt ? t - releaseAt : Infinity
+        const decay = Math.exp(-sinceRelease * 2.6)
+        card.rotation.y += velocity.y * decay * 60 * dt
+        dragRotationX += velocity.x * decay * 60 * dt
+
+        const idleWeight = reduceMotion ? 0 : Math.min(1, sinceRelease / 1.4)
+        card.rotation.y += spin * dt * idleWeight
+      }
+
+      dragRotationX = Math.max(-MAX_TILT, Math.min(MAX_TILT, dragRotationX))
+      if (!dragging) dragRotationX *= 1 - Math.min(1, dt * 1.6)
 
       eased.x += (target.x - eased.x) * Math.min(1, dt * 4)
       eased.y += (target.y - eased.y) * Math.min(1, dt * 4)
 
-      // Idle float plus pointer tilt, kept small so the spin stays the subject.
-      card.rotation.x = Math.sin(t * 0.55) * 0.06 + eased.y * -0.22
+      const idleFloat = reduceMotion ? 0 : Math.sin(t * 0.55) * 0.06
+      card.rotation.x = dragRotationX + idleFloat + eased.y * -0.22
       card.rotation.z = Math.sin(t * 0.37) * 0.028 + eased.x * 0.06
-      card.position.y = Math.sin(t * 0.75) * 0.055
+      card.position.y = reduceMotion ? 0 : Math.sin(t * 0.75) * 0.055
       shadow.material.opacity = 0.85 - Math.abs(Math.sin(card.rotation.y)) * 0.25
 
       renderer.render(scene, camera)
@@ -420,7 +482,10 @@ export default function AmexCard3D({
       cancelled = true
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', handleResize)
+      container.removeEventListener('pointerdown', onPointerDown)
       container.removeEventListener('pointermove', onPointerMove)
+      container.removeEventListener('pointerup', endDrag)
+      container.removeEventListener('pointercancel', endDrag)
       container.removeEventListener('pointerleave', onPointerLeave)
       bodyGeo.dispose()
       faceGeo.dispose()

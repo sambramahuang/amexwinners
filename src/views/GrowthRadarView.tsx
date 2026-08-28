@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { View } from '../App'
-import { CLUSTERS, GROWING_MERCHANTS, type GrowingMerchant } from '../data/growthRadar'
+import { US_CITIES, US_MERCHANTS, type UsMerchant } from '../data/usMerchants'
 import './GrowthRadarView.css'
 
 const W = 108
@@ -34,38 +34,48 @@ interface GrowthRadarViewProps {
 }
 
 export default function GrowthRadarView({ onNavigate }: GrowthRadarViewProps) {
-  const [cluster, setCluster] = useState(CLUSTERS[0])
+  const [city, setCity] = useState(US_CITIES[0])
   const [onlyProspects, setOnlyProspects] = useState(false)
+  const [showAll, setShowAll] = useState(false)
 
-  const rows = useMemo<GrowingMerchant[]>(() => {
-    return GROWING_MERCHANTS.filter(
-      (m) =>
-        (cluster === CLUSTERS[0] || m.cluster === cluster) &&
-        (!onlyProspects || !m.onAmex),
-    )
-  }, [cluster, onlyProspects])
+  const matching = useMemo<UsMerchant[]>(
+    () =>
+      US_MERCHANTS.filter(
+        (m) =>
+          (city === US_CITIES[0] || m.city === city) &&
+          (!onlyProspects || !m.onAmex),
+      ).sort((a, b) => b.growthPct - a.growthPct),
+    [city, onlyProspects],
+  )
 
+  const rows = showAll ? matching : matching.slice(0, 20)
   const prospects = rows.filter((m) => !m.onAmex).length
 
   return (
     <main className="growth-main">
       <div className="growth-head">
         <div className="eyebrow">Growth radar</div>
-        <h1>The 20 fastest growing merchants in the region</h1>
+        <h1>
+          The fastest growing small businesses in {city === US_CITIES[0] ? 'the US' : city}
+        </h1>
         <p>
-          Ranked on 12 month card volume growth. {prospects} of the {rows.length}{' '}
-          shown are not on Amex yet, which is the point: the radar sees a business
-          before it is a customer.
+          Ranked on 12 month card volume growth, drawn from {US_MERCHANTS.length}{' '}
+          merchants across {US_CITIES.length - 1} cities. {prospects} of the{' '}
+          {rows.length} shown are not on Amex yet, which is the point: the radar
+          sees a business before it is a customer.
         </p>
       </div>
 
       <div className="growth-controls">
         <div className="growth-filters">
-          {CLUSTERS.map((c) => (
+          {US_CITIES.map((c) => (
             <button
               key={c}
-              className={`filter-pill ${c === cluster ? 'is-active' : ''}`}
-              onClick={() => setCluster(c)}
+              className={`filter-pill ${c === city ? 'is-active' : ''}`}
+              onClick={() => {
+                setCity(c)
+                setShowAll(false)
+              }}
             >
               {c}
             </button>
@@ -91,7 +101,8 @@ export default function GrowthRadarView({ onNavigate }: GrowthRadarViewProps) {
             <div className="growth-identity">
               <div className="growth-name">{m.name}</div>
               <div className="growth-meta">
-                {m.category} · {m.cluster} · {m.volumeBand} per month
+                {m.category} · {m.neighbourhood}, {m.city} {m.state} · {m.volumeBand}{' '}
+                per month
               </div>
             </div>
 
@@ -118,6 +129,12 @@ export default function GrowthRadarView({ onNavigate }: GrowthRadarViewProps) {
           <div className="growth-empty">No merchants match this filter.</div>
         )}
       </div>
+
+      {matching.length > 20 && (
+        <button className="btn btn-ghost growth-more" onClick={() => setShowAll((v) => !v)}>
+          {showAll ? 'Show the top 20' : `Show all ${matching.length}`}
+        </button>
+      )}
 
       <p className="growth-foot">
         Growth is read from card network and acquiring data across the region, so a

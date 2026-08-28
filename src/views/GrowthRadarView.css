@@ -184,6 +184,10 @@
   color: var(--text-55);
 }
 
+.growth-more {
+  margin-top: 14px;
+}
+
 .growth-foot {
   margin: 16px 0 0;
   font-size: 12px;

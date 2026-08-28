@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { TIER_LABELS, type MatchCandidate } from '../data/graphEngineData'
 import { redactCandidateName } from '../utils/redactCandidateName'
 import EmailComposer from './EmailComposer'
-import { buildMatchIntroEmail } from '../utils/outreachEmails'
+import { buildMatchIntroEmail, buildMerchantIntroEmail } from '../utils/outreachEmails'
 import CornerBrackets from './CornerBrackets'
 import { BenefitBarChart, UpliftTrendChart } from './BenefitCharts'
 import './MatchModal.css'
@@ -14,6 +14,8 @@ interface MatchModalProps {
   mode?: 'match' | 'preview'
   /** True pre-match — hides the counterpart's identity from another SME, keeping only its category. */
   hideIdentity?: boolean
+  /** SME view: the introduction is written by the merchant, not by Amex. */
+  smeVoice?: boolean
 }
 
 export default function MatchModal({
@@ -21,6 +23,7 @@ export default function MatchModal({
   onClose,
   mode = 'match',
   hideIdentity = false,
+  smeVoice = false,
 }: MatchModalProps) {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -96,25 +99,25 @@ export default function MatchModal({
         </div>
 
         <div className="match-modal-terms">Suggested terms: {redact(candidate.terms)}</div>
-        {mode !== 'preview' && (
-          <div className="match-modal-outreach">
-            {compose ? (
-              <EmailComposer
-                email={buildMatchIntroEmail(candidate)}
-                sendLabel={`Send to ${candidate.contact.name.split(' ')[0]}`}
-                sentLabel="Sent"
-              />
-            ) : (
-              <button className="btn btn-primary match-modal-compose" onClick={() => setCompose(true)}>
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-                  <rect x="2" y="4" width="20" height="16" rx="2" />
-                  <path d="m2 7 10 6 10-6" />
-                </svg>
-                Write the introduction
-              </button>
-            )}
-          </div>
-        )}
+        <div className="match-modal-outreach">
+          {compose ? (
+            <EmailComposer
+              email={
+                smeVoice ? buildMerchantIntroEmail(candidate) : buildMatchIntroEmail(candidate)
+              }
+              sendLabel={`Send to ${candidate.contact.name.split(' ')[0]}`}
+              sentLabel="Sent"
+            />
+          ) : (
+            <button className="btn btn-primary match-modal-compose" onClick={() => setCompose(true)}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="m2 7 10 6 10-6" />
+              </svg>
+              {smeVoice ? 'Write to them' : 'Write the introduction'}
+            </button>
+          )}
+        </div>
 
         <div className="match-modal-actions">
           {mode === 'preview' ? (
