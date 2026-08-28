@@ -61,39 +61,40 @@
 }
 
 .consent-clauses {
+  list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin: 12px 0 0;
+  gap: 2px;
+  margin: 22px 0 0;
+  padding: 0;
+  counter-reset: clause;
 }
 
 .consent-clause {
   display: flex;
   gap: 14px;
-  padding: 16px 18px;
-  border: 1px solid var(--border);
-  background: var(--bg-panel);
-  cursor: pointer;
+  padding: 15px 18px 15px 0;
+  border-bottom: 1px solid var(--border-soft);
   animation: fadeUp 0.34s ease backwards;
-  transition: border-color 0.18s ease, background 0.18s ease;
 }
 
-.consent-clause:hover {
-  border-color: var(--border-strong);
+.consent-clause:last-child {
+  border-bottom: none;
 }
 
-.consent-clause.is-agreed {
-  border-color: var(--accent);
-  background: var(--accent-dim);
-}
-
-.consent-clause input {
-  margin-top: 3px;
-  width: 17px;
-  height: 17px;
+.consent-clause-number {
   flex: 0 0 auto;
-  accent-color: var(--accent);
-  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent-dim-strong);
+  color: var(--accent-active);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  margin-top: 1px;
 }
 
 .consent-clause-body {
@@ -158,6 +159,40 @@
   color: var(--text-55);
   font-size: 11px;
   font-weight: 700;
+}
+
+/* One agreement, covering the three terms listed above it. */
+.consent-agree {
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  margin-top: 22px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-80);
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+
+.consent-agree:hover {
+  border-color: var(--border-strong);
+}
+
+.consent-agree.is-agreed {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.consent-agree input {
+  margin-top: 2px;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  accent-color: var(--accent);
+  cursor: pointer;
 }
 
 .consent-actions {

@@ -58,12 +58,10 @@ export default function ConsentGate({
   grantedOn,
   onWithdraw,
 }: ConsentGateProps) {
-  const [agreed, setAgreed] = useState<string[]>(grantedOn ? CLAUSES.map((c) => c.id) : [])
-  const complete = agreed.length === CLAUSES.length
-
-  function toggle(id: string) {
-    setAgreed((a) => (a.includes(id) ? a.filter((x) => x !== id) : [...a, id]))
-  }
+  // One agreement covering all three terms, which is how a consent form
+  // normally reads. The terms stay enumerated so nobody can claim they were
+  // buried in a paragraph.
+  const [agreed, setAgreed] = useState(Boolean(grantedOn))
 
   return (
     <div className="consent-gate">
@@ -81,35 +79,17 @@ export default function ConsentGate({
         time.
       </p>
 
-      <div className="consent-required">
-        <span className="consent-required-count">
-          {agreed.length} of {CLAUSES.length} agreed
-        </span>
-        <span className="consent-required-note">
-          All three are required. Matching cannot run on a partial agreement, so
-          leaving any one unticked means your business is not listed and no
-          merchant is shown to you.
-        </span>
-      </div>
-
-      <div className="consent-clauses">
-        {CLAUSES.map((c, i) => {
-          const on = agreed.includes(c.id)
-          return (
-            <label
-              key={c.id}
-              className={`consent-clause ${on ? 'is-agreed' : ''}`}
-              style={{ animationDelay: `${i * 60}ms` }}
-            >
-              <input type="checkbox" checked={on} onChange={() => toggle(c.id)} />
-              <span className="consent-clause-body">
-                <span className="consent-clause-title">{c.title}</span>
-                <span className="consent-clause-detail">{c.detail}</span>
-              </span>
-            </label>
-          )
-        })}
-      </div>
+      <ol className="consent-clauses">
+        {CLAUSES.map((c, i) => (
+          <li className="consent-clause" key={c.id} style={{ animationDelay: `${i * 60}ms` }}>
+            <span className="consent-clause-number">{i + 1}</span>
+            <span className="consent-clause-body">
+              <span className="consent-clause-title">{c.title}</span>
+              <span className="consent-clause-detail">{c.detail}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
 
       <div className="consent-never">
         <div className="consent-never-label">Never shared, with anyone</div>
@@ -122,6 +102,19 @@ export default function ConsentGate({
           ))}
         </ul>
       </div>
+
+      <label className={`consent-agree ${agreed ? 'is-agreed' : ''}`}>
+        <input
+          type="checkbox"
+          checked={agreed}
+          onChange={(e) => setAgreed(e.target.checked)}
+        />
+        <span>
+          I agree to all three terms above, and I understand that matching cannot
+          run without them. I can withdraw this at any time, which removes my
+          business from every queue it appears in.
+        </span>
+      </label>
 
       <div className="consent-actions">
         {grantedOn ? (
@@ -139,15 +132,13 @@ export default function ConsentGate({
           </>
         ) : (
           <>
-            <button className="btn btn-primary" disabled={!complete} onClick={onAccept}>
-              {complete
-                ? 'Agree and start matching'
-                : `${CLAUSES.length - agreed.length} left to agree`}
+            <button className="btn btn-primary" disabled={!agreed} onClick={onAccept}>
+              Agree and start matching
             </button>
             <span className="consent-footnote">
-              {complete
+              {agreed
                 ? "Consent is per merchant and revocable. No data leaves American Express's closed loop."
-                : 'You cannot take part in matching until all three are agreed.'}
+                : 'Tick the box above to take part in matching.'}
             </span>
           </>
         )}
