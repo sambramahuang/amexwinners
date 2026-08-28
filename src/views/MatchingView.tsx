@@ -1,4 +1,11 @@
-import { useMemo, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+} from 'react'
 import type { Role } from '../App'
 import { MATCH_CANDIDATES, type MatchCandidate } from '../data/graphEngineData'
 import CornerBrackets from '../components/CornerBrackets'
@@ -13,6 +20,7 @@ const EXIT_DISTANCE = 700
 const EXIT_DURATION_MS = 320
 
 const CONSENT_KEY = 'circuit.matchingConsent.v2'
+const SWIPE_HINT_KEY = 'circuit.swipeHintSeen.v1'
 
 /** The date consent was given, or null if it has not been. */
 function loadConsent(): string | null {
@@ -53,6 +61,13 @@ export default function MatchingView({ role }: MatchingViewProps) {
   const [drag, setDrag] = useState({ x: 0, y: 0 })
   const [exiting, setExiting] = useState<SwipeDirection | null>(null)
   const [likedIds, setLikedIds] = useState<number[]>([])
+  // The stack reserves exactly the height of the card in it, measured rather
+  // than guessed, so the controls always sit the same distance below whatever
+  // the tallest card in the pool happens to be.
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [stackHeight, setStackHeight] = useState<number>()
+  const [showSwipeHint, setShowSwipeHint] = useState(false)
+  const hintSeen = useRef(false)
   const [panel, setPanel] = useState<'discover' | 'requests'>('discover')
   const [modalCard, setModalCard] = useState<RankedCandidate | null>(null)
   const [previewCard, setPreviewCard] = useState<RankedCandidate | null>(null)
@@ -79,7 +94,50 @@ export default function MatchingView({ role }: MatchingViewProps) {
   const peek2 = rankedCandidates[qIndex + 2] ?? null
   const matchDone = qIndex >= total
 
+  useEffect(() => {
+    try {
+      hintSeen.current = localStorage.getItem(SWIPE_HINT_KEY) === '1'
+    } catch {
+      hintSeen.current = true
+    }
+  }, [])
+
+  useEffect(() => {
+    const el = cardRef.current
+    if (!el) return
+    // The rendered box, not the layout box: the card sits under a perspective
+    // transform, so offsetHeight overshoots what is actually on screen. Held
+    // still during a drag, when rotation is changing the rendered height.
+    const measure = () => {
+      if (dragging || exiting) return
+      const stack = el.closest('.card-stack')
+      if (!stack) return
+      // Card top sits inset from the stack top, so the reserve is that offset
+      // plus the rendered height, or the controls ride up over the card.
+      const box = el.getBoundingClientRect()
+      const offset = box.top - stack.getBoundingClientRect().top
+      setStackHeight(Math.ceil(offset + box.height))
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [qIndex, consented, panel, dragging, exiting])
+
+  function dismissHint() {
+    setShowSwipeHint(false)
+    hintSeen.current = true
+    try {
+      localStorage.setItem(SWIPE_HINT_KEY, '1')
+    } catch {
+      /* localStorage unavailable, so the hint shows again next visit */
+    }
+  }
+
   function onDown(e: ReactPointerEvent<HTMLDivElement>) {
+    // Shown the first time a merchant puts a finger on the card, which is the
+    // moment they need it, rather than as a modal before they have seen one.
+    if (!hintSeen.current) setShowSwipeHint(true)
     e.currentTarget.setPointerCapture?.(e.pointerId)
     setDragging(true)
     setStart({ x: e.clientX, y: e.clientY })
@@ -110,6 +168,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
       setQIndex((i) => i + 1)
       setExiting(null)
       setDrag({ x: 0, y: 0 })
+      if (showSwipeHint) dismissHint()
       if (dir !== 'right') return
       setLikedIds((ids) => (ids.includes(card.id) ? ids : [...ids, card.id]))
       // A like on its own goes into Requests. Only a like that runs both ways
@@ -225,12 +284,13 @@ export default function MatchingView({ role }: MatchingViewProps) {
 
         {consented && !reviewingConsent && panel === 'discover' && !matchDone && (
           <>
-            <div className="card-stack">
+            <div className="card-stack" style={stackHeight ? { height: stackHeight } : undefined}>
               {peek2 && <div className="stack-card peek-2" />}
               {peek1 && <div className="stack-card peek-1" />}
               {current && (
                 <div className="swipe-card-mount" key={current.id}>
                 <div
+                  ref={cardRef}
                   className="swipe-card"
                   style={cardStyle}
                   onPointerDown={onDown}
@@ -246,6 +306,26 @@ export default function MatchingView({ role }: MatchingViewProps) {
                   <div className="swipe-badge swipe-badge-pass" style={{ opacity: nopeOpacity }}>
                     PASS
                   </div>
+
+                  {showSwipeHint && (
+                    <div className="swipe-hint" onPointerDown={dismissHint}>
+                      <div className="swipe-hint-side">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                          <path d="m15 18-6-6 6-6" />
+                        </svg>
+                        <span className="swipe-hint-label">Swipe left</span>
+                        <span className="swipe-hint-word">to pass</span>
+                      </div>
+                      <div className="swipe-hint-rule" />
+                      <div className="swipe-hint-side">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                          <path d="m9 18 6-6-6-6" />
+                        </svg>
+                        <span className="swipe-hint-label">Swipe right</span>
+                        <span className="swipe-hint-word">to like</span>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="swipe-card-top">
                     <MerchantMark candidate={current} size={54} />
