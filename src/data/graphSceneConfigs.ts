@@ -10,6 +10,8 @@ export interface GraphNodeConfig {
   color?: number
   /** Short name rendered as a floating label on the node, e.g. "Basin Coffee". */
   name?: string
+  /** Key into GRAPH_ICONS (src/utils/graphIcons.ts), rendered centered on the node. */
+  icon?: string
 }
 
 export interface GraphGapConfig {
@@ -57,9 +59,9 @@ const CLUSTER_GAP_POSITION: [number, number, number] = [0, 1.1, 0]
 export const DOWNTOWN_LOOP_GRAPH: GraphSceneConfig = {
   cameraPosition: CLUSTER_CAMERA_POSITION,
   nodes: [
-    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x006fcf, name: 'Basin Coffee' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x4fa3e8, name: 'Spinebound' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0xa688f0, name: 'Nettle & Bloom' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x006fcf, name: 'Basin Coffee', icon: 'coffee' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x4fa3e8, name: 'Spinebound', icon: 'book' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0xa688f0, name: 'Nettle & Bloom', icon: 'flower' },
   ],
   edges: CLUSTER_TRIANGLE_EDGES,
   gaps: [{ position: CLUSTER_GAP_POSITION, color: 0xc81e2e, connectedNodeIndexes: [0, 1, 2], label: 'No gift shop' }],
@@ -68,9 +70,9 @@ export const DOWNTOWN_LOOP_GRAPH: GraphSceneConfig = {
 export const RIVERSIDE_ROW_GRAPH: GraphSceneConfig = {
   cameraPosition: CLUSTER_CAMERA_POSITION,
   nodes: [
-    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0xe8b54d, name: 'Ridgeline Yoga' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0xd97757, name: 'Loom Bicycle' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0xc9a86a, name: 'Anchor & Awl' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0xe8b54d, name: 'Ridgeline Yoga', icon: 'pulse' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0xd97757, name: 'Loom Bicycle', icon: 'bike' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0xc9a86a, name: 'Anchor & Awl', icon: 'scissors' },
   ],
   edges: CLUSTER_TRIANGLE_EDGES,
   gaps: [{ position: CLUSTER_GAP_POSITION, color: 0xc81e2e, connectedNodeIndexes: [0, 1, 2], label: 'No wellness' }],
@@ -81,9 +83,9 @@ export const RIVERSIDE_ROW_GRAPH: GraphSceneConfig = {
 export const HARBOR_DISTRICT_GRAPH: GraphSceneConfig = {
   cameraPosition: CLUSTER_CAMERA_POSITION,
   nodes: [
-    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x2bb8a3, name: 'Salt & Barrel' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0xc9962c, name: 'Anchorline Brewing' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0xb6493f, name: 'Tidewater Butchery' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x2bb8a3, name: 'Salt & Barrel', icon: 'restaurant' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0xc9962c, name: 'Anchorline Brewing', icon: 'beer' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0xb6493f, name: 'Tidewater Butchery', icon: 'knife' },
   ],
   edges: CLUSTER_TRIANGLE_EDGES,
   framingPoints: [CLUSTER_GAP_POSITION],
@@ -92,9 +94,9 @@ export const HARBOR_DISTRICT_GRAPH: GraphSceneConfig = {
 export const MERIDIAN_HEIGHTS_GRAPH: GraphSceneConfig = {
   cameraPosition: CLUSTER_CAMERA_POSITION,
   nodes: [
-    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x6f8fa8, name: 'Cinder & Slate' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x8a5a3b, name: 'Loft & Ladder' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0xb06bc9, name: 'Halcyon Records' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x6f8fa8, name: 'Cinder & Slate', icon: 'pan' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x8a5a3b, name: 'Loft & Ladder', icon: 'sofa' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0xb06bc9, name: 'Halcyon Records', icon: 'vinyl' },
   ],
   edges: CLUSTER_TRIANGLE_EDGES,
   framingPoints: [CLUSTER_GAP_POSITION],
@@ -103,9 +105,9 @@ export const MERIDIAN_HEIGHTS_GRAPH: GraphSceneConfig = {
 export const OLD_MILL_QUARTER_GRAPH: GraphSceneConfig = {
   cameraPosition: CLUSTER_CAMERA_POSITION,
   nodes: [
-    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0xc2703f, name: 'Millhouse Diner' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x5a8f6f, name: 'Birchwood Apothecary' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0x8a7a5a, name: 'Loft Nine Print & Copy' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0xc2703f, name: 'Millhouse Diner', icon: 'restaurant' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x5a8f6f, name: 'Birchwood Apothecary', icon: 'cross' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0x8a7a5a, name: 'Loft Nine Print & Copy', icon: 'printer' },
   ],
   edges: CLUSTER_TRIANGLE_EDGES,
   gaps: [
@@ -117,9 +119,9 @@ export const OLD_MILL_QUARTER_GRAPH: GraphSceneConfig = {
 export const SABLE_QUAY_GRAPH: GraphSceneConfig = {
   cameraPosition: CLUSTER_CAMERA_POSITION,
   nodes: [
-    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x3a8fa0, name: 'Quay & Anchor Seafood' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x9e8a5a, name: 'Driftwood Mercantile' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0x5a6f9e, name: 'Lantern Row Books' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x3a8fa0, name: 'Quay & Anchor Seafood', icon: 'fish' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x9e8a5a, name: 'Driftwood Mercantile', icon: 'cart' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0x5a6f9e, name: 'Lantern Row Books', icon: 'book' },
   ],
   edges: CLUSTER_TRIANGLE_EDGES,
   framingPoints: [CLUSTER_GAP_POSITION],
@@ -128,9 +130,9 @@ export const SABLE_QUAY_GRAPH: GraphSceneConfig = {
 export const FERRY_LANDING_GRAPH: GraphSceneConfig = {
   cameraPosition: CLUSTER_CAMERA_POSITION,
   nodes: [
-    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x6a8caf, name: 'Ferry Landing Dry Cleaners' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x8a6f4f, name: 'Cobblestone Shoe Repair' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0xb0784a, name: 'Platform Nine News & Coffee' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x6a8caf, name: 'Ferry Landing Dry Cleaners', icon: 'hanger' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x8a6f4f, name: 'Cobblestone Shoe Repair', icon: 'shoe' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0xb0784a, name: 'Platform Nine News & Coffee', icon: 'newspaper' },
   ],
   edges: CLUSTER_TRIANGLE_EDGES,
   gaps: [{ position: CLUSTER_GAP_POSITION, color: 0xc81e2e, connectedNodeIndexes: [0, 1, 2], label: 'No bakery' }],
@@ -139,9 +141,9 @@ export const FERRY_LANDING_GRAPH: GraphSceneConfig = {
 export const HOLLOW_CREEK_GRAPH: GraphSceneConfig = {
   cameraPosition: CLUSTER_CAMERA_POSITION,
   nodes: [
-    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x7fae7a, name: 'Hollow Creek Nursery School' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0xd97fa0, name: 'Tumble & Blocks Toy Co.' },
-    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0x6fa3c9, name: 'Creekside Pediatrics' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x7fae7a, name: 'Hollow Creek Nursery School', icon: 'star' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0xd97fa0, name: 'Tumble & Blocks Toy Co.', icon: 'blocks' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0x6fa3c9, name: 'Creekside Pediatrics', icon: 'heart' },
   ],
   edges: CLUSTER_TRIANGLE_EDGES,
   gaps: [

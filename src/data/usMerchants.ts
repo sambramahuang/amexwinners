@@ -89,6 +89,19 @@ const RAW: [string, string, string, string, string, number, number, boolean][] =
   ['Harbor Lane Bikes', 'Bike shop', 'Point Loma', 'San Diego', 'CA', 13, 0, false],
   ['Violet & Vale Salon', 'Hair studio', 'Buckhead', 'Atlanta', 'GA', 11, 1, true],
   ['Old Post Tailoring', 'Tailor', 'Rittenhouse', 'Philadelphia', 'PA', 8, 0, true],
+  // Every Gap Radar prospect below is one of these entries — a real, currently-growing,
+  // not-yet-on-Amex business, not an invented placeholder with a separate "real"
+  // company cross-referenced next to it. Same idea Cedar Recovery already modeled
+  // (further up this file): the prospect and the market-data entry are the same
+  // business, named identically, matched by NAME_MATCH_PROSPECT_ID in gapMatch.ts.
+  ['Juniper & Fern Gift Co.', 'Gift shop', 'Pilsen', 'Chicago', 'IL', 44, 1, false],
+  ['Marlowe Paper Goods', 'Stationery', 'Logan Square', 'Chicago', 'IL', 37, 0, false],
+  ['Sable & Stone Gifts', 'Home & gift', 'Ravenswood', 'Chicago', 'IL', 41, 1, false],
+  ['Whisker & Bramble Pet Co.', 'Pet supply', 'Highlands', 'Denver', 'CO', 53, 1, false],
+  ['Burrow Pet Supply', 'Pet supply', 'Baker', 'Denver', 'CO', 39, 0, false],
+  ['Proof & Crumb Bakery', 'Bakery', 'Williamsburg', 'Brooklyn', 'NY', 61, 2, false],
+  ['Millgate Bakehouse', 'Bakery', 'Greenpoint', 'Brooklyn', 'NY', 47, 1, false],
+  ["Acorn & Owl Books", "Children's bookstore", 'Sellwood', 'Portland', 'OR', 48, 0, false],
 ]
 
 export const US_MERCHANTS: UsMerchant[] = RAW.map(

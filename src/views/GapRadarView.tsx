@@ -1,9 +1,9 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import GraphCanvas from '../components/GraphCanvas'
+import ProspectAnalysisModal from '../components/ProspectAnalysisModal'
 import { INDUSTRY_CLUSTERS } from '../data/graphSceneConfigs'
 import { PROSPECT_TARGETS, type ProspectTarget } from '../data/graphEngineData'
 import { scoreProspect } from '../utils/prospectScore'
-import { findGrowingMatches } from '../utils/gapMatch'
 import './GapRadarView.css'
 
 interface GapRadarViewProps {
@@ -33,9 +33,10 @@ interface RecruitTableProps {
   clusterLabel: string
   prospects: { prospect: ProspectTarget; index: number }[]
   onGeneratePitch: (prospectIdx: number) => void
+  onShowAnalysis: (prospect: ProspectTarget) => void
 }
 
-function RecruitTable({ clusterLabel, prospects, onGeneratePitch }: RecruitTableProps) {
+function RecruitTable({ clusterLabel, prospects, onGeneratePitch, onShowAnalysis }: RecruitTableProps) {
   if (prospects.length === 0) {
     return (
       <div className="gaps-empty">
@@ -47,6 +48,14 @@ function RecruitTable({ clusterLabel, prospects, onGeneratePitch }: RecruitTable
   return (
     <div className="gaps-table-wrap">
       <table className="gaps-table">
+        <colgroup>
+          <col style={{ width: 150 }} />
+          <col style={{ width: 100 }} />
+          <col />
+          <col style={{ width: 90 }} />
+          <col style={{ width: 80 }} />
+          <col style={{ width: 290 }} />
+        </colgroup>
         <thead>
           <tr>
             <th>Prospect</th>
@@ -54,14 +63,11 @@ function RecruitTable({ clusterLabel, prospects, onGeneratePitch }: RecruitTable
             <th>Why this gap</th>
             <th>Waiting</th>
             <th>Amex fit</th>
-            <th>Growing match</th>
             <th />
           </tr>
         </thead>
         <tbody>
           {prospects.map(({ prospect, index }) => {
-            const growing = findGrowingMatches(prospect)
-            const best = growing[0]
             return (
               <tr key={prospect.id}>
                 <td>
@@ -72,26 +78,10 @@ function RecruitTable({ clusterLabel, prospects, onGeneratePitch }: RecruitTable
                 <td className="gaps-table-reasoning">{prospect.reasoning}</td>
                 <td>{prospect.waiting.length} merchants</td>
                 <td className="gaps-table-fit">{scoreProspect(prospect)}</td>
-                <td className="gaps-table-growing">
-                  {best ? (
-                    <div
-                      title={
-                        growing.length > 1
-                          ? `${growing.length} real businesses growing to match this gap`
-                          : undefined
-                      }
-                    >
-                      <span className="gaps-table-growing-pct">+{best.merchant.growthPct}%</span>{' '}
-                      <span className="gaps-table-growing-name">{best.merchant.name}</span>
-                      {growing.length > 1 && (
-                        <span className="gaps-table-growing-more"> +{growing.length - 1} more</span>
-                      )}
-                    </div>
-                  ) : (
-                    <span className="gaps-table-growing-empty">No live match yet</span>
-                  )}
-                </td>
                 <td className="gaps-table-action">
+                  <button className="gaps-analysis-btn" onClick={() => onShowAnalysis(prospect)}>
+                    Why acquire →
+                  </button>
                   <button className="gaps-generate-btn" onClick={() => onGeneratePitch(index)}>
                     Generate pitch →
                   </button>
@@ -107,6 +97,7 @@ function RecruitTable({ clusterLabel, prospects, onGeneratePitch }: RecruitTable
 
 export default function GapRadarView({ onGeneratePitch }: GapRadarViewProps) {
   const [industryIdx, setIndustryIdx] = useState(0)
+  const [analysisProspect, setAnalysisProspect] = useState<ProspectTarget | null>(null)
   const total = INDUSTRY_CLUSTERS.length
   const current = INDUSTRY_CLUSTERS[industryIdx]
 
@@ -212,6 +203,7 @@ export default function GapRadarView({ onGeneratePitch }: GapRadarViewProps) {
               clusterLabel={cluster.label}
               prospects={prospectsForCluster(cluster.label)}
               onGeneratePitch={() => {}}
+              onShowAnalysis={() => {}}
             />
           ))}
         </div>
@@ -222,8 +214,13 @@ export default function GapRadarView({ onGeneratePitch }: GapRadarViewProps) {
           clusterLabel={current.label}
           prospects={clusterProspects}
           onGeneratePitch={onGeneratePitch}
+          onShowAnalysis={setAnalysisProspect}
         />
       </div>
+
+      {analysisProspect && (
+        <ProspectAnalysisModal prospect={analysisProspect} onClose={() => setAnalysisProspect(null)} />
+      )}
     </main>
   )
 }
