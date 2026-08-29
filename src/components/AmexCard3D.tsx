@@ -9,13 +9,14 @@ import './AmexCard3D.css'
 const CARD_W = 3.4
 const CARD_H = CARD_W / 1.586
 const CARD_D = 0.038
-const CORNER = 0.13
+const CORNER = 0.2
 
-// Platinum: a brushed metal face, engraved dark rather than printed light.
-const PLATE_LIGHT = '#f2f3f5'
-const PLATE_MID = '#d8dbe0'
-const PLATE_DEEP = '#b9bec6'
-const ENGRAVE = '#2b3038'
+// Black: a near-black brushed metal face, engraved in a light silver ink
+// rather than dark on light.
+const PLATE_LIGHT = '#2c2e33'
+const PLATE_MID = '#17181b'
+const PLATE_DEEP = '#08090a'
+const ENGRAVE = '#d7dae0'
 
 interface AmexCard3DProps {
   /** Height of the canvas. Width always fills the container. */
@@ -55,7 +56,7 @@ function roundedFace(w: number, h: number, r: number) {
 /** Guilloche: the fine interference pattern engraved on financial documents. */
 function drawGuilloche(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.save()
-  ctx.strokeStyle = 'rgba(43, 48, 56, 0.30)'
+  ctx.strokeStyle = 'rgba(215, 218, 224, 0.30)'
   ctx.lineWidth = 1.1
   const cx = w * 0.62
   const cy = h * 0.5
@@ -78,7 +79,7 @@ function drawGuilloche(ctx: CanvasRenderingContext2D, w: number, h: number) {
 /** Hexagon lattice, echoing the backdrop used across the Connexion interface. */
 function drawHexes(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.save()
-  ctx.strokeStyle = 'rgba(43, 48, 56, 0.055)'
+  ctx.strokeStyle = 'rgba(215, 218, 224, 0.055)'
   ctx.lineWidth = 1.4
   const s = 58
   for (let row = 0; row * s * 1.5 < h + s; row += 1) {
@@ -132,7 +133,7 @@ function drawChip(ctx: CanvasRenderingContext2D, x: number, y: number, w: number
 function drawFrame(ctx: CanvasRenderingContext2D, W: number, H: number) {
   const m = 44
   ctx.save()
-  ctx.strokeStyle = 'rgba(43, 48, 56, 0.85)'
+  ctx.strokeStyle = 'rgba(215, 218, 224, 0.85)'
   ctx.lineWidth = 5
   ctx.strokeRect(m, m, W - m * 2, H - m * 2)
   ctx.lineWidth = 1.8
@@ -141,7 +142,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, W: number, H: number) {
   // Fine ticks between the rules, which is what gives an engraved border its
   // texture at a distance.
   ctx.lineWidth = 1
-  ctx.strokeStyle = 'rgba(43, 48, 56, 0.45)'
+  ctx.strokeStyle = 'rgba(215, 218, 224, 0.45)'
   for (let x = m + 16; x < W - m - 16; x += 9) {
     ctx.beginPath()
     ctx.moveTo(x, m + 4)
@@ -170,7 +171,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, W: number, H: number) {
 function drawMedallion(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
   ctx.save()
   ctx.translate(cx, cy)
-  ctx.strokeStyle = 'rgba(43, 48, 56, 0.88)'
+  ctx.strokeStyle = 'rgba(215, 218, 224, 0.88)'
 
   ctx.lineWidth = 3
   ctx.beginPath()
@@ -184,7 +185,7 @@ function drawMedallion(ctx: CanvasRenderingContext2D, cx: number, cy: number, r:
 
   // Radiating engine-turned lines inside the ring.
   ctx.lineWidth = 0.9
-  ctx.strokeStyle = 'rgba(43, 48, 56, 0.38)'
+  ctx.strokeStyle = 'rgba(215, 218, 224, 0.38)'
   for (let i = 0; i < 96; i += 1) {
     const a = (i / 96) * Math.PI * 2
     ctx.beginPath()
@@ -196,7 +197,7 @@ function drawMedallion(ctx: CanvasRenderingContext2D, cx: number, cy: number, r:
   // The mark itself: two laurel branches climbing from a shared stem,
   // open at the top for the star. Sized to read as leaves rather than a
   // dotted ring once the medallion is scaled down onto the card.
-  ctx.fillStyle = 'rgba(43, 48, 56, 0.85)'
+  ctx.fillStyle = 'rgba(215, 218, 224, 0.85)'
   const leaves = 6
   const startDeg = 88
   const endDeg = -58
@@ -221,7 +222,7 @@ function drawMedallion(ctx: CanvasRenderingContext2D, cx: number, cy: number, r:
   }
 
   // Stem tying both branches to a shared base.
-  ctx.strokeStyle = 'rgba(43, 48, 56, 0.85)'
+  ctx.strokeStyle = 'rgba(215, 218, 224, 0.85)'
   ctx.lineWidth = 6
   ctx.beginPath()
   ctx.moveTo(0, r * 0.3)
@@ -247,14 +248,70 @@ function drawMedallion(ctx: CanvasRenderingContext2D, cx: number, cy: number, r:
   ctx.restore()
 }
 
+/**
+ * The supplied crest is a flat RGB export with a plain white square behind
+ * the badge, not a transparent PNG. Flood-fills from the four corners over
+ * near-white pixels so only the connected background is cut out; the
+ * badge's own white line art (the helmet, the wordmark) is enclosed by blue
+ * and never touches the edge, so it survives untouched.
+ */
+function stripWhiteBackground(img: HTMLImageElement): HTMLCanvasElement {
+  const w = img.naturalWidth
+  const h = img.naturalHeight
+  const c = document.createElement('canvas')
+  c.width = w
+  c.height = h
+  const ctx = c.getContext('2d')!
+  ctx.drawImage(img, 0, 0)
+
+  const imageData = ctx.getImageData(0, 0, w, h)
+  const d = imageData.data
+  // The export's "background" is actually two very close shades (a checker
+  // pattern invisible on a light page, stark once composited onto black),
+  // so the threshold has to clear both rather than just pure white.
+  const isBg = (px: number) => d[px] > 225 && d[px + 1] > 225 && d[px + 2] > 225
+  const visited = new Uint8Array(w * h)
+  const queue: number[] = []
+
+  function seed(x: number, y: number) {
+    const idx = y * w + x
+    if (!visited[idx] && isBg(idx * 4)) {
+      visited[idx] = 1
+      queue.push(idx)
+    }
+  }
+  for (let x = 0; x < w; x += 1) {
+    seed(x, 0)
+    seed(x, h - 1)
+  }
+  for (let y = 0; y < h; y += 1) {
+    seed(0, y)
+    seed(w - 1, y)
+  }
+
+  while (queue.length) {
+    const idx = queue.pop()!
+    const x = idx % w
+    const y = (idx / w) | 0
+    d[idx * 4 + 3] = 0
+    if (x > 0) seed(x - 1, y)
+    if (x < w - 1) seed(x + 1, y)
+    if (y > 0) seed(x, y - 1)
+    if (y < h - 1) seed(x, y + 1)
+  }
+
+  ctx.putImageData(imageData, 0, 0)
+  return c
+}
+
 // Loaded once and cached module-wide: every card instance shares the same
-// crest rather than re-fetching it.
-let crestPromise: Promise<HTMLImageElement | null> | null = null
-function loadCrest(): Promise<HTMLImageElement | null> {
+// crest rather than re-fetching or re-processing it.
+let crestPromise: Promise<HTMLCanvasElement | null> | null = null
+function loadCrest(): Promise<HTMLCanvasElement | null> {
   if (!crestPromise) {
     crestPromise = new Promise((resolve) => {
       const img = new Image()
-      img.onload = () => resolve(img)
+      img.onload = () => resolve(stripWhiteBackground(img))
       img.onerror = () => resolve(null) // fall back to the drawn medallion rather than break the card
       img.src = amexCrestSrc
     })
@@ -262,7 +319,7 @@ function loadCrest(): Promise<HTMLImageElement | null> {
   return crestPromise
 }
 
-function frontTexture(holder: string, crest: HTMLImageElement | null) {
+function frontTexture(holder: string, crest: HTMLCanvasElement | null) {
   const W = 2048
   const H = Math.round(W / 1.586)
   const c = document.createElement('canvas')
@@ -315,7 +372,7 @@ function frontTexture(holder: string, crest: HTMLImageElement | null) {
 
   ctx.font = '500 46px Futura, "Futura PT", Jost, system-ui, sans-serif'
   ctx.letterSpacing = '26px'
-  ctx.fillStyle = 'rgba(43, 48, 56, 0.82)'
+  ctx.fillStyle = 'rgba(215, 218, 224, 0.82)'
   ctx.fillText('CONNEXION', W / 2 + 13, 268)
   ctx.letterSpacing = '0px'
   ctx.textAlign = 'left'
@@ -323,7 +380,7 @@ function frontTexture(holder: string, crest: HTMLImageElement | null) {
   drawChip(ctx, 150, H * 0.43, 250, 192)
 
   // Member since, set small to the right of the medallion.
-  ctx.fillStyle = 'rgba(43, 48, 56, 0.72)'
+  ctx.fillStyle = 'rgba(215, 218, 224, 0.72)'
   ctx.font = '500 24px Futura, "Futura PT", Jost, system-ui, sans-serif'
   ctx.letterSpacing = '3px'
   ctx.fillText('MEMBER SINCE', W * 0.72, H * 0.44)
@@ -331,21 +388,22 @@ function frontTexture(holder: string, crest: HTMLImageElement | null) {
   ctx.fillText('26', W * 0.72, H * 0.52)
   ctx.letterSpacing = '0px'
 
-  // Embossed digits: a light underprint and a dark face, so they sit proud.
+  // Embossed digits: a dark underprint and a light face, so they sit proud
+  // against the black plate (the reverse pairing of ink-on-light).
   ctx.font = '500 72px "IBM Plex Mono", ui-monospace, monospace'
   ctx.letterSpacing = '9px'
   const digits = '3782  822463  10005'
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.75)'
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
   ctx.fillText(digits, 150, H * 0.79 - 3)
-  ctx.fillStyle = 'rgba(43, 48, 56, 0.9)'
+  ctx.fillStyle = 'rgba(215, 218, 224, 0.9)'
   ctx.fillText(digits, 152, H * 0.79)
   ctx.letterSpacing = '0px'
 
   ctx.font = '600 40px Futura, "Futura PT", Jost, system-ui, sans-serif'
   ctx.letterSpacing = '5px'
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.55)'
   ctx.fillText(holder.toUpperCase(), 150, H * 0.925 - 2)
-  ctx.fillStyle = 'rgba(43, 48, 56, 0.88)'
+  ctx.fillStyle = 'rgba(215, 218, 224, 0.88)'
   ctx.fillText(holder.toUpperCase(), 152, H * 0.925)
   ctx.letterSpacing = '0px'
 
@@ -386,7 +444,7 @@ function backTexture() {
   ctx.font = '500 44px "IBM Plex Mono", ui-monospace, monospace'
   ctx.fillText('4021', W * 0.752, H * 0.545)
 
-  ctx.fillStyle = 'rgba(43,48,56,0.5)'
+  ctx.fillStyle = 'rgba(215,218,224,0.5)'
   ctx.font = '400 24px Futura, "Futura PT", Jost, system-ui, sans-serif'
   ctx.fillText('Concept prototype. Not a payment instrument.', W * 0.08, H * 0.74)
   ctx.fillText('Synthetic demo asset, AMEX AI Innovation Hackathon 2026.', W * 0.08, H * 0.79)
@@ -468,7 +526,7 @@ export default function AmexCard3D({
 
     const bodyGeo = new RoundedBoxGeometry(CARD_W, CARD_H, CARD_D, 6, CORNER)
     const bodyMat = new THREE.MeshPhysicalMaterial({
-      color: 0xd3d7dd,
+      color: 0x1c1d20,
       metalness: 1,
       roughness: 0.13,
       clearcoat: 1,
