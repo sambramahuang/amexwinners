@@ -20,6 +20,8 @@ export type Role = 'amex' | 'sme'
 const VIEWS: View[] = ['growth', 'overview', 'graph', 'match', 'gaps', 'pitch', 'standing']
 const ROLE_KEY = 'connexion.role.v1'
 
+const SME_VIEWS: View[] = ['standing', 'match']
+
 const NAV_ITEMS_BY_ROLE: Record<Role, { id: View; label: string }[]> = {
   amex: [
     { id: 'growth', label: 'Growth Radar' },
@@ -100,19 +102,9 @@ export default function App() {
     setView(nextView)
   }
 
-  if (!role) {
-    return (
-      <div className="app-shell">
-        <HexagonBackground className="app-hexagon-backdrop" hexagonSize={55} />
-        <RoleSelectView onSelect={chooseRole} />
-      </div>
-    )
-  }
-
-  const SME_VIEWS: View[] = ['standing', 'match']
   // Matching is the merchant's screen, so an admin landing on #match is sent
   // back to their own landing page rather than shown a queue that is not theirs.
-  const effectiveView =
+  const effectiveView: View =
     role === 'sme'
       ? SME_VIEWS.includes(view)
         ? view
@@ -121,10 +113,21 @@ export default function App() {
         ? 'growth'
         : view
 
-  // A redirected view should not leave a stale hash behind it.
+  // A redirected view should not leave a stale hash behind it. This has to sit
+  // above the early return below: a hook after it would change the hook count
+  // the moment a role is chosen, which React treats as a torn tree.
   useEffect(() => {
-    if (effectiveView !== view) setView(effectiveView)
+    if (role && effectiveView !== view) setView(effectiveView)
   })
+
+  if (!role) {
+    return (
+      <div className="app-shell">
+        <HexagonBackground className="app-hexagon-backdrop" hexagonSize={55} />
+        <RoleSelectView onSelect={chooseRole} />
+      </div>
+    )
+  }
 
   return (
     <div className="app-shell">
