@@ -765,42 +765,81 @@
   font-weight: 500;
 }
 
-/* One sentence on what the number is, on hover. Below the block rather than
-   above it, so it never covers the merchant's name. */
+/* One line on what the number is, on hover. Set beside the dial rather than
+   over the card, so it never covers the merchant or the evidence. */
 .score-tip {
   position: absolute;
-  top: calc(100% - 8px);
-  left: 50%;
-  width: min(300px, 88%);
-  transform: translate(-50%, -6px);
+  top: 50%;
+  right: calc(100% + 26px);
+  width: 208px;
+  transform: translate(6px, -50%);
   z-index: 5;
-  padding: 11px 14px;
-  background: var(--text);
-  color: rgba(255, 255, 255, 0.92);
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-75);
   font-size: 12.5px;
   line-height: 1.5;
   text-align: left;
-  box-shadow: 0 18px 34px -20px rgba(11, 28, 51, 0.9);
+  box-shadow: 0 14px 30px -18px rgba(11, 28, 51, 0.45);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
   transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
 }
 
+/* Arrow back to the dial, drawn as two triangles so the hairline border
+   carries through it. */
+.score-tip::before,
 .score-tip::after {
   content: '';
   position: absolute;
-  bottom: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border: 5px solid transparent;
-  border-bottom-color: var(--text);
+  top: 50%;
+  left: 100%;
+  border: 7px solid transparent;
+  border-left-color: var(--border);
+  transform: translateY(-50%);
+}
+
+.score-tip::after {
+  border-left-color: var(--bg);
+  margin-left: -1px;
 }
 
 .swipe-card-score:hover .score-tip {
   opacity: 1;
   visibility: visible;
-  transform: translate(-50%, 0);
+  transform: translate(0, -50%);
+}
+
+/* No room beside the card on a narrow screen, so it drops underneath. */
+@media (max-width: 1080px) {
+  .score-tip {
+    top: calc(100% - 8px);
+    right: auto;
+    left: 50%;
+    width: min(280px, 86%);
+    transform: translate(-50%, -6px);
+  }
+
+  .score-tip::before,
+  .score-tip::after {
+    top: auto;
+    bottom: 100%;
+    left: 50%;
+    margin-left: -7px;
+    border-left-color: transparent;
+    border-bottom-color: var(--border);
+  }
+
+  .score-tip::after {
+    border-bottom-color: var(--bg);
+    margin-bottom: -1px;
+  }
+
+  .swipe-card-score:hover .score-tip {
+    transform: translate(-50%, 0);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

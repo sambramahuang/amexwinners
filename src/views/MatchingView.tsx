@@ -398,10 +398,8 @@ export default function MatchingView() {
                     <div className="score-dial-note">Match score out of 100</div>
 
                     <div className="score-tip" role="note">
-                      Calculated from customer profile, industry overlap,
-                      business value and openness to collaborate, weighted 35,
-                      25, 25 and 15 percent, all read from card transactions
-                      American Express already processes.
+                      The match score is subject to overlap, industry, value and
+                      openness.
                     </div>
                   </div>
 
