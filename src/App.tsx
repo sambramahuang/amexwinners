@@ -140,7 +140,9 @@ export default function App() {
         onSwitchRole={switchRole}
       />
 
-      {role === 'amex' && effectiveView === 'growth' && <GrowthRadarView onNavigate={setView} />}
+      {role === 'amex' && effectiveView === 'growth' && (
+        <GrowthRadarView onNavigate={setView} onGeneratePitch={(idx) => generatePitch(idx, 'pitch')} />
+      )}
       {role === 'sme' && effectiveView === 'standing' && (
         <StandingView onNavigate={setView} />
       )}
