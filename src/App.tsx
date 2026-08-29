@@ -25,7 +25,6 @@ const NAV_ITEMS_BY_ROLE: Record<Role, { id: View; label: string }[]> = {
     { id: 'growth', label: 'Growth Radar' },
     { id: 'overview', label: 'Overview' },
     { id: 'graph', label: 'Graph' },
-    { id: 'match', label: 'Matching' },
     { id: 'gaps', label: 'Gap Radar' },
     { id: 'pitch', label: 'Recruit Pitch' },
   ],
@@ -111,8 +110,21 @@ export default function App() {
   }
 
   const SME_VIEWS: View[] = ['standing', 'match']
+  // Matching is the merchant's screen, so an admin landing on #match is sent
+  // back to their own landing page rather than shown a queue that is not theirs.
   const effectiveView =
-    role === 'sme' && !SME_VIEWS.includes(view) ? 'standing' : view
+    role === 'sme'
+      ? SME_VIEWS.includes(view)
+        ? view
+        : 'standing'
+      : view === 'match'
+        ? 'growth'
+        : view
+
+  // A redirected view should not leave a stale hash behind it.
+  useEffect(() => {
+    if (effectiveView !== view) setView(effectiveView)
+  })
 
   return (
     <div className="app-shell">
@@ -135,7 +147,7 @@ export default function App() {
           <GraphView />
         </Suspense>
       )}
-      {effectiveView === 'match' && <MatchingView role={role} />}
+      {role === 'sme' && effectiveView === 'match' && <MatchingView />}
       {role === 'amex' && view === 'gaps' && (
         <Suspense fallback={null}>
           <GapRadarView onGeneratePitch={generatePitch} />

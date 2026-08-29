@@ -6,7 +6,6 @@ import {
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
 } from 'react'
-import type { Role } from '../App'
 import {
   GOAL_LABELS,
   MATCH_CANDIDATES,
@@ -57,11 +56,7 @@ function clearConsent() {
 type SwipeDirection = 'left' | 'right'
 export type RankedCandidate = MatchCandidate
 
-interface MatchingViewProps {
-  role: Role
-}
-
-export default function MatchingView({ role }: MatchingViewProps) {
+export default function MatchingView() {
   const [qIndex, setQIndex] = useState(0)
   const [dragging, setDragging] = useState(false)
   const [start, setStart] = useState({ x: 0, y: 0 })
@@ -537,7 +532,6 @@ export default function MatchingView({ role }: MatchingViewProps) {
           mode="match"
           /* The card promises identity is revealed once you match, so this is
              the moment it is. The preview below stays anonymous. */
-          smeVoice={role === 'sme'}
           onClose={() => setModalCard(null)}
         />
       )}

@@ -1,6 +1,5 @@
 import {
   AMEX_REP,
-  TIER_LABELS,
   type MatchCandidate,
   type MerchantContact,
   type ProspectTarget,
@@ -15,7 +14,6 @@ export interface OutreachEmail {
   body: string
 }
 
-const ANCHOR = 'Basin Coffee Roasters'
 
 const signature = [
   '',
@@ -24,42 +22,6 @@ const signature = [
   AMEX_REP.role,
   `${AMEX_REP.email} · ${AMEX_REP.phone}`,
 ].join('\n')
-
-/**
- * The introduction sent once both merchants have matched.
- *
- * Written as a relationship manager would write it: one specific reason for
- * the email, the numbers behind it, a concrete first step, and a single easy
- * next action. No pitch, no adjectives, nothing the recipient has to decode.
- */
-export function buildMatchIntroEmail(candidate: MatchCandidate): OutreachEmail {
-  const symmetryGap = Math.abs(candidate.upliftYou - candidate.upliftThem)
-  const tier = TIER_LABELS[candidate.tier].split('·')[1]?.trim() ?? 'Linked Offer'
-
-  const body = [
-    `Hi ${candidate.contact.name.split(' ')[0]},`,
-    '',
-    `I look after merchant partnerships at American Express. I am writing with something specific rather than a general introduction.`,
-    '',
-    `Our merchant graph paired ${candidate.name} with ${ANCHOR} this week, and both of you accepted. The pairing came out of your own card data rather than a category guess: ${candidate.sequential.charAt(0).toLowerCase()}${candidate.sequential.slice(1)}`,
-    '',
-    `Projected uplift sits at ${candidate.upliftThem}% for you and ${candidate.upliftYou}% for ${ANCHOR}. That is ${symmetryGap} points apart, which matters more than the headline: a partnership where the value runs one way tends not to survive the first quarter, so we flag the gap before either side commits.`,
-    '',
-    `Where we would start, as a ${tier.toLowerCase()}: ${candidate.terms.charAt(0).toLowerCase()}${candidate.terms.slice(1)}`,
-    '',
-    `Nothing to sign, and no cost to either business. If it is worth exploring, I can set up fifteen minutes with both of you this week and handle the mechanics from there.`,
-    signature,
-  ].join('\n')
-
-  return {
-    fromName: AMEX_REP.name,
-    fromRole: AMEX_REP.role,
-    fromEmail: AMEX_REP.email,
-    to: candidate.contact,
-    subject: `${ANCHOR} and ${candidate.name}: a partnership worth fifteen minutes`,
-    body,
-  }
-}
 
 /**
  * The recruitment email, sent to a merchant who is not on Amex yet.

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { TIER_LABELS, type MatchCandidate } from '../data/graphEngineData'
 import EmailComposer from './EmailComposer'
-import { buildMatchIntroEmail, buildMerchantIntroEmail } from '../utils/outreachEmails'
+import { buildMerchantIntroEmail } from '../utils/outreachEmails'
 import { scoreMatch } from '../utils/matchScore'
 import CornerBrackets from './CornerBrackets'
 import { BenefitBarChart, UpliftTrendChart } from './BenefitCharts'
@@ -12,15 +12,12 @@ interface MatchModalProps {
   candidate: MatchCandidate
   onClose: () => void
   mode?: 'match' | 'preview'
-  /** SME view: the introduction is written by the merchant, not by Amex. */
-  smeVoice?: boolean
 }
 
 export default function MatchModal({
   candidate,
   onClose,
   mode = 'match',
-  smeVoice = false,
 }: MatchModalProps) {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -120,9 +117,7 @@ export default function MatchModal({
           <div className="match-modal-outreach">
             {compose ? (
               <EmailComposer
-                email={
-                  smeVoice ? buildMerchantIntroEmail(candidate) : buildMatchIntroEmail(candidate)
-                }
+                email={buildMerchantIntroEmail(candidate)}
                 sendLabel={`Send to ${candidate.contact.name.split(' ')[0]}`}
                 sentLabel="Sent"
               />
@@ -132,7 +127,7 @@ export default function MatchModal({
                   <rect x="2" y="4" width="20" height="16" rx="2" />
                   <path d="m2 7 10 6 10-6" />
                 </svg>
-                {smeVoice ? 'Write to them' : 'Write the introduction'}
+                Write to them
               </button>
             )}
           </div>

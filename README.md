@@ -28,7 +28,6 @@ graph.
 | **Growth Radar** | The fastest growing small businesses in the region, ranked on 12 month card volume across 50 merchants in 28 US cities. Some are not on Amex, which is the point: the radar sees a business before it is a customer, so the same screen is a portfolio view and an acquisition list. |
 | **Overview** | The graph model, and the way into the three prongs. |
 | **Graph** | The full merchant graph as a three.js scene that builds itself in and rotates. Node colour is industry, dashed edges are weak cross cluster signal, a gold line marks a Tier 3 structural relationship, and red wireframe markers are structural gaps. |
-| **Matching** | The matching queue as the merchant sees it. |
 | **Gap Radar** | Clusters with strong mutual overlap but a missing category, plus who to recruit to fill each one. |
 | **Recruit Pitch** | The pitch a not yet Amex business is shown, and a recruitment email that can be dispatched to a selected list of prospects. |
 
@@ -67,10 +66,10 @@ dialog open, contact details move, and the introduction email unlock. Requests
 is a second tab splitting matches from likes still waiting.
 
 **Connexion writes the first message.** After a mutual match, one button drafts
-the introduction: for the SME, in their own voice, opening with who they are and
-what they run; for the Amex admin, as a relationship manager. On the recruit
-side the same mechanism dispatches a per prospect email built from that
-prospect's own cluster evidence. Sending is simulated and says so, and every
+the introduction in the merchant's own voice, opening with who they are and what
+they run. On the recruit side the same mechanism dispatches a per prospect email
+from an American Express relationship manager, built from that prospect's own
+cluster evidence. Sending is simulated and says so, and every
 address uses the reserved .example domain.
 
 ## Running it
