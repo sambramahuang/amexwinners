@@ -812,8 +812,9 @@
   transform: translate(0, -50%);
 }
 
-/* No room beside the card on a narrow screen, so it drops underneath. */
-@media (max-width: 1080px) {
+/* Only once the sidebar has stacked and there is truly no room beside the
+   card does the note drop underneath it. */
+@media (max-width: 760px) {
   .score-tip {
     top: calc(100% - 8px);
     left: 50%;
