@@ -10,11 +10,12 @@ const CARD_H = CARD_W / 1.586
 const CARD_D = 0.038
 const CORNER = 0.26
 
-// Black: a near-black brushed metal face, engraved in a light silver ink
-// rather than dark on light.
-const PLATE_LIGHT = '#2c2e33'
-const PLATE_MID = '#17181b'
-const PLATE_DEEP = '#08090a'
+// A gunmetal black rather than a near-void one: enough tonal range for the
+// brushed diagonal sheen and the engraved detail to still read at the small
+// size the card actually renders at, not just zoomed in for review.
+const PLATE_LIGHT = '#43464d'
+const PLATE_MID = '#2a2c31'
+const PLATE_DEEP = '#1a1c20'
 const ENGRAVE = '#d7dae0'
 
 interface AmexCard3DProps {
@@ -81,7 +82,16 @@ function roundedBody(w: number, h: number, totalDepth: number, r: number) {
     bevelSegments: 3,
     curveSegments: 22,
   })
-  geo.translate(0, 0, -totalDepth / 2)
+  // The bevel straddles z=0 (extending bevelThickness behind it, before the
+  // straight section even starts) rather than sitting entirely in front of
+  // it, so the unrotated shape is centred on straightDepth / 2, not
+  // totalDepth / 2. Centering on the latter left the body's front cap
+  // 0.0095 units further forward than intended, past the face plane -
+  // invisible head-on where depth-testing still favoured the face, but
+  // occluding it at exactly the angles where a thin, near-mirror surface
+  // was already hardest to read, which is what made this so easy to
+  // mistake for a lighting or angle-dependent effect.
+  geo.translate(0, 0, -straightDepth / 2)
   return geo
 }
 
@@ -408,7 +418,7 @@ function frontTexture(holder: string, crest: HTMLCanvasElement | null) {
   g.addColorStop(0.22, PLATE_MID)
   g.addColorStop(0.44, PLATE_LIGHT)
   g.addColorStop(0.68, PLATE_MID)
-  g.addColorStop(1, '#a8aeb7')
+  g.addColorStop(1, '#34363c')
   ctx.fillStyle = g
   ctx.fillRect(0, 0, W, H)
 
@@ -589,7 +599,11 @@ function mountCard(container: HTMLDivElement, holder: string, rpm: number) {
   container.appendChild(renderer.domElement)
 
   const scene = new THREE.Scene()
-  const camera = new THREE.PerspectiveCamera(32, w / h, 0.1, 100)
+  // A near/far range no wider than the scene actually needs: 0.1-100 was
+  // wasting depth-buffer precision on empty space, when everything here
+  // sits within a few units of the camera and the face plane and the
+  // body's cap behind it are fractions of a unit apart.
+  const camera = new THREE.PerspectiveCamera(32, w / h, 1, 15)
   camera.position.set(0, 0.32, 6.4)
   camera.lookAt(0, 0, 0)
 
@@ -619,10 +633,10 @@ function mountCard(container: HTMLDivElement, holder: string, rpm: number) {
   const bodyMat = new THREE.MeshPhysicalMaterial({
     color: 0x1c1d20,
     metalness: 1,
-    roughness: 0.13,
-    clearcoat: 1,
-    clearcoatRoughness: 0.08,
-    envMapIntensity: 2.9,
+    roughness: 0.32,
+    clearcoat: 0.6,
+    clearcoatRoughness: 0.2,
+    envMapIntensity: 1.3,
   })
   card.add(new THREE.Mesh(bodyGeo, bodyMat))
 
@@ -630,28 +644,36 @@ function mountCard(container: HTMLDivElement, holder: string, rpm: number) {
   let frontTex = frontTexture(holder, null)
   const backTex = backTexture()
 
+  // Toned down from a near-mirror finish: the fixed-position lights (not
+  // attached to the card) mean any rotation sweeps the reflective plate
+  // through some angle that catches a harsh, glare-bright reflection off
+  // one of them, and at high metalness/low roughness/high envMapIntensity
+  // that reflection was strong enough to fully overpower the printed
+  // texture rather than just adding sheen on top of it. Still metallic,
+  // just not so close to a literal mirror that legibility depends on
+  // catching the lights just right.
   const frontMat = new THREE.MeshPhysicalMaterial({
     map: frontTex,
-    metalness: 0.86,
-    roughness: 0.19,
-    clearcoat: 1,
-    clearcoatRoughness: 0.05,
-    envMapIntensity: 2.1,
+    metalness: 0.7,
+    roughness: 0.38,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.25,
+    envMapIntensity: 1.0,
   })
   const front = new THREE.Mesh(faceGeo, frontMat)
-  front.position.z = CARD_D / 2 + 0.0012
+  front.position.z = CARD_D / 2 + 0.008
   card.add(front)
 
   const backMat = new THREE.MeshPhysicalMaterial({
     map: backTex,
-    metalness: 0.8,
-    roughness: 0.26,
-    clearcoat: 0.85,
-    clearcoatRoughness: 0.15,
-    envMapIntensity: 1.8,
+    metalness: 0.65,
+    roughness: 0.42,
+    clearcoat: 0.45,
+    clearcoatRoughness: 0.3,
+    envMapIntensity: 0.9,
   })
   const back = new THREE.Mesh(faceGeo, backMat)
-  back.position.z = -CARD_D / 2 - 0.0012
+  back.position.z = -CARD_D / 2 - 0.008
   back.rotation.y = Math.PI
   card.add(back)
 
@@ -733,7 +755,11 @@ function mountCard(container: HTMLDivElement, holder: string, rpm: number) {
 
   function animate() {
     if (disposed) return
-    const dt = clock.getDelta()
+    // Clamped: a stall (a slow frame, a backgrounded tab, the main thread
+    // blocked processing the crest image) would otherwise show up here as
+    // one huge delta, and since rotation.y is an unbounded integrator, a
+    // single big dt spins the card to an arbitrary angle in one frame.
+    const dt = Math.min(clock.getDelta(), 1 / 30)
     const t = clock.getElapsedTime()
 
     if (dragging) {
