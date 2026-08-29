@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import CornerBrackets from './CornerBrackets'
+import TermsModal from './TermsModal'
 import './ConsentGate.css'
 
 interface ConsentGateProps {
@@ -62,6 +63,11 @@ export default function ConsentGate({
   // normally reads. The terms stay enumerated so nobody can claim they were
   // buried in a paragraph.
   const [agreed, setAgreed] = useState(Boolean(grantedOn))
+  // Separate from the three data-sharing terms above: this is the general
+  // terms-of-service agreement, kept as its own tick so it isn't implied by
+  // agreeing to the data clauses.
+  const [termsAgreed, setTermsAgreed] = useState(Boolean(grantedOn))
+  const [showTerms, setShowTerms] = useState(false)
 
   return (
     <div className="consent-gate">
@@ -116,6 +122,28 @@ export default function ConsentGate({
         </span>
       </label>
 
+      <label className={`consent-agree ${termsAgreed ? 'is-agreed' : ''}`}>
+        <input
+          type="checkbox"
+          checked={termsAgreed}
+          onChange={(e) => setTermsAgreed(e.target.checked)}
+        />
+        <span>
+          I agree to the{' '}
+          <button
+            type="button"
+            className="consent-terms-link"
+            onClick={(e) => {
+              e.preventDefault()
+              setShowTerms(true)
+            }}
+          >
+            terms and conditions
+          </button>
+          .
+        </span>
+      </label>
+
       <div className="consent-actions">
         {grantedOn ? (
           <>
@@ -132,17 +160,23 @@ export default function ConsentGate({
           </>
         ) : (
           <>
-            <button className="btn btn-primary" disabled={!agreed} onClick={onAccept}>
+            <button
+              className="btn btn-primary"
+              disabled={!agreed || !termsAgreed}
+              onClick={onAccept}
+            >
               Agree and start matching
             </button>
             <span className="consent-footnote">
-              {agreed
+              {agreed && termsAgreed
                 ? "Consent is per merchant and revocable. No data leaves American Express's closed loop."
-                : 'Tick the box above to take part in matching.'}
+                : 'Tick both boxes above to take part in matching.'}
             </span>
           </>
         )}
       </div>
+
+      {showTerms && <TermsModal onClose={() => setShowTerms(false)} />}
     </div>
   )
 }

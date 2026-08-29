@@ -1,0 +1,104 @@
+.terms-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(11, 28, 51, 0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 500;
+  animation: fadeIn 0.2s ease both;
+}
+
+.terms-modal {
+  position: relative;
+  width: min(620px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 32px;
+  box-shadow: 0 24px 60px rgba(11, 28, 51, 0.22);
+  animation: popIn 0.25s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.terms-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-panel);
+  color: var(--text-70);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.terms-modal-close:hover {
+  background: var(--border-soft);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.terms-modal-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 6px;
+  padding-right: 30px;
+}
+
+.terms-modal-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 24px;
+  margin: 0 0 6px;
+}
+
+.terms-modal-note {
+  margin: 0 0 20px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-55);
+}
+
+.terms-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-soft);
+}
+
+.terms-modal-section h3 {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.terms-modal-section p {
+  margin: 0 0 8px;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-70);
+}
+
+.terms-modal-section p:last-child {
+  margin-bottom: 0;
+}
+
+.terms-modal-done {
+  margin-top: 24px;
+  width: 100%;
+}

@@ -188,6 +188,22 @@
   cursor: pointer;
 }
 
+.consent-terms-link {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.consent-terms-link:hover {
+  color: var(--accent-active);
+}
+
 .consent-actions {
   display: flex;
   align-items: center;
