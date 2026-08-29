@@ -574,15 +574,23 @@
   font-size: 38px;
   font-weight: 700;
   line-height: 1;
-  color: var(--accent);
+  color: currentColor;
   font-variant-numeric: tabular-nums;
 }
+
+/* The dial and the number take the tone; everything else stays neutral. */
+.swipe-card-score.is-good { color: #12857a; }
+.swipe-card-score.is-fair { color: var(--accent); }
+.swipe-card-score.is-weak { color: var(--gold); }
+
+.swipe-card-score.is-good .score-dial-band { color: #0f6f66; }
 
 .score-dial-band {
   margin-top: 12px;
   font-family: var(--font-display);
   font-size: 17px;
   font-weight: 600;
+  color: var(--text);
 }
 
 .score-dial-note {

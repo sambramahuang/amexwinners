@@ -114,20 +114,9 @@ export default function MatchModal({
         </div>
 
         <div className="match-modal-actions">
-          {mode === 'preview' ? (
-            <button className="btn btn-primary" onClick={onClose}>
-              Close
-            </button>
-          ) : (
-            <>
-              <button className="btn btn-ghost" onClick={onClose}>
-                Keep reviewing
-              </button>
-              <button className="btn btn-primary" onClick={onClose}>
-                Add to pipeline
-              </button>
-            </>
-          )}
+          <button className="btn btn-ghost" onClick={onClose}>
+            Close
+          </button>
         </div>
       </div>
     </div>,

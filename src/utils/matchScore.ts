@@ -98,3 +98,13 @@ export function scoreBand(total: number): string {
   if (total >= 50) return 'Worth a look'
   return 'Weak match'
 }
+
+/**
+ * Green once the match is worth acting on, blue while it is only worth a
+ * look. Colour carries the verdict so the number does not have to be read.
+ */
+export function scoreTone(total: number): 'good' | 'fair' | 'weak' {
+  if (total >= 65) return 'good'
+  if (total >= 50) return 'fair'
+  return 'weak'
+}

@@ -11,7 +11,7 @@ import { MATCH_CANDIDATES, type MatchCandidate } from '../data/graphEngineData'
 import CornerBrackets from '../components/CornerBrackets'
 import MatchModal from '../components/MatchModal'
 import MerchantMark from '../components/MerchantMark'
-import { scoreBand, scoreMatch } from '../utils/matchScore'
+import { scoreBand, scoreMatch, scoreTone } from '../utils/matchScore'
 import ConsentGate from '../components/ConsentGate'
 import './MatchingView.css'
 
@@ -95,12 +95,15 @@ export default function MatchingView({ role }: MatchingViewProps) {
   const matchDone = qIndex >= total
 
   useEffect(() => {
+    let seen = true
     try {
-      hintSeen.current = localStorage.getItem(SWIPE_HINT_KEY) === '1'
+      seen = localStorage.getItem(SWIPE_HINT_KEY) === '1'
     } catch {
-      hintSeen.current = true
+      seen = true
     }
-  }, [])
+    hintSeen.current = seen
+    if (!seen && consented) setShowSwipeHint(true)
+  }, [consented])
 
   useEffect(() => {
     const el = cardRef.current
@@ -135,9 +138,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
   }
 
   function onDown(e: ReactPointerEvent<HTMLDivElement>) {
-    // Shown the first time a merchant puts a finger on the card, which is the
-    // moment they need it, rather than as a modal before they have seen one.
-    if (!hintSeen.current) setShowSwipeHint(true)
+    if (showSwipeHint) dismissHint()
     e.currentTarget.setPointerCapture?.(e.pointerId)
     setDragging(true)
     setStart({ x: e.clientX, y: e.clientY })
@@ -216,6 +217,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
   }
 
   function acceptConsent() {
+    if (!hintSeen.current) setShowSwipeHint(true)
     const today = new Date().toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'long',
@@ -333,7 +335,9 @@ export default function MatchingView({ role }: MatchingViewProps) {
                     <div className="swipe-card-category">{current.category}</div>
                   </div>
 
-                  <div className="swipe-card-score">
+                  <div
+                    className={`swipe-card-score is-${scoreTone(scoreMatch(current).total)}`}
+                  >
                     <div className="score-dial">
                       <svg viewBox="0 0 112 112" width="112" height="112">
                         <circle cx="56" cy="56" r="48" fill="none" stroke="rgba(11,28,51,0.09)" strokeWidth="9" />
@@ -342,7 +346,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
                           cy="56"
                           r="48"
                           fill="none"
-                          stroke="var(--accent)"
+                          stroke="currentColor"
                           strokeWidth="9"
                           strokeLinecap="round"
                           strokeDasharray={`${(scoreMatch(current).total / 100) * 301.6} 301.6`}
@@ -353,31 +357,6 @@ export default function MatchingView({ role }: MatchingViewProps) {
                     </div>
                     <div className="score-dial-band">{scoreBand(scoreMatch(current).total)}</div>
                     <div className="score-dial-note">Match score out of 100</div>
-                  </div>
-
-                  <div className="swipe-card-overlap">
-                    <svg width="150" height="52" viewBox="0 0 150 52">
-                      <line
-                        x1="20"
-                        y1="26"
-                        x2="130"
-                        y2="26"
-                        stroke="#006fcf"
-                        strokeWidth={0.6 + current.overlapPct / 22}
-                      />
-                      <circle cx="20" cy="26" r="8" fill="#003d75" />
-                      <circle cx="130" cy="26" r="8" fill="#006fcf" />
-                      <text x="20" y="46" fontSize="8" fill="#0b1c33" opacity="0.65" textAnchor="middle" fontFamily="IBM Plex Sans">
-                        Basin
-                      </text>
-                      <text x="130" y="46" fontSize="8" fill="#0b1c33" opacity="0.65" textAnchor="middle" fontFamily="IBM Plex Sans">
-                        {current.shortName}
-                      </text>
-                    </svg>
-                    <div>
-                      <div className="swipe-card-overlap-pct">{current.overlapPct}%</div>
-                      <div className="swipe-card-overlap-label">Customer overlap</div>
-                    </div>
                   </div>
 
                   <div className="swipe-card-sequential">
