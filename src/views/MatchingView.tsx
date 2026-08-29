@@ -81,7 +81,6 @@ export default function MatchingView() {
   })
   const [editingGoals, setEditingGoals] = useState(false)
   const [modalCard, setModalCard] = useState<RankedCandidate | null>(null)
-  const [previewCard, setPreviewCard] = useState<RankedCandidate | null>(null)
   const [consentedOn, setConsentedOn] = useState<string | null>(() => loadConsent())
   const [reviewingConsent, setReviewingConsent] = useState(false)
   const consented = consentedOn !== null
@@ -444,17 +443,6 @@ export default function MatchingView() {
                     </svg>
                     <p>{current.sequential}</p>
                   </div>
-
-                  <button
-                    className="btn btn-ghost swipe-card-proposal-btn"
-                    onPointerDown={(e) => e.stopPropagation()}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setPreviewCard(current)
-                    }}
-                  >
-                    See Amex's proposal &amp; predicted benefits
-                  </button>
                 </div>
                 </div>
               )}
@@ -554,18 +542,9 @@ export default function MatchingView() {
       {modalCard && (
         <MatchModal
           candidate={modalCard}
-          mode="match"
           /* The card promises identity is revealed once you match, so this is
-             the moment it is. The preview below stays anonymous. */
+             the moment it is. */
           onClose={() => setModalCard(null)}
-        />
-      )}
-
-      {previewCard && (
-        <MatchModal
-          candidate={previewCard}
-          mode="preview"
-          onClose={() => setPreviewCard(null)}
         />
       )}
     </main>
