@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import amexCrestSrc from './amex-crest.png'
 import './AmexCard3D.css'
@@ -28,8 +27,8 @@ interface AmexCard3DProps {
   className?: string
 }
 
-/** Rounded rectangle as a flat face, with UVs remapped to 0..1 across the face. */
-function roundedFace(w: number, h: number, r: number) {
+/** A card-shaped rounded rectangle, centred at the origin. */
+function roundedRectShape(w: number, h: number, r: number) {
   const shape = new THREE.Shape()
   const x = -w / 2
   const y = -h / 2
@@ -42,14 +41,47 @@ function roundedFace(w: number, h: number, r: number) {
   shape.quadraticCurveTo(x, y + h, x, y + h - r)
   shape.lineTo(x, y + r)
   shape.quadraticCurveTo(x, y, x + r, y)
+  return shape
+}
 
-  const geo = new THREE.ShapeGeometry(shape, 22)
+/** Rounded rectangle as a flat face, with UVs remapped to 0..1 across the face. */
+function roundedFace(w: number, h: number, r: number) {
+  const geo = new THREE.ShapeGeometry(roundedRectShape(w, h, r), 22)
   const pos = geo.attributes.position
   const uv = geo.attributes.uv
   for (let i = 0; i < pos.count; i += 1) {
     uv.setXY(i, (pos.getX(i) + w / 2) / w, (pos.getY(i) + h / 2) / h)
   }
   uv.needsUpdate = true
+  return geo
+}
+
+/**
+ * The card body: the rounded-rect plan shape extruded to the card's
+ * thickness, with a small bevel softening the front/back edges. A real
+ * card's plan-view corner radius (CORNER, generous) and its edge bevel (a
+ * fraction of CARD_D, since the card is thin) are two different-scaled
+ * features — RoundedBoxGeometry applies one uniform radius to both and
+ * clamps it to at most half the thinnest dimension, so with CORNER far
+ * bigger than CARD_D it silently rendered an almost-sharp corner. Building
+ * from the same 2D shape as the face keeps the two in sync instead.
+ */
+function roundedBody(w: number, h: number, totalDepth: number, r: number) {
+  // ExtrudeGeometry's bevel adds bevelThickness beyond `depth` at each end
+  // rather than carving into it, so the straight section is shrunk to
+  // leave room for it — otherwise the body would extend past totalDepth
+  // and bury the face meshes, which sit at the intended ±totalDepth / 2.
+  const bevel = totalDepth * 0.25
+  const straightDepth = totalDepth - bevel * 2
+  const geo = new THREE.ExtrudeGeometry(roundedRectShape(w, h, r), {
+    depth: straightDepth,
+    bevelEnabled: true,
+    bevelThickness: bevel,
+    bevelSize: bevel,
+    bevelSegments: 3,
+    curveSegments: 22,
+  })
+  geo.translate(0, 0, -totalDepth / 2)
   return geo
 }
 
@@ -132,7 +164,7 @@ function drawChip(ctx: CanvasRenderingContext2D, x: number, y: number, w: number
 /** Double-ruled frame with corner flourishes, the way engraved stock is bordered. */
 function drawFrame(ctx: CanvasRenderingContext2D, W: number, H: number) {
   const m = 44
-  // The card body itself is rounded (RoundedBoxGeometry with radius CORNER).
+  // The card body itself is rounded (roundedBody with radius CORNER).
   // An inset rule offset inward by `inset` from that same silhouette has
   // radius `cardRadius - inset` — so the engraved border follows the card's
   // curve instead of mitering to a hard corner against a rounded body.
@@ -471,8 +503,22 @@ function backTexture() {
   ctx.fillStyle = g
   ctx.fillRect(0, 0, W, H)
   drawHexes(ctx, W, H)
+  // Lighter than the front's: there's no chip, medallion or wordmark here
+  // to sit on top of it and break it up, so at full strength it reads as
+  // fingerprint-whorl clutter rather than a subtle engraved pattern.
+  ctx.save()
+  ctx.globalAlpha = 0.45
+  drawGuilloche(ctx, W, H)
+  ctx.restore()
+  drawFrame(ctx, W, H)
 
-  ctx.fillStyle = '#14181e'
+  // Magnetic stripe: a metallic sheen across it, not flat black, or it
+  // reads as a gap in the plate rather than a stripe sitting on it.
+  const stripe = ctx.createLinearGradient(0, 0, W, 0)
+  stripe.addColorStop(0, '#1c1e22')
+  stripe.addColorStop(0.5, '#3d4046')
+  stripe.addColorStop(1, '#1c1e22')
+  ctx.fillStyle = stripe
   ctx.fillRect(0, H * 0.12, W, H * 0.2)
 
   ctx.fillStyle = '#f4f5f7'
@@ -486,6 +532,12 @@ function backTexture() {
   ctx.fillStyle = '#f4f5f7'
   ctx.font = '500 44px "IBM Plex Mono", ui-monospace, monospace'
   ctx.fillText('4021', W * 0.752, H * 0.545)
+
+  ctx.fillStyle = 'rgba(215, 218, 224, 0.55)'
+  ctx.font = '500 26px Futura, "Futura PT", Jost, system-ui, sans-serif'
+  ctx.letterSpacing = '1px'
+  ctx.fillText('CONNEXION SUPPORT  ·  1-800-555-0199  ·  support@connexion.example', W * 0.08, H * 0.65)
+  ctx.letterSpacing = '0px'
 
   ctx.fillStyle = 'rgba(215,218,224,0.5)'
   ctx.font = '400 24px Futura, "Futura PT", Jost, system-ui, sans-serif'
@@ -563,7 +615,7 @@ function mountCard(container: HTMLDivElement, holder: string, rpm: number) {
   const card = new THREE.Group()
   scene.add(card)
 
-  const bodyGeo = new RoundedBoxGeometry(CARD_W, CARD_H, CARD_D, 10, CORNER)
+  const bodyGeo = roundedBody(CARD_W, CARD_H, CARD_D, CORNER)
   const bodyMat = new THREE.MeshPhysicalMaterial({
     color: 0x1c1d20,
     metalness: 1,
