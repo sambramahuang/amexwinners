@@ -1,6 +1,5 @@
 import type { View } from '../App'
 import AmexCard3D from '../components/AmexCard3D'
-import CornerBrackets from '../components/CornerBrackets'
 import './OverviewView.css'
 
 interface ProngCard {
@@ -69,8 +68,8 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
             cluster. That gap is what Prong 3 hunts for.
           </p>
         </div>
-        <span className="overview-diagram-link" onClick={() => onNavigate('graph')}>
-          Explore the full graph
+        <span className="overview-diagram-link" onClick={() => onNavigate('gaps')}>
+          Explore gap radar
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
             <path d="m9 18 6-6-6-6" />
           </svg>
@@ -80,7 +79,6 @@ export default function OverviewView({ onNavigate }: OverviewViewProps) {
       <div className="prong-grid">
         {PRONG_CARDS.map((card) => (
           <div className="prong-card" key={card.title}>
-            <CornerBrackets />
             <div className="prong-label">{card.prong}</div>
             <div className="prong-title">{card.title}</div>
             <p className="prong-description">{card.description}</p>

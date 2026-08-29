@@ -30,6 +30,15 @@ export interface GraphSceneConfig {
   /** Tier-3 structural-relationship edges, rendered with a second parallel gold line. */
   tier3Edges?: [number, number][]
   gaps?: GraphGapConfig[]
+  /**
+   * Invisible points the camera should still leave room for. The auto-fit camera sizes
+   * its zoom from whatever's actually in the scene, so a cluster with a gap marker
+   * floating above it needs more room than one that's just the bare triangle — without
+   * this, the gap-less clusters zoom in closer and read as a different size. Give them
+   * a framing point at the same height the gap marker would occupy, so every cluster
+   * frames at the same scale regardless of whether it actually has a gap to show.
+   */
+  framingPoints?: [number, number, number][]
 }
 
 const CLUSTER_TRIANGLE_POSITIONS: [number, number, number][] = [
@@ -42,104 +51,67 @@ const CLUSTER_TRIANGLE_EDGES: [number, number][] = [
   [1, 2],
   [2, 0],
 ]
+const CLUSTER_CAMERA_POSITION: [number, number, number] = [0, 0.7, 4.1]
+const CLUSTER_GAP_POSITION: [number, number, number] = [0, 1.1, 0]
 
 export const DOWNTOWN_LOOP_GRAPH: GraphSceneConfig = {
-  cameraPosition: [0, 0.7, 4.1],
+  cameraPosition: CLUSTER_CAMERA_POSITION,
   nodes: [
     { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x006fcf, name: 'Basin Coffee' },
     { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x4fa3e8, name: 'Spinebound' },
     { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0xa688f0, name: 'Nettle & Bloom' },
   ],
   edges: CLUSTER_TRIANGLE_EDGES,
-  gaps: [{ position: [0, 1.1, 0], color: 0xc81e2e, connectedNodeIndexes: [0, 1, 2], label: 'No gift shop' }],
+  gaps: [{ position: CLUSTER_GAP_POSITION, color: 0xc81e2e, connectedNodeIndexes: [0, 1, 2], label: 'No gift shop' }],
 }
 
 export const RIVERSIDE_ROW_GRAPH: GraphSceneConfig = {
-  cameraPosition: [0, 0.7, 4.1],
+  cameraPosition: CLUSTER_CAMERA_POSITION,
   nodes: [
     { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0xe8b54d, name: 'Ridgeline Yoga' },
     { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0xd97757, name: 'Loom Bicycle' },
     { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0xc9a86a, name: 'Anchor & Awl' },
   ],
   edges: CLUSTER_TRIANGLE_EDGES,
-  gaps: [{ position: [0, 1.1, 0], color: 0xc81e2e, connectedNodeIndexes: [0, 1, 2], label: 'No wellness' }],
+  gaps: [{ position: CLUSTER_GAP_POSITION, color: 0xc81e2e, connectedNodeIndexes: [0, 1, 2], label: 'No wellness' }],
 }
 
-export interface IndustryLegendEntry {
-  label: string
-  colorHex: string
-}
-
-export const INDUSTRY_LEGEND: IndustryLegendEntry[] = [
-  { label: 'Café · Basin Coffee', colorHex: '#006fcf' },
-  { label: 'Bookstore · Spinebound', colorHex: '#4fa3e8' },
-  { label: 'Florist · Nettle & Bloom', colorHex: '#a688f0' },
-  { label: 'Fitness · Ridgeline Yoga', colorHex: '#e8b54d' },
-  { label: 'Bike shop · Loom Bicycle', colorHex: '#d97757' },
-  { label: 'Tailor · Anchor & Awl', colorHex: '#c9a86a' },
-  { label: 'Restaurant · Salt & Barrel', colorHex: '#2bb8a3' },
-  { label: 'Butcher · Tidewater Butchery', colorHex: '#b6493f' },
-  { label: 'Brewery · Anchorline Brewing', colorHex: '#c9962c' },
-  { label: 'Kitchenware · Cinder & Slate', colorHex: '#6f8fa8' },
-  { label: 'Furniture · Loft & Ladder', colorHex: '#8a5a3b' },
-  { label: 'Record shop · Halcyon Records', colorHex: '#b06bc9' },
-]
-
-export interface GapLegendEntry {
-  label: string
-  colorHex: string
-}
-
-export const GAP_LEGEND: GapLegendEntry[] = [
-  { label: 'Downtown Loop · no gift shop', colorHex: '#c81e2e' },
-  { label: 'Riverside Row · no wellness merchant', colorHex: '#c81e2e' },
-]
-
-export const FULL_GRAPH: GraphSceneConfig = {
-  cameraPosition: [0, 2.3, 6.8],
+// Fully-formed clusters, no structural gap, browsable in the gap radar carousel for contrast
+// against the two clusters above that do have an opening.
+export const HARBOR_DISTRICT_GRAPH: GraphSceneConfig = {
+  cameraPosition: CLUSTER_CAMERA_POSITION,
   nodes: [
-    { position: [-1.6, 0, 0.9], color: 0x006fcf, name: 'Basin Coffee' },
-    { position: [-0.82, 0, -0.45], color: 0x4fa3e8, name: 'Spinebound' },
-    { position: [-2.38, 0, -0.45], color: 0xa688f0, name: 'Nettle & Bloom' },
-    { position: [1.6, 0, 0.9], color: 0xe8b54d, name: 'Ridgeline Yoga' },
-    { position: [2.38, 0, -0.45], color: 0xd97757, name: 'Loom Bicycle' },
-    { position: [0.82, 0, -0.45], color: 0xc9a86a, name: 'Anchor & Awl' },
-    // Harbor District, a fully-formed cluster with no structural gap, for contrast.
-    // Offset below the y=0 plane so it stays visually separated from Downtown Loop
-    // at every rotation angle (rotation is around the Y axis, so Y separation holds).
-    { position: [-3.2, -1.1, 0.9], color: 0x2bb8a3, name: 'Salt & Barrel' },
-    { position: [-1.9, -1.1, -0.45], color: 0xb6493f, name: 'Tidewater Butchery' },
-    { position: [-4.5, -1.1, -0.45], color: 0xc9962c, name: 'Anchorline Brewing' },
-    // Meridian Heights, another fully-formed cluster, no structural gap. Offset below,
-    // same as Harbor District, so neither collides with the gap markers above y=0.
-    { position: [3.2, -1.1, 0.9], color: 0x6f8fa8, name: 'Cinder & Slate' },
-    { position: [4.5, -1.1, -0.45], color: 0x8a5a3b, name: 'Loft & Ladder' },
-    { position: [1.9, -1.1, -0.45], color: 0xb06bc9, name: 'Halcyon Records' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x2bb8a3, name: 'Salt & Barrel' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0xc9962c, name: 'Anchorline Brewing' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0xb6493f, name: 'Tidewater Butchery' },
   ],
-  edges: [
-    [0, 1],
-    [1, 2],
-    [2, 0],
-    [3, 4],
-    [4, 5],
-    [5, 3],
-    [6, 7],
-    [7, 8],
-    [8, 6],
-    [9, 10],
-    [10, 11],
-    [11, 9],
-  ],
-  // Faint bridges showing the whole graph is one connected network, not isolated clusters.
-  dashedEdges: [
-    [2, 5],
-    [2, 6],
-    [5, 9],
-  ],
-  // Basin and Spinebound share the cluster's Tier 3 structural relationship (see MATCH_CANDIDATES).
-  tier3Edges: [[0, 1]],
-  gaps: [
-    { position: [-1.6, 1.0, 0], color: 0xc81e2e, connectedNodeIndexes: [0, 1, 2], label: 'No gift shop' },
-    { position: [1.6, 1.0, 0], color: 0xc81e2e, connectedNodeIndexes: [3, 4, 5], label: 'No wellness' },
-  ],
+  edges: CLUSTER_TRIANGLE_EDGES,
+  framingPoints: [CLUSTER_GAP_POSITION],
 }
+
+export const MERIDIAN_HEIGHTS_GRAPH: GraphSceneConfig = {
+  cameraPosition: CLUSTER_CAMERA_POSITION,
+  nodes: [
+    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x6f8fa8, name: 'Cinder & Slate' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x8a5a3b, name: 'Loft & Ladder' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0xb06bc9, name: 'Halcyon Records' },
+  ],
+  edges: CLUSTER_TRIANGLE_EDGES,
+  framingPoints: [CLUSTER_GAP_POSITION],
+}
+
+export interface IndustryCluster {
+  id: string
+  label: string
+  graph: GraphSceneConfig
+  /** The structural gap this cluster is missing, or null for a fully-formed cluster. */
+  gapLabel: string | null
+}
+
+/** Every industry cluster the gap radar carousel can page through. */
+export const INDUSTRY_CLUSTERS: IndustryCluster[] = [
+  { id: 'downtown-loop', label: 'Downtown Loop', graph: DOWNTOWN_LOOP_GRAPH, gapLabel: 'No gift shop' },
+  { id: 'riverside-row', label: 'Riverside Row', graph: RIVERSIDE_ROW_GRAPH, gapLabel: 'No wellness merchant' },
+  { id: 'harbor-district', label: 'Harbor District', graph: HARBOR_DISTRICT_GRAPH, gapLabel: null },
+  { id: 'meridian-heights', label: 'Meridian Heights', graph: MERIDIAN_HEIGHTS_GRAPH, gapLabel: null },
+]

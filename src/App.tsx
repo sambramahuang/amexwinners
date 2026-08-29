@@ -9,15 +9,14 @@ import RecruitPitchView from './views/RecruitPitchView'
 import RoleSelectView from './views/RoleSelectView'
 import './App.css'
 
-// The 3D graph views pull in three.js, so they are code-split and only
-// downloaded when a visitor actually opens Graph or Gap Radar.
-const GraphView = lazy(() => import('./views/GraphView'))
+// The 3D graph view pulls in three.js, so it is code-split and only
+// downloaded when a visitor actually opens Gap Radar.
 const GapRadarView = lazy(() => import('./views/GapRadarView'))
 
-export type View = 'growth' | 'overview' | 'graph' | 'match' | 'gaps' | 'pitch' | 'standing'
+export type View = 'growth' | 'overview' | 'match' | 'gaps' | 'pitch' | 'standing'
 export type Role = 'amex' | 'sme'
 
-const VIEWS: View[] = ['growth', 'overview', 'graph', 'match', 'gaps', 'pitch', 'standing']
+const VIEWS: View[] = ['growth', 'overview', 'match', 'gaps', 'pitch', 'standing']
 const ROLE_KEY = 'connexion.role.v1'
 
 const SME_VIEWS: View[] = ['standing', 'match']
@@ -26,7 +25,6 @@ const NAV_ITEMS_BY_ROLE: Record<Role, { id: View; label: string }[]> = {
   amex: [
     { id: 'growth', label: 'Growth Radar' },
     { id: 'overview', label: 'Overview' },
-    { id: 'graph', label: 'Graph' },
     { id: 'gaps', label: 'Gap Radar' },
     { id: 'pitch', label: 'Recruit Pitch' },
   ],
@@ -145,11 +143,6 @@ export default function App() {
         <StandingView onNavigate={setView} />
       )}
       {role === 'amex' && view === 'overview' && <OverviewView onNavigate={setView} />}
-      {role === 'amex' && view === 'graph' && (
-        <Suspense fallback={null}>
-          <GraphView />
-        </Suspense>
-      )}
       {role === 'sme' && effectiveView === 'match' && <MatchingView />}
       {role === 'amex' && view === 'gaps' && (
         <Suspense fallback={null}>

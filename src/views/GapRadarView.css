@@ -19,38 +19,128 @@
   max-width: 640px;
 }
 
-.cluster-diagram-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+.cluster-carousel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 20px;
-  margin-bottom: 36px;
+  margin-bottom: 16px;
 }
 
-@media (max-width: 700px) {
-  .cluster-diagram-grid {
-    grid-template-columns: 1fr;
+@media (max-width: 620px) {
+  .cluster-carousel {
+    gap: 10px;
   }
 }
 
-.cluster-diagram-card {
+.carousel-arrow {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.carousel-arrow:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+  transform: scale(1.06);
+}
+
+.carousel-arrow:active {
+  transform: scale(0.94);
+}
+
+.carousel-viewport {
+  position: relative;
+  width: 760px;
+  max-width: 100%;
+  height: 410px;
+  overflow: hidden;
+}
+
+.carousel-slot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 520px;
+  max-width: 88vw;
+  padding: 20px;
   border: 1px solid var(--border);
   background: var(--bg);
-  padding: 20px;
-  animation: fadeUp 0.4s ease both;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  /* transform (translateX/scale) is driven inline per-slot from the current ring
+     offset — that's the one property JS updates on every click, so it's also the
+     one property this transition animates: an existing slot slides smoothly from
+     peek to center (or center to peek) instead of popping to its new spot.
+     Opacity is deliberately much quicker than the 0.45s slide: the outgoing current
+     card starts a click still at full opacity, and a slow fade let it stay bright
+     while it visibly slid into the peek spot ("shine, then dim"). Dimming it fast
+     up front avoids that. */
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.15s ease-out, filter 0.15s ease-out;
+  /* No `both`/`forwards` fill mode: a filled animation pins its `to` value in the
+     cascade above regular rules for as long as it's considered active, which would
+     permanently override the is-peek opacity below. Letting it end normally hands
+     control back to that rule the moment the 0.35s intro fade finishes. */
+  animation: carousel-slot-in 0.35s ease;
 }
 
-.cluster-diagram-card:nth-child(1) {
-  animation-delay: 0.1s;
+/* Ends at the peek resting opacity (0.35), not 1: nearly every slot that actually
+   mounts fresh (as opposed to sliding between roles on a persisted node) enters as
+   a peek, not the current card. Ending the fade at 1 would overshoot past 0.35 and
+   then hand off to the transition below, which visibly dims back down right after —
+   the "shine then dim" flash. Ending at the value it's handing off to removes the
+   overshoot entirely. The one card that mounts directly as current (page load) just
+   brightens the rest of the way via the transition below instead — barely visible,
+   and it only ever happens once. */
+@keyframes carousel-slot-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.35;
+  }
 }
 
-.cluster-diagram-card:nth-child(2) {
-  animation-delay: 0.18s;
+.carousel-slot.is-current {
+  opacity: 1;
+  cursor: default;
 }
 
-.cluster-diagram-card:hover {
-  transform: translateY(-3px);
+.carousel-slot.is-current:hover {
   box-shadow: 0 3px 10px rgba(2, 5, 12, 0.4);
+}
+
+.carousel-slot.is-peek {
+  opacity: 0.35;
+  cursor: pointer;
+  filter: saturate(0.7);
+}
+
+.carousel-slot.is-peek:hover {
+  opacity: 0.8;
+  filter: saturate(1);
+}
+
+/* Kept in the DOM (not conditionally rendered) so a peek card's layout height
+   matches the current card's exactly — nothing about the slot's own size changes
+   when its role changes, only these two pieces fade in reading the badge/caption. */
+.carousel-slot.is-peek .cluster-gap-status,
+.carousel-slot.is-peek .cluster-diagram-caption {
+  visibility: hidden;
+}
+
+@media (max-width: 760px) {
+  .carousel-slot.is-peek {
+    display: none;
+  }
 }
 
 .cluster-diagram-title {
@@ -60,12 +150,70 @@
   margin-bottom: 10px;
 }
 
+.cluster-gap-status {
+  margin-top: 10px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  text-align: center;
+  padding: 5px 10px;
+  border: 1px solid;
+}
+
+.cluster-gap-status.has-gap {
+  color: var(--rose);
+  border-color: var(--rose);
+  background: var(--rose-dim);
+}
+
+.cluster-gap-status.no-gap {
+  color: var(--accent);
+  border-color: var(--accent-dim-strong);
+  background: var(--accent-dim);
+}
+
 .cluster-diagram-caption {
   font-size: 9.5px;
   text-align: center;
   opacity: 0.5;
   margin-top: 8px;
   font-family: var(--font-mono);
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 36px;
+}
+
+.carousel-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--border-strong);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.carousel-dot:hover {
+  background: var(--accent-dim-strong);
+}
+
+.carousel-dot.is-active {
+  background: var(--accent);
+  transform: scale(1.3);
+}
+
+.gaps-empty {
+  border: 1px solid var(--border);
+  padding: 24px;
+  text-align: center;
+  font-size: 13px;
+  opacity: 0.7;
+  animation: fadeUp 0.4s ease both;
+  animation-delay: 0.1s;
 }
 
 .gaps-table-label {
@@ -77,10 +225,16 @@
   margin-bottom: 10px;
 }
 
-.gaps-table-wrap {
-  overflow-x: auto;
+.gaps-table-region {
+  /* Reserves room for the tallest possible content (a 3-row table) so switching to a
+     shorter table, or the empty-state message, never shifts anything below it. */
+  min-height: 230px;
   animation: fadeUp 0.4s ease both;
   animation-delay: 0.3s;
+}
+
+.gaps-table-wrap {
+  overflow-x: auto;
 }
 
 .gaps-table {

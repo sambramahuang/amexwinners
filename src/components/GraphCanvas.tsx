@@ -64,6 +64,7 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
     const anchors = [
       ...config.nodes.map(({ position: [x, y, z] }) => new THREE.Vector3(x, y + 0.24, z)),
       ...(config.gaps ?? []).map(({ position: [x, y, z] }) => new THREE.Vector3(x, y + 0.22, z)),
+      ...(config.framingPoints ?? []).map(([x, y, z]) => new THREE.Vector3(x, y + 0.22, z)),
     ]
     // Labels are fixed-pixel-size DOM boxes anchored to that point, so they still extend
     // a bit past it on screen no matter how tightly the anchors themselves are framed.
