@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { CSS2DObject, CSS2DRenderer } from 'three/examples/jsm/renderers/CSS2DRenderer.js'
 import type { GraphSceneConfig } from '../data/graphSceneConfigs'
+import { GRAPH_ICONS } from '../utils/graphIcons'
 import './GraphCanvas.css'
 
 const DEFAULT_NODE_COLOR = 0x006fcf
@@ -121,6 +122,18 @@ export default function GraphCanvas({ config, height = 190 }: GraphCanvasProps) 
         const label = new CSS2DObject(el)
         label.position.set(node.position[0], node.position[1] + 0.24, node.position[2])
         scene.add(label)
+      }
+
+      if (node.icon && GRAPH_ICONS[node.icon]) {
+        const iconEl = document.createElement('div')
+        iconEl.className = 'graph-node-icon'
+        iconEl.innerHTML =
+          `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ` +
+          `stroke-linecap="round" stroke-linejoin="round">${GRAPH_ICONS[node.icon]}</svg>`
+        const iconLabel = new CSS2DObject(iconEl)
+        // Centered directly on the node itself, not offset like the name label above it.
+        iconLabel.position.set(...node.position)
+        scene.add(iconLabel)
       }
     }
 

@@ -270,17 +270,23 @@ export default function MatchingView() {
     setReviewingConsent(false)
   }
 
-  return (
-    <main className="matching-main">
-      <div className="matching-column">
-        <div className="matching-header">
-          <h1>Matching queue</h1>
-          <p>Candidates already on Amex, ranked by graph signal strength. Swipe or use the controls below.</p>
-          <p className="matching-tier-blurb">
-            Matches start as a single linked offer and can grow into a recurring or longer-term relationship as
-            performance holds up over time.
-          </p>
-        </div>
+  const header = (
+    <div className="matching-header">
+      <h1>Matching queue</h1>
+      <p>Candidates already on Amex, ranked by graph signal strength. Swipe or use the controls below.</p>
+      <p className="matching-tier-blurb">
+        Matches start as a single linked offer and can grow into a recurring or longer-term relationship as
+        performance holds up over time.
+      </p>
+    </div>
+  )
+
+  // Consent and the preferences quiz have no sidebar yet, so they run in a
+  // plain centered page rather than .matching-main's permanent sidebar grid.
+  if (!consented || reviewingConsent || goals === null || editingGoals) {
+    return (
+      <main className="matching-gate-main">
+        {header}
 
         {!consented && <ConsentGate onAccept={acceptConsent} />}
 
@@ -304,26 +310,32 @@ export default function MatchingView() {
             initial={goals ?? []}
           />
         )}
+      </main>
+    )
+  }
 
-        {consented && goals !== null && !editingGoals && !reviewingConsent && (
-          <div className="panel-tabs">
-            <button
-              className={`panel-tab ${panel === 'discover' ? 'is-active' : ''}`}
-              onClick={() => setPanel('discover')}
-            >
-              Discover
-            </button>
-            <button
-              className={`panel-tab ${panel === 'requests' ? 'is-active' : ''}`}
-              onClick={() => setPanel('requests')}
-            >
-              Requests
-              {liked.length > 0 && <span className="panel-tab-count">{liked.length}</span>}
-            </button>
-          </div>
-        )}
+  return (
+    <main className="matching-main">
+      <div className="matching-column">
+        {header}
 
-        {consented && goals !== null && !editingGoals && !reviewingConsent && panel === 'requests' && (
+        <div className="panel-tabs">
+          <button
+            className={`panel-tab ${panel === 'discover' ? 'is-active' : ''}`}
+            onClick={() => setPanel('discover')}
+          >
+            Discover
+          </button>
+          <button
+            className={`panel-tab ${panel === 'requests' ? 'is-active' : ''}`}
+            onClick={() => setPanel('requests')}
+          >
+            Requests
+            {liked.length > 0 && <span className="panel-tab-count">{liked.length}</span>}
+          </button>
+        </div>
+
+        {panel === 'requests' && (
           <RequestPanel
             mutual={mutual}
             waiting={waiting}
@@ -332,7 +344,7 @@ export default function MatchingView() {
           />
         )}
 
-        {consented && goals !== null && !editingGoals && !reviewingConsent && panel === 'discover' && !matchDone && (
+        {panel === 'discover' && !matchDone && (
           <>
             <div className="card-stack" style={stackHeight ? { height: stackHeight } : undefined}>
               {peek2 && <div className="stack-card peek-2" />}
@@ -464,7 +476,7 @@ export default function MatchingView() {
           </>
         )}
 
-        {consented && goals !== null && !editingGoals && !reviewingConsent && panel === 'discover' && matchDone && (
+        {panel === 'discover' && matchDone && (
           <div className="queue-done">
             <div className="queue-done-title">Queue cleared</div>
             <p>
@@ -483,63 +495,61 @@ export default function MatchingView() {
         )}
       </div>
 
-      {consented && goals !== null && !editingGoals && !reviewingConsent && (
-        <aside className="matching-sidebar">
-          <div className="sidebar-card">
-            <div className="sidebar-label">This session</div>
-            <div className="sidebar-row">
-              <span>Liked</span>
-              <span className="sidebar-value-accent">{liked.length}</span>
-            </div>
-            <div className="sidebar-row sidebar-row-last">
-              <span>Matched</span>
-              <span className="sidebar-value-accent">{mutual.length}</span>
-            </div>
+      <aside className="matching-sidebar">
+        <div className="sidebar-card">
+          <div className="sidebar-label">This session</div>
+          <div className="sidebar-row">
+            <span>Liked</span>
+            <span className="sidebar-value-accent">{liked.length}</span>
           </div>
-          <div className="sidebar-card">
-            <div className="sidebar-label">Data sharing</div>
-            <p className="sidebar-consent-status">
-              Consent given on {consentedOn}. Your name, logo and match score are
-              visible to merchants in your queue.
-            </p>
-            <button
-              className="btn btn-ghost sidebar-consent-btn"
-              onClick={() => setReviewingConsent(true)}
-            >
-              Review or withdraw
-            </button>
+          <div className="sidebar-row sidebar-row-last">
+            <span>Matched</span>
+            <span className="sidebar-value-accent">{mutual.length}</span>
           </div>
+        </div>
+        <div className="sidebar-card">
+          <div className="sidebar-label">Data sharing</div>
+          <p className="sidebar-consent-status">
+            Consent given on {consentedOn}. Your name, logo and match score are
+            visible to merchants in your queue.
+          </p>
+          <button
+            className="btn btn-ghost sidebar-consent-btn"
+            onClick={() => setReviewingConsent(true)}
+          >
+            Review or withdraw
+          </button>
+        </div>
 
-          <div className="sidebar-card">
-            <div className="sidebar-label">Looking for</div>
-            <p className="sidebar-consent-status">
-              {goals && goals.length > 0
-                ? goals.map((g) => GOAL_LABELS[g]).join('. ') + '.'
-                : 'Everything. The queue is ordered by match score alone.'}
-            </p>
-            <button
-              className="btn btn-ghost sidebar-consent-btn"
-              onClick={() => setEditingGoals(true)}
-            >
-              Change
-            </button>
-          </div>
+        <div className="sidebar-card">
+          <div className="sidebar-label">Looking for</div>
+          <p className="sidebar-consent-status">
+            {goals && goals.length > 0
+              ? goals.map((g) => GOAL_LABELS[g]).join('. ') + '.'
+              : 'Everything. The queue is ordered by match score alone.'}
+          </p>
+          <button
+            className="btn btn-ghost sidebar-consent-btn"
+            onClick={() => setEditingGoals(true)}
+          >
+            Change
+          </button>
+        </div>
 
-          <div className="sidebar-card">
-            <div className="sidebar-label">Liked this session</div>
-            <div className="sidebar-chips">
-              {liked.map((c) => (
-                <span className="sidebar-chip" key={c.id}>
-                  {c.name}
-                </span>
-              ))}
-              {liked.length === 0 && (
-                <span className="sidebar-empty">None yet. Tap the heart to like one.</span>
-              )}
-            </div>
+        <div className="sidebar-card">
+          <div className="sidebar-label">Liked this session</div>
+          <div className="sidebar-chips">
+            {liked.map((c) => (
+              <span className="sidebar-chip" key={c.id}>
+                {c.name}
+              </span>
+            ))}
+            {liked.length === 0 && (
+              <span className="sidebar-empty">None yet. Tap the heart to like one.</span>
+            )}
           </div>
-        </aside>
-      )}
+        </div>
+      </aside>
 
       {modalCard && (
         <MatchModal

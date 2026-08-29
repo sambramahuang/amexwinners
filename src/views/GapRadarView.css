@@ -273,6 +273,13 @@
 
 .gaps-table {
   width: 100%;
+  min-width: 710px;
+  /* Fixed, so column widths come from the <colgroup> instead of each
+     cluster's own row content — otherwise every column boundary (and every
+     header/cell's text with it) shifts left or right on every carousel
+     click, since a name or reasoning string of a different length changes
+     what the auto layout would have picked. */
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 13px;
 }
@@ -326,36 +333,13 @@
   font-variant-numeric: tabular-nums;
 }
 
-.gaps-table-growing {
-  font-size: 12px;
+.gaps-table-action {
+  text-align: right;
   white-space: nowrap;
 }
 
-.gaps-table-growing-pct {
-  font-family: var(--font-display);
-  font-weight: 600;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-}
-
-.gaps-table-growing-name {
-  opacity: 0.85;
-}
-
-.gaps-table-growing-more {
-  opacity: 0.55;
-}
-
-.gaps-table-growing-empty {
-  opacity: 0.5;
-  font-style: italic;
-}
-
-.gaps-table-action {
-  text-align: right;
-}
-
-.gaps-generate-btn {
+.gaps-generate-btn,
+.gaps-analysis-btn {
   border: 1px solid var(--accent);
   color: var(--accent);
   background: transparent;
@@ -368,7 +352,19 @@
   transition: background 0.15s ease, color 0.15s ease;
 }
 
-.gaps-generate-btn:hover {
+.gaps-generate-btn:hover,
+.gaps-analysis-btn:hover {
   background: var(--accent);
   color: var(--bg);
+}
+
+.gaps-analysis-btn {
+  border-color: var(--border-strong);
+  color: var(--text-70);
+  margin-right: 6px;
+}
+
+.gaps-analysis-btn:hover {
+  background: var(--border-soft);
+  color: var(--text);
 }

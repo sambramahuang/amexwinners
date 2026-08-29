@@ -34,3 +34,16 @@
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid rgba(200, 30, 46, 0.4);
 }
+
+.graph-node-icon {
+  display: block;
+  color: #fff;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 1px 1.5px rgba(2, 5, 12, 0.45));
+}
+
+.graph-node-icon svg {
+  display: block;
+  width: 15px;
+  height: 15px;
+}

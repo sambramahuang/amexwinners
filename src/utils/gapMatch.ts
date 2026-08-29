@@ -2,32 +2,45 @@ import type { ProspectTarget } from '../data/graphEngineData'
 import { US_MERCHANTS, type UsMerchant } from '../data/usMerchants'
 
 /**
- * Bridges Gap Radar's dataset (structural holes found among Amex's own
- * merchants) to market-wide card network data: for a gap Gap Radar has
- * already named, which real, currently-growing businesses — Amex merchant
- * or not — could actually fill it. Gap Radar's own prospect is always one
- * hand-picked example; this is evidence beyond that one pick, from data
- * Amex actually has. A business already on Amex is excluded since it isn't
- * a recruit target.
+ * Confirms that a Gap Radar prospect is a real business, not an invented
+ * placeholder: every current prospect has a matching entry in the market-wide
+ * card network dataset (US_MERCHANTS), named identically, which is what
+ * NAME_MATCH_PROSPECT_ID below asserts. The category+city fallback exists for
+ * a prospect that doesn't have a hand-authored real-world entry yet — weaker
+ * evidence (a comparable real business nearby, not a confirmed identity), used
+ * only until one gets added.
  */
 
-/** The one cluster Gap Radar names that also has a real city in this market-wide dataset. */
+/** Every cluster Gap Radar names, mapped to a real city in this market-wide dataset. */
 const CLUSTER_CITY: Partial<Record<string, string>> = {
   'Downtown Loop': 'Chicago',
+  'Riverside Row': 'Austin',
+  'Old Mill Quarter': 'Denver',
+  'Ferry Landing': 'Brooklyn',
+  'Hollow Creek': 'Portland',
 }
 
-/** Businesses the two synthetic datasets happen to name identically — the strongest signal available. */
+/** Every prospect's real-world identity: PROSPECT_TARGETS.id -> its matching US_MERCHANTS entry, by name. */
 const NAME_MATCH_PROSPECT_ID: Record<string, number> = {
+  'juniper & fern gift co.': 1,
+  'marlowe paper goods': 2,
+  'sable & stone gifts': 3,
   'cedar recovery': 4, // -> Cedar Recovery Co., the Riverside Row wellness gap
+  'whisker & bramble pet co.': 5,
+  'burrow pet supply': 6,
+  'proof & crumb bakery': 7,
+  'millgate bakehouse': 8,
+  'acorn & owl books': 9,
 }
 
 export interface GrowingMatch {
   merchant: UsMerchant
-  /** 'name': the same business was flagged independently by both engines. */
+  /** 'name': this prospect's confirmed real-world identity. 'category': a comparable
+   *  real business nearby, used only when no confirmed identity exists yet. */
   reason: 'name' | 'category'
 }
 
-/** Real, currently-growing businesses that could fill this prospect's gap, ranked by growth. */
+/** This prospect's real-world market data — its confirmed identity if it has one, or the closest comparable real business if it doesn't yet. */
 export function findGrowingMatches(prospect: ProspectTarget): GrowingMatch[] {
   const city = CLUSTER_CITY[prospect.cluster]
 
@@ -42,5 +55,12 @@ export function findGrowingMatches(prospect: ProspectTarget): GrowingMatch[] {
       return null
     })
     .filter((m): m is GrowingMatch => m !== null)
-    .sort((a, b) => b.merchant.growthPct - a.merchant.growthPct)
+    .sort((a, b) => {
+      // A confirmed identity always outranks a merely-comparable nearby business,
+      // no matter how much faster the comparable one happens to be growing —
+      // sorting on growth alone let a category match with higher growth bury a
+      // prospect's own (slower-growing) confirmed real-world entry.
+      if (a.reason !== b.reason) return a.reason === 'name' ? -1 : 1
+      return b.merchant.growthPct - a.merchant.growthPct
+    })
 }
