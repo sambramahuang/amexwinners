@@ -152,7 +152,7 @@ function frontTexture(holder: string) {
   ctx.fillRect(0, 0, W, H)
 
   ctx.fillStyle = 'rgba(255,255,255,0.94)'
-  ctx.font = '700 78px "Space Grotesk", system-ui, sans-serif'
+  ctx.font = '700 78px Futura, "Futura PT", Jost, system-ui, sans-serif'
   ctx.fillText('American Express', 96, 150)
 
   ctx.fillStyle = BLUE
@@ -183,7 +183,7 @@ function frontTexture(holder: string) {
   ctx.fillText('VALID THRU 08/31', W * 0.42, H * 0.895)
   ctx.letterSpacing = '0px'
 
-  ctx.font = '600 42px "IBM Plex Sans", system-ui, sans-serif'
+  ctx.font = '600 42px Futura, "Futura PT", Jost, system-ui, sans-serif'
   ctx.letterSpacing = '5px'
   ctx.fillStyle = 'rgba(3, 14, 26, 0.5)'
   ctx.fillText(holder.toUpperCase(), 98, H * 0.955 + 2)
@@ -218,7 +218,7 @@ function backTexture() {
   ctx.fillStyle = '#e8eef6'
   ctx.fillRect(W * 0.08, H * 0.46, W * 0.62, H * 0.13)
   ctx.fillStyle = 'rgba(11,28,51,0.5)'
-  ctx.font = 'italic 44px "IBM Plex Sans", system-ui, sans-serif'
+  ctx.font = 'italic 44px Futura, "Futura PT", Jost, system-ui, sans-serif'
   ctx.fillText('authorised signature', W * 0.1, H * 0.545)
 
   ctx.fillStyle = '#04101d'
@@ -228,7 +228,7 @@ function backTexture() {
   ctx.fillText('4021', W * 0.752, H * 0.545)
 
   ctx.fillStyle = 'rgba(255,255,255,0.34)'
-  ctx.font = '400 24px "IBM Plex Sans", system-ui, sans-serif'
+  ctx.font = '400 24px Futura, "Futura PT", Jost, system-ui, sans-serif'
   ctx.fillText('Concept prototype. Not a payment instrument.', W * 0.08, H * 0.74)
   ctx.fillText('Synthetic demo asset, AMEX AI Innovation Hackathon 2026.', W * 0.08, H * 0.79)
 
