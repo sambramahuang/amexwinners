@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
+import amexCrestSrc from './amex-crest.png'
 import './AmexCard3D.css'
 
 // Real card proportions: 85.6mm by 53.98mm.
@@ -246,7 +247,22 @@ function drawMedallion(ctx: CanvasRenderingContext2D, cx: number, cy: number, r:
   ctx.restore()
 }
 
-function frontTexture(holder: string) {
+// Loaded once and cached module-wide: every card instance shares the same
+// crest rather than re-fetching it.
+let crestPromise: Promise<HTMLImageElement | null> | null = null
+function loadCrest(): Promise<HTMLImageElement | null> {
+  if (!crestPromise) {
+    crestPromise = new Promise((resolve) => {
+      const img = new Image()
+      img.onload = () => resolve(img)
+      img.onerror = () => resolve(null) // fall back to the drawn medallion rather than break the card
+      img.src = amexCrestSrc
+    })
+  }
+  return crestPromise
+}
+
+function frontTexture(holder: string, crest: HTMLImageElement | null) {
   const W = 2048
   const H = Math.round(W / 1.586)
   const c = document.createElement('canvas')
@@ -281,7 +297,14 @@ function frontTexture(holder: string) {
   ctx.restore()
 
   drawFrame(ctx, W, H)
-  drawMedallion(ctx, W * 0.52, H * 0.47, 205)
+  // The real Amex crest once it has loaded; the hand-drawn wreath stands in
+  // for the one frame or two before that (and if it never loads at all).
+  if (crest) {
+    const d = 205 * 2
+    ctx.drawImage(crest, W * 0.52 - d / 2, H * 0.47 - d / 2, d, d)
+  } else {
+    drawMedallion(ctx, W * 0.52, H * 0.47, 205)
+  }
 
   // Wordmark, centred above the medallion.
   ctx.fillStyle = ENGRAVE
@@ -455,7 +478,7 @@ export default function AmexCard3D({
     card.add(new THREE.Mesh(bodyGeo, bodyMat))
 
     const faceGeo = roundedFace(CARD_W - 0.012, CARD_H - 0.012, CORNER - 0.006)
-    const frontTex = frontTexture(holder)
+    let frontTex = frontTexture(holder, null)
     const backTex = backTexture()
 
     const frontMat = new THREE.MeshPhysicalMaterial({
@@ -603,15 +626,20 @@ export default function AmexCard3D({
     }
     window.addEventListener('resize', handleResize)
 
-    // Webfonts land after first paint; redraw the face once they are ready so
-    // the card is not baked with fallback type.
+    // Webfonts land after first paint, and the crest is fetched over the
+    // network; redraw the face once both are ready so the card is not baked
+    // with fallback type or the drawn-medallion stand-in.
     let cancelled = false
-    document.fonts?.ready.then(() => {
-      if (cancelled || disposed) return
-      frontMat.map = frontTexture(holder)
-      frontMat.needsUpdate = true
-      frontTex.dispose()
-    })
+    document.fonts?.ready
+      .then(() => loadCrest())
+      .then((crest) => {
+        if (cancelled || disposed) return
+        const nextTex = frontTexture(holder, crest)
+        frontMat.map = nextTex
+        frontMat.needsUpdate = true
+        frontTex.dispose()
+        frontTex = nextTex
+      })
 
     return () => {
       disposed = true
