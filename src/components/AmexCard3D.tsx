@@ -161,8 +161,10 @@ function drawFrame(ctx: CanvasRenderingContext2D, W: number, H: number) {
 }
 
 /**
- * Engraved medallion. An original device carrying this product's mark: two
- * merchants and the edge between them, ringed the way a struck seal is.
+ * Engraved medallion: a laurel wreath rising to a star, the crest language
+ * expected on a premium card face, in place of Connexion's own two-node
+ * mark. Built from the same primitives as the rest of the plate (arcs,
+ * radiating lines) rather than traced from any existing artwork.
  */
 function drawMedallion(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
   ctx.save()
@@ -190,20 +192,57 @@ function drawMedallion(ctx: CanvasRenderingContext2D, cx: number, cy: number, r:
     ctx.stroke()
   }
 
-  // The mark itself.
-  ctx.strokeStyle = 'rgba(43, 48, 56, 0.85)'
+  // The mark itself: two laurel branches climbing from a shared stem,
+  // open at the top for the star. Sized to read as leaves rather than a
+  // dotted ring once the medallion is scaled down onto the card.
   ctx.fillStyle = 'rgba(43, 48, 56, 0.85)'
-  ctx.lineWidth = 4
+  const leaves = 6
+  const startDeg = 88
+  const endDeg = -58
+  for (const side of [-1, 1] as const) {
+    for (let i = 0; i < leaves; i += 1) {
+      const t = i / (leaves - 1)
+      const deg = startDeg + (endDeg - startDeg) * t
+      const a = (deg * Math.PI) / 180
+      const rad = r * (0.32 + t * 0.5)
+      const x = side * Math.cos(a) * rad
+      const y = Math.sin(a) * rad
+      // Tangent to the branch's curve, so each leaf lies along it.
+      const tangent = Math.atan2(Math.cos(a), -side * Math.sin(a))
+      ctx.save()
+      ctx.translate(x, y)
+      ctx.rotate(tangent)
+      ctx.beginPath()
+      ctx.ellipse(0, 0, 34 - t * 14, 14 - t * 5, 0, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
+    }
+  }
+
+  // Stem tying both branches to a shared base.
+  ctx.strokeStyle = 'rgba(43, 48, 56, 0.85)'
+  ctx.lineWidth = 6
   ctx.beginPath()
-  ctx.moveTo(-r * 0.3, r * 0.22)
-  ctx.lineTo(r * 0.3, -r * 0.22)
+  ctx.moveTo(0, r * 0.3)
+  ctx.lineTo(0, r * 0.5)
   ctx.stroke()
+
+  // Five-pointed star, centred where the wreath opens.
+  const spikes = 5
+  const outerR = r * 0.24
+  const innerR = outerR * 0.42
   ctx.beginPath()
-  ctx.arc(-r * 0.3, r * 0.22, 9, 0, Math.PI * 2)
+  for (let i = 0; i < spikes * 2; i += 1) {
+    const a = (Math.PI / spikes) * i - Math.PI / 2
+    const rr = i % 2 === 0 ? outerR : innerR
+    const x = Math.cos(a) * rr
+    const y = Math.sin(a) * rr - r * 0.06
+    if (i === 0) ctx.moveTo(x, y)
+    else ctx.lineTo(x, y)
+  }
+  ctx.closePath()
   ctx.fill()
-  ctx.beginPath()
-  ctx.arc(r * 0.3, -r * 0.22, 9, 0, Math.PI * 2)
-  ctx.stroke()
+
   ctx.restore()
 }
 
