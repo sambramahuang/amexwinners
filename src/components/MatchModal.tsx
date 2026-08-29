@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { TIER_LABELS, type MatchCandidate } from '../data/graphEngineData'
 import EmailComposer from './EmailComposer'
 import { buildMatchIntroEmail, buildMerchantIntroEmail } from '../utils/outreachEmails'
+import { scoreMatch } from '../utils/matchScore'
 import CornerBrackets from './CornerBrackets'
 import { BenefitBarChart, UpliftTrendChart } from './BenefitCharts'
 import './MatchModal.css'
@@ -93,25 +94,49 @@ export default function MatchModal({
         </div>
 
         <div className="match-modal-terms">Suggested terms: {candidate.terms}</div>
-        <div className="match-modal-outreach">
-          {compose ? (
-            <EmailComposer
-              email={
-                smeVoice ? buildMerchantIntroEmail(candidate) : buildMatchIntroEmail(candidate)
-              }
-              sendLabel={`Send to ${candidate.contact.name.split(' ')[0]}`}
-              sentLabel="Sent"
-            />
-          ) : (
-            <button className="btn btn-primary match-modal-compose" onClick={() => setCompose(true)}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-                <rect x="2" y="4" width="20" height="16" rx="2" />
-                <path d="m2 7 10 6 10-6" />
-              </svg>
-              {smeVoice ? 'Write to them' : 'Write the introduction'}
-            </button>
-          )}
-        </div>
+        {mode === 'preview' ? (
+          <div className="match-modal-breakdown">
+            <div className="match-modal-section-label">How this score was built</div>
+            {scoreMatch(candidate).factors.map((f) => (
+              <div className="factor" key={f.key}>
+                <div className="factor-head">
+                  <span className="factor-label">
+                    {f.label}
+                    <span className="factor-weight">weight {Math.round(f.weight * 100)}%</span>
+                  </span>
+                  <span className="factor-value">{f.value}</span>
+                </div>
+                <div className="factor-track">
+                  <div className="factor-fill" style={{ width: `${f.value}%` }} />
+                </div>
+                <p className="factor-detail">{f.detail}</p>
+              </div>
+            ))}
+            <p className="match-modal-locked">
+              Writing to {candidate.shortName} unlocks once they like you back.
+            </p>
+          </div>
+        ) : (
+          <div className="match-modal-outreach">
+            {compose ? (
+              <EmailComposer
+                email={
+                  smeVoice ? buildMerchantIntroEmail(candidate) : buildMatchIntroEmail(candidate)
+                }
+                sendLabel={`Send to ${candidate.contact.name.split(' ')[0]}`}
+                sentLabel="Sent"
+              />
+            ) : (
+              <button className="btn btn-primary match-modal-compose" onClick={() => setCompose(true)}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+                  <rect x="2" y="4" width="20" height="16" rx="2" />
+                  <path d="m2 7 10 6 10-6" />
+                </svg>
+                {smeVoice ? 'Write to them' : 'Write the introduction'}
+              </button>
+            )}
+          </div>
+        )}
 
         <div className="match-modal-actions">
           <button className="btn btn-ghost" onClick={onClose}>

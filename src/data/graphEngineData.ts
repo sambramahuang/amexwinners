@@ -12,6 +12,24 @@
  */
 export type RelationshipTier = 1 | 2 | 3
 
+/**
+ * What a merchant says they are looking for. Self reported, and used to
+ * reorder the queue rather than to score: the transaction data decides how
+ * good a match is, this decides which good matches to show first.
+ */
+export type PartnershipGoal =
+  | 'cross-industry'
+  | 'long-term'
+  | 'new-demographic'
+  | 'same-industry'
+
+export const GOAL_LABELS: Record<PartnershipGoal, string> = {
+  'cross-industry': 'Cross industry collaboration',
+  'long-term': 'Long term partnership',
+  'new-demographic': 'Exposure to a new demographic',
+  'same-industry': 'Collaboration in my own industry',
+}
+
 export interface MerchantContact {
   name: string
   role: string
@@ -64,6 +82,8 @@ export interface MatchCandidate {
   responseRate: number
   /** Two-letter monogram and brand colour for the card mark. */
   mark: { initials: string; color: string }
+  /** What a partnership with this merchant would offer. */
+  goals: PartnershipGoal[]
 }
 
 export const MATCH_CANDIDATES: MatchCandidate[] = [
@@ -82,6 +102,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 2,
     responseRate: 86,
     mark: { initials: 'SB', color: '#7d5a3c' },
+    goals: ['cross-industry', 'long-term'],
     tier: 3,
     monthsActive: 8,
     tierRationale:
@@ -104,6 +125,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 9,
     responseRate: 61,
     mark: { initials: 'FF', color: '#4f7f6a' },
+    goals: ['cross-industry', 'new-demographic'],
     tier: 2,
     monthsActive: 5,
     tierRationale: '5 months and 3 offer cycles of steady redemption support repeating this on an ongoing cadence instead of renegotiating each time.',
@@ -123,6 +145,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 4,
     responseRate: 74,
     mark: { initials: 'NB', color: '#a35a86' },
+    goals: ['cross-industry', 'new-demographic'],
     tier: 2,
     monthsActive: 4,
     tierRationale: '4 months and 2 offer cycles of consistent redemption support repeating this on an ongoing cadence instead of renegotiating each time.',
@@ -142,6 +165,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 21,
     responseRate: 38,
     mark: { initials: 'LB', color: '#c2683f' },
+    goals: ['cross-industry', 'new-demographic'],
     tier: 1,
     monthsActive: 1,
     tierRationale: 'A new, single-offer proposal. The sequencing signal is still forming, so it starts here rather than at a recurring cadence.',
@@ -161,6 +185,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 6,
     responseRate: 69,
     mark: { initials: 'RY', color: '#5b7fa6' },
+    goals: ['cross-industry', 'new-demographic', 'long-term'],
     tier: 1,
     monthsActive: 2,
     tierRationale: 'A new, single-offer proposal. The sequencing signal is still sparse, so it starts here rather than at a recurring cadence.',
@@ -180,6 +205,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 34,
     responseRate: 24,
     mark: { initials: 'AA', color: '#7a6a53' },
+    goals: ['cross-industry'],
     tier: 1,
     monthsActive: 1,
     tierRationale: 'Signal is too thin to propose anything beyond a single trial offer yet.',
@@ -203,6 +229,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 3,
     responseRate: 81,
     mark: { initials: 'MB', color: '#8a5a3b' },
+    goals: ['cross-industry', 'long-term'],
   },
   {
     id: 8,
@@ -223,6 +250,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 11,
     responseRate: 54,
     mark: { initials: 'NP', color: '#4f6f8f' },
+    goals: ['cross-industry', 'new-demographic'],
   },
   {
     id: 9,
@@ -243,6 +271,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 1,
     responseRate: 92,
     mark: { initials: 'KK', color: '#b1743f' },
+    goals: ['same-industry', 'long-term'],
   },
   {
     id: 10,
@@ -263,6 +292,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 6,
     responseRate: 63,
     mark: { initials: 'FG', color: '#a35a86' },
+    goals: ['cross-industry', 'new-demographic'],
   },
   {
     id: 11,
@@ -283,6 +313,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 4,
     responseRate: 77,
     mark: { initials: 'GC', color: '#c2683f' },
+    goals: ['cross-industry', 'new-demographic'],
   },
   {
     id: 12,
@@ -303,6 +334,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 19,
     responseRate: 41,
     mark: { initials: 'AE', color: '#7b6a94' },
+    goals: ['cross-industry', 'new-demographic'],
   },
   {
     id: 13,
@@ -323,6 +355,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 8,
     responseRate: 58,
     mark: { initials: 'SP', color: '#5f7f5a' },
+    goals: ['cross-industry', 'long-term'],
   },
   {
     id: 14,
@@ -343,6 +376,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 27,
     responseRate: 33,
     mark: { initials: 'VP', color: '#6f8fa8' },
+    goals: ['cross-industry'],
   },
   {
     id: 15,
@@ -363,6 +397,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 7,
     responseRate: 66,
     mark: { initials: 'HR', color: '#b06bc9' },
+    goals: ['cross-industry', 'new-demographic'],
   },
   {
     id: 16,
@@ -383,6 +418,196 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 41,
     responseRate: 19,
     mark: { initials: 'QK', color: '#7a6a53' },
+    goals: ['cross-industry'],
+  },
+  {
+    id: 17,
+    name: 'Vellum & Vine Bookbindery',
+    shortName: 'Vellum & Vine',
+    category: 'Bookbinder',
+    overlapPct: 33,
+    sequential: "33% of Vellum & Vine's workshop attendees order at Basin before their class.",
+    upliftYou: 13,
+    upliftThem: 16,
+    terms: "Workshop pairing: class bookings include a Basin drink, Basin displays bound work.",
+    tier: 1,
+    monthsActive: 3,
+    tierRationale:
+      "A new proposal on a small but reliable class-day pattern.",
+    contact: { name: 'Ines Cardoso', role: 'Owner', email: 'ines@vellumvinebookbindery.example' },
+    likedYouBack: true,
+    lastActiveDays: 5,
+    responseRate: 72,
+    mark: { initials: 'VV', color: '#6b5b8a' },
+    goals: ['cross-industry', 'new-demographic'],
+  },
+  {
+    id: 18,
+    name: 'Copperleaf Tea Room',
+    shortName: 'Copperleaf',
+    category: 'Tea room',
+    overlapPct: 29,
+    sequential: "29% of Copperleaf's afternoon customers were at Basin that morning.",
+    upliftYou: 11,
+    upliftThem: 9,
+    terms: "Split the day: Basin takes mornings, Copperleaf takes afternoons, each refers the other.",
+    tier: 2,
+    monthsActive: 6,
+    tierRationale:
+      "Six months of a clean morning and afternoon split that neither side has had to police.",
+    contact: { name: 'Marta Lindqvist', role: 'Owner', email: 'marta@copperleaftearoom.example' },
+    likedYouBack: false,
+    lastActiveDays: 9,
+    responseRate: 64,
+    mark: { initials: 'CT', color: '#8a6f4f' },
+    goals: ['same-industry', 'long-term'],
+  },
+  {
+    id: 19,
+    name: 'Foundry Coworking',
+    shortName: 'Foundry',
+    category: 'Coworking',
+    overlapPct: 47,
+    sequential: "47% of Foundry members buy from Basin at least twice a week.",
+    upliftYou: 24,
+    upliftThem: 18,
+    terms: "Member rate: Foundry members get a standing discount, Basin becomes the house cafe.",
+    tier: 3,
+    monthsActive: 11,
+    tierRationale:
+      "Eleven months of daily volume from a fixed member base, the steadiest relationship in the cluster.",
+    contact: { name: 'Dario Bennett', role: 'Managing Director', email: 'dario@foundrycoworking.example' },
+    likedYouBack: true,
+    lastActiveDays: 1,
+    responseRate: 89,
+    mark: { initials: 'FC', color: '#3f6f8f' },
+    goals: ['cross-industry', 'long-term', 'new-demographic'],
+  },
+  {
+    id: 20,
+    name: 'Ashgrove Montessori',
+    shortName: 'Ashgrove',
+    category: 'Nursery',
+    overlapPct: 26,
+    sequential: "26% of Ashgrove parents stop at Basin on the school run.",
+    upliftYou: 12,
+    upliftThem: 7,
+    terms: "Parent hour: a discount between drop-off and ten, when Basin is quiet.",
+    tier: 1,
+    monthsActive: 2,
+    tierRationale:
+      "A new proposal aimed squarely at Basin's quietest hour.",
+    contact: { name: 'Grace Okonjo', role: 'Founder', email: 'grace@ashgrovemontessori.example' },
+    likedYouBack: true,
+    lastActiveDays: 6,
+    responseRate: 68,
+    mark: { initials: 'AM', color: '#5f8a6a' },
+    goals: ['cross-industry', 'new-demographic'],
+  },
+  {
+    id: 21,
+    name: 'Pallet & Pour Wine Bar',
+    shortName: 'Pallet & Pour',
+    category: 'Wine bar',
+    overlapPct: 22,
+    sequential: "22% of Pallet & Pour's early customers came from Basin earlier the same day.",
+    upliftYou: 10,
+    upliftThem: 13,
+    terms: "Day into night: Basin closes at five, Pallet & Pour opens at four, one shared loyalty card.",
+    tier: 2,
+    monthsActive: 5,
+    tierRationale:
+      "Five months of a handover that works because the trading hours barely overlap.",
+    contact: { name: 'Luca Moretti', role: 'Owner', email: 'luca@palletpourwinebar.example' },
+    likedYouBack: false,
+    lastActiveDays: 14,
+    responseRate: 49,
+    mark: { initials: 'PP', color: '#7a3f52' },
+    goals: ['cross-industry', 'new-demographic'],
+  },
+  {
+    id: 22,
+    name: 'Rill & Row Bakehouse',
+    shortName: 'Rill & Row',
+    category: 'Bakery',
+    overlapPct: 39,
+    sequential: "39% of Rill & Row's customers pick up coffee at Basin within the hour.",
+    upliftYou: 16,
+    upliftThem: 25,
+    terms: "Morning pairing: a Rill & Row pastry with any Basin filter at a set price.",
+    tier: 1,
+    monthsActive: 2,
+    tierRationale:
+      "A new proposal, and the uplift runs one way, so it starts small while that is watched.",
+    contact: { name: 'Sofia Marchetti', role: 'Owner', email: 'sofia@rillrowbakehouse.example' },
+    likedYouBack: true,
+    lastActiveDays: 2,
+    responseRate: 84,
+    mark: { initials: 'RR', color: '#b1743f' },
+    goals: ['same-industry', 'new-demographic'],
+  },
+  {
+    id: 23,
+    name: 'Latitude Travel Co.',
+    shortName: 'Latitude',
+    category: 'Travel agency',
+    overlapPct: 19,
+    sequential: "19% of Latitude's consultation bookings are followed by a Basin visit the same hour.",
+    upliftYou: 9,
+    upliftThem: 11,
+    terms: "Consultation stop: Latitude books meetings at Basin, Basin displays Latitude's window cards.",
+    tier: 1,
+    monthsActive: 4,
+    tierRationale:
+      "A new proposal on a thin but consistent meeting pattern.",
+    contact: { name: 'Emeka Nwosu', role: 'Owner', email: 'emeka@latitudetravelco.example' },
+    likedYouBack: false,
+    lastActiveDays: 23,
+    responseRate: 37,
+    mark: { initials: 'LT', color: '#4f7f8a' },
+    goals: ['cross-industry', 'new-demographic'],
+  },
+  {
+    id: 24,
+    name: 'Ember Yoga Collective',
+    shortName: 'Ember Yoga',
+    category: 'Fitness studio',
+    overlapPct: 31,
+    sequential: "31% of Ember's morning class attendees order at Basin straight after.",
+    upliftYou: 14,
+    upliftThem: 19,
+    terms: "Post-class token: any class includes a Basin drink within the hour.",
+    tier: 2,
+    monthsActive: 7,
+    tierRationale:
+      "Seven months of post-class volume that holds through the winter timetable.",
+    contact: { name: 'Nadia Farrow', role: 'Founder', email: 'nadia@emberyogacollective.example' },
+    likedYouBack: true,
+    lastActiveDays: 3,
+    responseRate: 79,
+    mark: { initials: 'EY', color: '#8a5f7a' },
+    goals: ['cross-industry', 'long-term', 'new-demographic'],
+  },
+  {
+    id: 25,
+    name: 'Cartwright Hardware',
+    shortName: 'Cartwright',
+    category: 'Hardware',
+    overlapPct: 14,
+    sequential: "14% overlap, mostly weekend trade customers.",
+    upliftYou: 6,
+    upliftThem: 8,
+    terms: "Trade morning: a discounted flask refill for anyone with a Cartwright receipt.",
+    tier: 1,
+    monthsActive: 1,
+    tierRationale:
+      "A new proposal on a narrow weekend slice of both bases.",
+    contact: { name: 'Roy Salazar', role: 'Owner', email: 'roy@cartwrighthardware.example' },
+    likedYouBack: false,
+    lastActiveDays: 38,
+    responseRate: 21,
+    mark: { initials: 'CH', color: '#6f6f5a' },
+    goals: ['cross-industry'],
   },
 ]
 

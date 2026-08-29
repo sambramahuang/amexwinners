@@ -746,3 +746,20 @@
 @media (prefers-reduced-motion: reduce) {
   .swipe-hint, .swipe-hint-side svg { animation: none; }
 }
+
+/* Which of the merchant's stated goals this candidate serves. */
+.swipe-card-goals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.goal-chip {
+  padding: 4px 10px;
+  border: 1px solid rgba(18, 133, 122, 0.28);
+  background: rgba(18, 133, 122, 0.09);
+  color: #0f6f66;
+  font-size: 11px;
+  font-weight: 500;
+}

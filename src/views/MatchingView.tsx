@@ -7,12 +7,18 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react'
 import type { Role } from '../App'
-import { MATCH_CANDIDATES, type MatchCandidate } from '../data/graphEngineData'
+import {
+  GOAL_LABELS,
+  MATCH_CANDIDATES,
+  type MatchCandidate,
+  type PartnershipGoal,
+} from '../data/graphEngineData'
 import CornerBrackets from '../components/CornerBrackets'
 import MatchModal from '../components/MatchModal'
 import MerchantMark from '../components/MerchantMark'
 import { scoreBand, scoreMatch, scoreTone } from '../utils/matchScore'
 import ConsentGate from '../components/ConsentGate'
+import PreferencesStep from '../components/PreferencesStep'
 import './MatchingView.css'
 
 const SWIPE_THRESHOLD = 120
@@ -21,6 +27,7 @@ const EXIT_DURATION_MS = 320
 
 const CONSENT_KEY = 'connexion.matchingConsent.v2'
 const SWIPE_HINT_KEY = 'connexion.swipeHintSeen.v1'
+const GOALS_KEY = 'connexion.goals.v1'
 
 /** The date consent was given, or null if it has not been. */
 function loadConsent(): string | null {
@@ -69,6 +76,15 @@ export default function MatchingView({ role }: MatchingViewProps) {
   const [showSwipeHint, setShowSwipeHint] = useState(false)
   const hintSeen = useRef(false)
   const [panel, setPanel] = useState<'discover' | 'requests'>('discover')
+  const [goals, setGoals] = useState<PartnershipGoal[] | null>(() => {
+    try {
+      const raw = localStorage.getItem(GOALS_KEY)
+      return raw ? (JSON.parse(raw) as PartnershipGoal[]) : null
+    } catch {
+      return null
+    }
+  })
+  const [editingGoals, setEditingGoals] = useState(false)
   const [modalCard, setModalCard] = useState<RankedCandidate | null>(null)
   const [previewCard, setPreviewCard] = useState<RankedCandidate | null>(null)
   const [consentedOn, setConsentedOn] = useState<string | null>(() => loadConsent())
@@ -76,13 +92,18 @@ export default function MatchingView({ role }: MatchingViewProps) {
   const consented = consentedOn !== null
 
   // Ranked on the closed-loop transaction signal alone.
-  const rankedCandidates = useMemo<RankedCandidate[]>(
-    () =>
-      [...MATCH_CANDIDATES].sort(
-        (a, b) => scoreMatch(b).total - scoreMatch(a).total,
-      ),
-    [],
-  )
+  const rankedCandidates = useMemo<RankedCandidate[]>(() => {
+    const wanted = goals ?? []
+    const served = (c: MatchCandidate) =>
+      wanted.length === 0 ? 0 : c.goals.filter((g) => wanted.includes(g)).length
+    return [...MATCH_CANDIDATES].sort((a, b) => {
+      // Every merchant a merchant asked for comes first, best score inside each
+      // group. The score itself is untouched by what they said they wanted.
+      const byGoal = served(b) - served(a)
+      if (byGoal !== 0) return byGoal
+      return scoreMatch(b).total - scoreMatch(a).total
+    })
+  }, [goals])
 
   const liked = MATCH_CANDIDATES.filter((c) => likedIds.includes(c.id))
   const mutual = liked.filter((c) => c.likedYouBack)
@@ -216,8 +237,19 @@ export default function MatchingView({ role }: MatchingViewProps) {
     resetQueue()
   }
 
-  function acceptConsent() {
+  function saveGoals(next: PartnershipGoal[]) {
+    setGoals(next)
+    setEditingGoals(false)
+    setQIndex(0)
     if (!hintSeen.current) setShowSwipeHint(true)
+    try {
+      localStorage.setItem(GOALS_KEY, JSON.stringify(next))
+    } catch {
+      /* localStorage unavailable, so preferences will not persist */
+    }
+  }
+
+  function acceptConsent() {
     const today = new Date().toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'long',
@@ -257,7 +289,19 @@ export default function MatchingView({ role }: MatchingViewProps) {
           />
         )}
 
-        {consented && !reviewingConsent && (
+        {consented && goals === null && !reviewingConsent && (
+          <PreferencesStep onDone={saveGoals} onSkip={() => saveGoals([])} />
+        )}
+
+        {consented && editingGoals && !reviewingConsent && (
+          <PreferencesStep
+            onDone={saveGoals}
+            onSkip={() => setEditingGoals(false)}
+            initial={goals ?? []}
+          />
+        )}
+
+        {consented && goals !== null && !editingGoals && !reviewingConsent && (
           <div className="panel-tabs">
             <button
               className={`panel-tab ${panel === 'discover' ? 'is-active' : ''}`}
@@ -275,7 +319,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
           </div>
         )}
 
-        {consented && !reviewingConsent && panel === 'requests' && (
+        {consented && goals !== null && !editingGoals && !reviewingConsent && panel === 'requests' && (
           <RequestPanel
             mutual={mutual}
             waiting={waiting}
@@ -284,7 +328,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
           />
         )}
 
-        {consented && !reviewingConsent && panel === 'discover' && !matchDone && (
+        {consented && goals !== null && !editingGoals && !reviewingConsent && panel === 'discover' && !matchDone && (
           <>
             <div className="card-stack" style={stackHeight ? { height: stackHeight } : undefined}>
               {peek2 && <div className="stack-card peek-2" />}
@@ -359,6 +403,18 @@ export default function MatchingView({ role }: MatchingViewProps) {
                     <div className="score-dial-note">Match score out of 100</div>
                   </div>
 
+                  {goals && goals.length > 0 && (
+                    <div className="swipe-card-goals">
+                      {current.goals
+                        .filter((g) => goals.includes(g))
+                        .map((g) => (
+                          <span className="goal-chip" key={g}>
+                            {GOAL_LABELS[g]}
+                          </span>
+                        ))}
+                    </div>
+                  )}
+
                   <div className="swipe-card-sequential">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#006fcf" strokeWidth="1.5">
                       <circle cx="12" cy="12" r="10" />
@@ -398,7 +454,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
           </>
         )}
 
-        {consented && !reviewingConsent && panel === 'discover' && matchDone && (
+        {consented && goals !== null && !editingGoals && !reviewingConsent && panel === 'discover' && matchDone && (
           <div className="queue-done">
             <div className="queue-done-title">Queue cleared</div>
             <p>
@@ -417,7 +473,7 @@ export default function MatchingView({ role }: MatchingViewProps) {
         )}
       </div>
 
-      {consented && !reviewingConsent && (
+      {consented && goals !== null && !editingGoals && !reviewingConsent && (
         <aside className="matching-sidebar">
           <div className="sidebar-card">
             <div className="sidebar-label">This session</div>
@@ -441,6 +497,21 @@ export default function MatchingView({ role }: MatchingViewProps) {
               onClick={() => setReviewingConsent(true)}
             >
               Review or withdraw
+            </button>
+          </div>
+
+          <div className="sidebar-card">
+            <div className="sidebar-label">Looking for</div>
+            <p className="sidebar-consent-status">
+              {goals && goals.length > 0
+                ? goals.map((g) => GOAL_LABELS[g]).join('. ') + '.'
+                : 'Everything. The queue is ordered by match score alone.'}
+            </p>
+            <button
+              className="btn btn-ghost sidebar-consent-btn"
+              onClick={() => setEditingGoals(true)}
+            >
+              Change
             </button>
           </div>
 

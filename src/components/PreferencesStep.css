@@ -1,0 +1,102 @@
+.prefs {
+  position: relative;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 32px 34px 28px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  animation: fadeUp 0.32s ease backwards;
+}
+
+.prefs-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.prefs-title {
+  margin: 9px 0 0;
+  font-family: var(--font-display);
+  font-size: 27px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.prefs-intro {
+  margin: 12px 0 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text-70);
+  max-width: 56ch;
+}
+
+.prefs-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 24px 0 0;
+}
+
+.prefs-option {
+  display: flex;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  cursor: pointer;
+  animation: fadeUp 0.34s ease backwards;
+  transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+}
+
+.prefs-option:hover {
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+.prefs-option.is-picked {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.prefs-option input {
+  margin-top: 3px;
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.prefs-option-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.prefs-option-title {
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+.prefs-option-detail {
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--text-65);
+}
+
+.prefs-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .prefs, .prefs-option { animation: none; }
+  .prefs-option:hover { transform: none; }
+}
