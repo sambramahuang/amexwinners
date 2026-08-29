@@ -166,18 +166,26 @@ function drawFrame(ctx: CanvasRenderingContext2D, W: number, H: number) {
   // Wide enough to clear the card's own corner radius (CORNER, well above
   // the frame's straight corner point) so the rule doesn't get clipped.
   const m = 52
+  // Rounded to match the card's own corner, rather than a sharp rectangle
+  // sitting inside a rounded plate.
+  const r = 40
   ctx.save()
   ctx.strokeStyle = 'rgba(215, 218, 224, 0.85)'
   ctx.lineWidth = 5
-  ctx.strokeRect(m, m, W - m * 2, H - m * 2)
+  ctx.beginPath()
+  ctx.roundRect(m, m, W - m * 2, H - m * 2, r)
+  ctx.stroke()
   ctx.lineWidth = 1.8
-  ctx.strokeRect(m + 11, m + 11, W - (m + 11) * 2, H - (m + 11) * 2)
+  ctx.beginPath()
+  ctx.roundRect(m + 11, m + 11, W - (m + 11) * 2, H - (m + 11) * 2, r - 8)
+  ctx.stroke()
 
   // Fine ticks between the rules, which is what gives an engraved border its
-  // texture at a distance.
+  // texture at a distance. Kept clear of the rounded corners (r, plus a
+  // margin) so they only mark the genuinely straight runs of the rule.
   ctx.lineWidth = 1
   ctx.strokeStyle = 'rgba(215, 218, 224, 0.45)'
-  for (let x = m + 16; x < W - m - 16; x += 9) {
+  for (let x = m + r + 6; x < W - m - r - 6; x += 9) {
     ctx.beginPath()
     ctx.moveTo(x, m + 4)
     ctx.lineTo(x, m + 8)
@@ -185,7 +193,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, W: number, H: number) {
     ctx.lineTo(x, H - m - 8)
     ctx.stroke()
   }
-  for (let y = m + 16; y < H - m - 16; y += 9) {
+  for (let y = m + r + 6; y < H - m - r - 6; y += 9) {
     ctx.beginPath()
     ctx.moveTo(m + 4, y)
     ctx.lineTo(m + 8, y)
@@ -490,8 +498,22 @@ function backTexture() {
   ctx.fillStyle = g
   ctx.fillRect(0, 0, W, H)
   drawHexes(ctx, W, H)
+  // Lighter than the front's: there's no chip, medallion or wordmark here
+  // to sit on top of it and break it up, so at full strength it reads as
+  // fingerprint-whorl clutter rather than a subtle engraved pattern.
+  ctx.save()
+  ctx.globalAlpha = 0.45
+  drawGuilloche(ctx, W, H)
+  ctx.restore()
+  drawFrame(ctx, W, H)
 
-  ctx.fillStyle = '#14181e'
+  // Magnetic stripe: a metallic sheen across it, not flat black, or it
+  // reads as a gap in the plate rather than a stripe sitting on it.
+  const stripe = ctx.createLinearGradient(0, 0, W, 0)
+  stripe.addColorStop(0, '#1c1e22')
+  stripe.addColorStop(0.5, '#3d4046')
+  stripe.addColorStop(1, '#1c1e22')
+  ctx.fillStyle = stripe
   ctx.fillRect(0, H * 0.12, W, H * 0.2)
 
   ctx.fillStyle = '#f4f5f7'
@@ -505,6 +527,12 @@ function backTexture() {
   ctx.fillStyle = '#f4f5f7'
   ctx.font = '500 44px "IBM Plex Mono", ui-monospace, monospace'
   ctx.fillText('4021', W * 0.752, H * 0.545)
+
+  ctx.fillStyle = 'rgba(215, 218, 224, 0.55)'
+  ctx.font = '500 26px Futura, "Futura PT", Jost, system-ui, sans-serif'
+  ctx.letterSpacing = '1px'
+  ctx.fillText('CONNEXION SUPPORT  ·  1-800-555-0199  ·  support@connexion.example', W * 0.08, H * 0.65)
+  ctx.letterSpacing = '0px'
 
   ctx.fillStyle = 'rgba(215,218,224,0.5)'
   ctx.font = '400 24px Futura, "Futura PT", Jost, system-ui, sans-serif'
