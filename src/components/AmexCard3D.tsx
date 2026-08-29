@@ -9,7 +9,7 @@ import './AmexCard3D.css'
 const CARD_W = 3.4
 const CARD_H = CARD_W / 1.586
 const CARD_D = 0.038
-const CORNER = 0.2
+const CORNER = 0.26
 
 // Black: a near-black brushed metal face, engraved in a light silver ink
 // rather than dark on light.
@@ -131,7 +131,9 @@ function drawChip(ctx: CanvasRenderingContext2D, x: number, y: number, w: number
 
 /** Double-ruled frame with corner flourishes, the way engraved stock is bordered. */
 function drawFrame(ctx: CanvasRenderingContext2D, W: number, H: number) {
-  const m = 44
+  // Wide enough to clear the card's own corner radius (CORNER, well above
+  // the frame's straight corner point) so the rule doesn't get clipped.
+  const m = 52
   ctx.save()
   ctx.strokeStyle = 'rgba(215, 218, 224, 0.85)'
   ctx.lineWidth = 5
@@ -304,6 +306,34 @@ function stripWhiteBackground(img: HTMLImageElement): HTMLCanvasElement {
   return c
 }
 
+/**
+ * The crest's only two colors are its blue fill and white line art. Rather
+ * than threshold them (which bands the antialiased edge between the two),
+ * each opaque pixel is projected onto the blue-to-white axis and remapped
+ * to the same position on a black-to-white axis, so the disc goes black,
+ * the line art stays white, and the antialiasing in between stays smooth.
+ */
+function blueToBlack(canvas: HTMLCanvasElement): HTMLCanvasElement {
+  const ctx = canvas.getContext('2d')!
+  const { width: w, height: h } = canvas
+  const imageData = ctx.getImageData(0, 0, w, h)
+  const d = imageData.data
+  const blue = [0, 132, 179]
+  const span = [255 - blue[0], 255 - blue[1], 255 - blue[2]]
+  const denom = span[0] ** 2 + span[1] ** 2 + span[2] ** 2
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i + 3] === 0) continue
+    const dot = (d[i] - blue[0]) * span[0] + (d[i + 1] - blue[1]) * span[1] + (d[i + 2] - blue[2]) * span[2]
+    const t = Math.max(0, Math.min(1, dot / denom))
+    const v = Math.round(t * 255)
+    d[i] = v
+    d[i + 1] = v
+    d[i + 2] = v
+  }
+  ctx.putImageData(imageData, 0, 0)
+  return canvas
+}
+
 // Loaded once and cached module-wide: every card instance shares the same
 // crest rather than re-fetching or re-processing it.
 let crestPromise: Promise<HTMLCanvasElement | null> | null = null
@@ -311,7 +341,7 @@ function loadCrest(): Promise<HTMLCanvasElement | null> {
   if (!crestPromise) {
     crestPromise = new Promise((resolve) => {
       const img = new Image()
-      img.onload = () => resolve(stripWhiteBackground(img))
+      img.onload = () => resolve(blueToBlack(stripWhiteBackground(img)))
       img.onerror = () => resolve(null) // fall back to the drawn medallion rather than break the card
       img.src = amexCrestSrc
     })
