@@ -1,27 +1,23 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { TIER_LABELS, type MatchCandidate } from '../data/graphEngineData'
-import type { PersonalityProfile } from '../data/personalityQuiz'
-import { redactCandidateName } from '../utils/redactCandidateName'
+import EmailComposer from './EmailComposer'
+import { buildMerchantIntroEmail } from '../utils/outreachEmails'
+import { scoreMatch } from '../utils/matchScore'
 import CornerBrackets from './CornerBrackets'
 import { BenefitBarChart, UpliftTrendChart } from './BenefitCharts'
 import './MatchModal.css'
 
 interface MatchModalProps {
   candidate: MatchCandidate
-  personalityProfile: PersonalityProfile | null
   onClose: () => void
   mode?: 'match' | 'preview'
-  /** True pre-match — hides the counterpart's identity from another SME, keeping only its category. */
-  hideIdentity?: boolean
 }
 
 export default function MatchModal({
   candidate,
-  personalityProfile,
   onClose,
   mode = 'match',
-  hideIdentity = false,
 }: MatchModalProps) {
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
@@ -31,9 +27,9 @@ export default function MatchModal({
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [onClose])
 
-  const displayName = hideIdentity ? candidate.category : candidate.name
-  const displayShortName = hideIdentity ? candidate.category : candidate.shortName
-  const redact = (text: string) => (hideIdentity ? redactCandidateName(text, candidate) : text)
+  const [compose, setCompose] = useState(false)
+  const displayName = candidate.name
+  const displayShortName = candidate.shortName
 
   return createPortal(
     <div className="match-modal-backdrop" onClick={onClose}>
@@ -50,13 +46,12 @@ export default function MatchModal({
         <div className="match-modal-title">
           Basin Coffee Roasters × {displayName}
         </div>
-        <p className="match-modal-note">{redact(candidate.balanceNote)}</p>
 
         <div className="match-modal-tier">
           <span className={`tier-badge tier-badge-${candidate.tier}`}>{TIER_LABELS[candidate.tier]}</span>
           <span className="match-modal-tier-months">{candidate.monthsActive} mo. active</span>
         </div>
-        <p className="match-modal-tier-rationale">{redact(candidate.tierRationale)}</p>
+        <p className="match-modal-tier-rationale">{candidate.tierRationale}</p>
 
         <div className="match-modal-section">
           <div className="match-modal-section-label">Predicted benefits</div>
@@ -80,37 +75,68 @@ export default function MatchModal({
 
         {candidate.tier === 3 && candidate.tier3Suggestion && (
           <div className="match-modal-tier3">
-            <div className="match-modal-tier3-label">Structural relationship — starter suggestion</div>
-            <p>{redact(candidate.tier3Suggestion)}</p>
+            <div className="match-modal-tier3-label">Structural relationship, starter suggestion</div>
+            <p>{candidate.tier3Suggestion}</p>
             <p className="match-modal-tier3-disclaimer">
-              A non-binding starting point — the merchants handle the actual arrangement themselves.
+              A non-binding starting point. The merchants handle the actual arrangement themselves.
             </p>
           </div>
         )}
 
         <div className="match-modal-ai">
           <div className="match-modal-ai-label">
-            AI explainability layer{personalityProfile && ' · transaction data + Basin’s partnership profile'}
+            AI explainability layer
           </div>
-          <p>{redact(candidate.sequential)}</p>
+          <p>{candidate.sequential}</p>
         </div>
 
-        <div className="match-modal-terms">Suggested terms: {redact(candidate.terms)}</div>
+        <div className="match-modal-terms">Suggested terms: {candidate.terms}</div>
+        {mode === 'preview' ? (
+          <div className="match-modal-breakdown">
+            <div className="match-modal-section-label">How this score was built</div>
+            {scoreMatch(candidate).factors.map((f) => (
+              <div className="factor" key={f.key}>
+                <div className="factor-head">
+                  <span className="factor-label">
+                    {f.label}
+                    <span className="factor-weight">weight {Math.round(f.weight * 100)}%</span>
+                  </span>
+                  <span className="factor-value">{f.value}</span>
+                </div>
+                <div className="factor-track">
+                  <div className="factor-fill" style={{ width: `${f.value}%` }} />
+                </div>
+                <p className="factor-detail">{f.detail}</p>
+              </div>
+            ))}
+            <p className="match-modal-locked">
+              Writing to {candidate.shortName} unlocks once they like you back.
+            </p>
+          </div>
+        ) : (
+          <div className="match-modal-outreach">
+            {compose ? (
+              <EmailComposer
+                email={buildMerchantIntroEmail(candidate)}
+                sendLabel={`Send to ${candidate.contact.name.split(' ')[0]}`}
+                sentLabel="Sent"
+              />
+            ) : (
+              <button className="btn btn-primary match-modal-compose" onClick={() => setCompose(true)}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
+                  <rect x="2" y="4" width="20" height="16" rx="2" />
+                  <path d="m2 7 10 6 10-6" />
+                </svg>
+                Write to them
+              </button>
+            )}
+          </div>
+        )}
+
         <div className="match-modal-actions">
-          {mode === 'preview' ? (
-            <button className="btn btn-primary" onClick={onClose}>
-              Close
-            </button>
-          ) : (
-            <>
-              <button className="btn btn-ghost" onClick={onClose}>
-                Keep reviewing
-              </button>
-              <button className="btn btn-primary" onClick={onClose}>
-                Add to pipeline
-              </button>
-            </>
-          )}
+          <button className="btn btn-ghost" onClick={onClose}>
+            Close
+          </button>
         </div>
       </div>
     </div>,

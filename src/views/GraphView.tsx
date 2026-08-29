@@ -38,12 +38,12 @@ export default function GraphView() {
             ))}
           </div>
           <p className="graph-legend-note">
-            The faint bridge between clusters is a weak cross-cluster signal — thin enough that
+            The faint bridge between clusters is a weak cross-cluster signal, thin enough that
             Prong 1 won't act on it yet, but the graph keeps it in view.
           </p>
           <p className="graph-legend-note">
             The doubled gold line (Basin ↔ Spinebound) marks a match that has grown past a single
-            offer into a Tier 3 structural relationship — see the Matching view for details.
+            offer into a Tier 3 structural relationship. See the Matching view for details.
           </p>
         </div>
       </div>

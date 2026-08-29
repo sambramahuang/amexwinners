@@ -1,0 +1,407 @@
+.standing-main {
+  max-width: 940px;
+  margin: 0 auto;
+  padding: 44px 32px 60px;
+}
+
+.standing-head {
+  max-width: 60ch;
+  margin-bottom: 26px;
+}
+
+.standing-head .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.standing-head h1 {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.standing-head p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--text-70);
+}
+
+.sales-card {
+  position: relative;
+  padding: 30px 32px 26px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  animation: fadeUp 0.4s ease backwards;
+}
+
+.standing-rank {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.standing-rank-value {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.015em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.standing-rank-caption {
+  display: block;
+  margin-top: 10px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text-65);
+  max-width: 42ch;
+}
+
+/* Where the merchant sits on the cohort, with the median marked. */
+.standing-scale {
+  margin: 22px 0 20px;
+}
+
+.standing-scale-track {
+  position: relative;
+  height: 8px;
+  background: linear-gradient(
+    90deg,
+    rgba(11, 28, 51, 0.06),
+    rgba(0, 111, 207, 0.22)
+  );
+}
+
+.standing-scale-median {
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  bottom: -4px;
+  width: 1px;
+  background: var(--text-55);
+}
+
+.standing-scale-you {
+  position: absolute;
+  top: -5px;
+  width: 3px;
+  height: 18px;
+  background: var(--accent);
+  transform: translateX(-50%);
+  animation: scaleIn 0.7s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+  animation-delay: 260ms;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: translateX(-50%) scaleY(0.2); }
+  to   { opacity: 1; transform: translateX(-50%) scaleY(1); }
+}
+
+.standing-scale-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-55);
+}
+
+.sales-compare {
+  display: flex;
+  align-items: flex-end;
+  gap: 36px;
+  flex-wrap: wrap;
+  padding-bottom: 22px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.sales-figure-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-55);
+  margin-bottom: 6px;
+}
+
+.sales-figure-value {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.sales-figure.is-peer .sales-figure-value {
+  color: var(--text-60);
+}
+
+.sales-gap {
+  padding: 7px 14px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sales-gap.is-behind {
+  background: var(--gold-dim);
+  color: var(--gold);
+}
+
+.sales-gap.is-ahead {
+  background: rgba(28, 136, 119, 0.12);
+  color: #12857a;
+}
+
+.sales-legend {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 6px;
+  font-size: 11.5px;
+  color: var(--text-60);
+}
+
+.sales-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.swatch {
+  width: 15px;
+  height: 2px;
+  display: inline-block;
+}
+
+.swatch-you { background: var(--accent); }
+.swatch-peers { background: #9fb0c4; }
+
+.sales-chart {
+  width: 100%;
+  height: 210px;
+  display: block;
+}
+
+.chart-line {
+  stroke-dasharray: 1600;
+  stroke-dashoffset: 1600;
+  animation: drawLine 1.5s cubic-bezier(0.3, 0.8, 0.3, 1) forwards;
+}
+
+.chart-line-you {
+  stroke: var(--accent);
+  stroke-width: 2.6;
+  animation-delay: 340ms;
+}
+
+.chart-line-peers {
+  stroke: #9fb0c4;
+  stroke-width: 2;
+  stroke-dasharray: 6 5;
+  animation: none;
+  stroke-dashoffset: 0;
+}
+
+@keyframes drawLine {
+  to { stroke-dashoffset: 0; }
+}
+
+.chart-point {
+  fill: var(--accent);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.chart-point.is-on { opacity: 1; }
+
+.sales-plot {
+  position: relative;
+}
+
+/* The readout sits on the point it describes, above the line, with a stem
+   down to the marker so there is no doubt which month it belongs to. */
+.sales-tip {
+  position: absolute;
+  transform: translate(-50%, calc(-100% - 14px));
+  z-index: 3;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px 11px 9px;
+  min-width: 0;
+  white-space: nowrap;
+  background: var(--text);
+  color: #fff;
+  box-shadow: 0 16px 30px -18px rgba(11, 28, 51, 0.9);
+  animation: tipIn 0.16s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+}
+
+@keyframes tipIn {
+  from { opacity: 0; transform: translate(-50%, calc(-100% - 8px)); }
+  to   { opacity: 1; transform: translate(-50%, calc(-100% - 14px)); }
+}
+
+/* Stem from the card down to the point. */
+.sales-tip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 1px;
+  height: 10px;
+  background: var(--text);
+  opacity: 0.42;
+}
+
+.sales-tip-month {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.sales-tip-value {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.sales-tip-peer {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.66);
+  font-variant-numeric: tabular-nums;
+}
+
+.sales-tip-gap {
+  margin-top: 5px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sales-tip-gap.is-behind { color: #f0c46a; }
+.sales-tip-gap.is-ahead { color: #6fd6c4; }
+
+.sales-guide {
+  position: absolute;
+  top: 8px;
+  bottom: 10px;
+  width: 1px;
+  background: rgba(0, 111, 207, 0.22);
+  pointer-events: none;
+}
+
+.sales-months {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-soft);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--text-55);
+}
+
+.sales-months-hint {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.standing-action {
+  position: relative;
+  margin-top: 16px;
+  padding: 26px 28px;
+  border: 1px solid rgba(156, 107, 31, 0.32);
+  background: var(--gold-dim);
+  animation: fadeUp 0.4s ease backwards;
+  animation-delay: 120ms;
+}
+
+.standing-action-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.standing-action-flag {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.standing-action-figure {
+  font-family: var(--font-display);
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.standing-action-copy {
+  margin: 12px 0 0;
+  font-size: 14.5px;
+  line-height: 1.65;
+  color: var(--text-80);
+  max-width: 68ch;
+}
+
+.standing-action-rec {
+  margin: 12px 0 18px;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--text-75);
+  max-width: 68ch;
+}
+
+.standing-action-count {
+  font-family: var(--font-mono);
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.standing-foot {
+  margin: 24px 0 0;
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--text-55);
+  max-width: 74ch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sales-card,
+  .standing-action { animation: none; }
+  .chart-line { stroke-dashoffset: 0; animation: none; }
+}
+
+@media (max-width: 720px) {
+  .sales-compare { gap: 22px; }
+  .sales-gap { margin-left: 0; }
+}

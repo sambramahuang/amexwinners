@@ -27,7 +27,7 @@ export interface GraphSceneConfig {
   edges: [number, number][]
   /** Weak/unconfirmed relationships, rendered as dashed lines. */
   dashedEdges?: [number, number][]
-  /** Tier-3 structural-relationship edges — rendered with a second parallel gold line. */
+  /** Tier-3 structural-relationship edges, rendered with a second parallel gold line. */
   tier3Edges?: [number, number][]
   gaps?: GraphGapConfig[]
 }
@@ -71,18 +71,18 @@ export interface IndustryLegendEntry {
 }
 
 export const INDUSTRY_LEGEND: IndustryLegendEntry[] = [
-  { label: 'Café — Basin Coffee', colorHex: '#006fcf' },
-  { label: 'Bookstore — Spinebound', colorHex: '#4fa3e8' },
-  { label: 'Florist — Nettle & Bloom', colorHex: '#a688f0' },
-  { label: 'Fitness — Ridgeline Yoga', colorHex: '#e8b54d' },
-  { label: 'Bike shop — Loom Bicycle', colorHex: '#d97757' },
-  { label: 'Tailor — Anchor & Awl', colorHex: '#c9a86a' },
-  { label: 'Restaurant — Salt & Barrel', colorHex: '#2bb8a3' },
-  { label: 'Butcher — Tidewater Butchery', colorHex: '#b6493f' },
-  { label: 'Brewery — Anchorline Brewing', colorHex: '#c9962c' },
-  { label: 'Kitchenware — Cinder & Slate', colorHex: '#6f8fa8' },
-  { label: 'Furniture — Loft & Ladder', colorHex: '#8a5a3b' },
-  { label: 'Record shop — Halcyon Records', colorHex: '#b06bc9' },
+  { label: 'Café · Basin Coffee', colorHex: '#006fcf' },
+  { label: 'Bookstore · Spinebound', colorHex: '#4fa3e8' },
+  { label: 'Florist · Nettle & Bloom', colorHex: '#a688f0' },
+  { label: 'Fitness · Ridgeline Yoga', colorHex: '#e8b54d' },
+  { label: 'Bike shop · Loom Bicycle', colorHex: '#d97757' },
+  { label: 'Tailor · Anchor & Awl', colorHex: '#c9a86a' },
+  { label: 'Restaurant · Salt & Barrel', colorHex: '#2bb8a3' },
+  { label: 'Butcher · Tidewater Butchery', colorHex: '#b6493f' },
+  { label: 'Brewery · Anchorline Brewing', colorHex: '#c9962c' },
+  { label: 'Kitchenware · Cinder & Slate', colorHex: '#6f8fa8' },
+  { label: 'Furniture · Loft & Ladder', colorHex: '#8a5a3b' },
+  { label: 'Record shop · Halcyon Records', colorHex: '#b06bc9' },
 ]
 
 export interface GapLegendEntry {
@@ -91,8 +91,8 @@ export interface GapLegendEntry {
 }
 
 export const GAP_LEGEND: GapLegendEntry[] = [
-  { label: 'Downtown Loop — no gift shop', colorHex: '#c81e2e' },
-  { label: 'Riverside Row — no wellness merchant', colorHex: '#c81e2e' },
+  { label: 'Downtown Loop · no gift shop', colorHex: '#c81e2e' },
+  { label: 'Riverside Row · no wellness merchant', colorHex: '#c81e2e' },
 ]
 
 export const FULL_GRAPH: GraphSceneConfig = {
@@ -104,13 +104,13 @@ export const FULL_GRAPH: GraphSceneConfig = {
     { position: [1.6, 0, 0.9], color: 0xe8b54d, name: 'Ridgeline Yoga' },
     { position: [2.38, 0, -0.45], color: 0xd97757, name: 'Loom Bicycle' },
     { position: [0.82, 0, -0.45], color: 0xc9a86a, name: 'Anchor & Awl' },
-    // Harbor District — a fully-formed cluster with no structural gap, for contrast.
+    // Harbor District, a fully-formed cluster with no structural gap, for contrast.
     // Offset below the y=0 plane so it stays visually separated from Downtown Loop
     // at every rotation angle (rotation is around the Y axis, so Y separation holds).
     { position: [-3.2, -1.1, 0.9], color: 0x2bb8a3, name: 'Salt & Barrel' },
     { position: [-1.9, -1.1, -0.45], color: 0xb6493f, name: 'Tidewater Butchery' },
     { position: [-4.5, -1.1, -0.45], color: 0xc9962c, name: 'Anchorline Brewing' },
-    // Meridian Heights — another fully-formed cluster, no structural gap. Offset below,
+    // Meridian Heights, another fully-formed cluster, no structural gap. Offset below,
     // same as Harbor District, so neither collides with the gap markers above y=0.
     { position: [3.2, -1.1, 0.9], color: 0x6f8fa8, name: 'Cinder & Slate' },
     { position: [4.5, -1.1, -0.45], color: 0x8a5a3b, name: 'Loft & Ladder' },
@@ -136,7 +136,7 @@ export const FULL_GRAPH: GraphSceneConfig = {
     [2, 6],
     [5, 9],
   ],
-  // Basin ↔ Spinebound is the cluster's Tier-3 structural relationship (see MATCH_CANDIDATES).
+  // Basin and Spinebound share the cluster's Tier 3 structural relationship (see MATCH_CANDIDATES).
   tier3Edges: [[0, 1]],
   gaps: [
     { position: [-1.6, 1.0, 0], color: 0xc81e2e, connectedNodeIndexes: [0, 1, 2], label: 'No gift shop' },

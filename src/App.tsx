@@ -1,37 +1,44 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import Nav from './components/Nav'
 import HexagonBackground from './components/HexagonBackground'
+import GrowthRadarView from './views/GrowthRadarView'
 import OverviewView from './views/OverviewView'
+import StandingView from './views/StandingView'
 import MatchingView from './views/MatchingView'
 import RecruitPitchView from './views/RecruitPitchView'
 import RoleSelectView from './views/RoleSelectView'
 import './App.css'
 
-// The 3D graph views pull in three.js — code-split them so it's only
+// The 3D graph views pull in three.js, so they are code-split and only
 // downloaded when a visitor actually opens Graph or Gap Radar.
 const GraphView = lazy(() => import('./views/GraphView'))
 const GapRadarView = lazy(() => import('./views/GapRadarView'))
 
-export type View = 'overview' | 'graph' | 'match' | 'gaps' | 'pitch'
+export type View = 'growth' | 'overview' | 'graph' | 'match' | 'gaps' | 'pitch' | 'standing'
 export type Role = 'amex' | 'sme'
 
-const VIEWS: View[] = ['overview', 'graph', 'match', 'gaps', 'pitch']
-const ROLE_KEY = 'circuit.role.v1'
+const VIEWS: View[] = ['growth', 'overview', 'graph', 'match', 'gaps', 'pitch', 'standing']
+const ROLE_KEY = 'connexion.role.v1'
+
+const SME_VIEWS: View[] = ['standing', 'match']
 
 const NAV_ITEMS_BY_ROLE: Record<Role, { id: View; label: string }[]> = {
   amex: [
+    { id: 'growth', label: 'Growth Radar' },
     { id: 'overview', label: 'Overview' },
     { id: 'graph', label: 'Graph' },
-    { id: 'match', label: 'Matching' },
     { id: 'gaps', label: 'Gap Radar' },
     { id: 'pitch', label: 'Recruit Pitch' },
   ],
-  sme: [{ id: 'match', label: 'Matching' }],
+  sme: [
+    { id: 'standing', label: 'Your standing' },
+    { id: 'match', label: 'Matching' },
+  ],
 }
 
 function readViewFromHash(): View {
   const hash = window.location.hash.slice(1)
-  return (VIEWS as string[]).includes(hash) ? (hash as View) : 'overview'
+  return (VIEWS as string[]).includes(hash) ? (hash as View) : 'growth'
 }
 
 function loadRole(): Role | null {
@@ -47,7 +54,7 @@ function saveRole(role: Role) {
   try {
     localStorage.setItem(ROLE_KEY, role)
   } catch {
-    /* localStorage unavailable — role just won't persist across visits */
+    /* localStorage unavailable, so the role just will not persist across visits */
   }
 }
 
@@ -82,7 +89,7 @@ export default function App() {
   function chooseRole(nextRole: Role) {
     saveRole(nextRole)
     setRole(nextRole)
-    setView(nextRole === 'sme' ? 'match' : 'overview')
+    setView(nextRole === 'sme' ? 'standing' : 'growth')
   }
 
   function switchRole() {
@@ -95,6 +102,24 @@ export default function App() {
     setView(nextView)
   }
 
+  // Matching is the merchant's screen, so an admin landing on #match is sent
+  // back to their own landing page rather than shown a queue that is not theirs.
+  const effectiveView: View =
+    role === 'sme'
+      ? SME_VIEWS.includes(view)
+        ? view
+        : 'standing'
+      : view === 'match'
+        ? 'growth'
+        : view
+
+  // A redirected view should not leave a stale hash behind it. This has to sit
+  // above the early return below: a hook after it would change the hook count
+  // the moment a role is chosen, which React treats as a torn tree.
+  useEffect(() => {
+    if (role && effectiveView !== view) setView(effectiveView)
+  })
+
   if (!role) {
     return (
       <div className="app-shell">
@@ -103,8 +128,6 @@ export default function App() {
       </div>
     )
   }
-
-  const effectiveView = role === 'sme' ? 'match' : view
 
   return (
     <div className="app-shell">
@@ -117,13 +140,17 @@ export default function App() {
         onSwitchRole={switchRole}
       />
 
+      {role === 'amex' && effectiveView === 'growth' && <GrowthRadarView onNavigate={setView} />}
+      {role === 'sme' && effectiveView === 'standing' && (
+        <StandingView onNavigate={setView} />
+      )}
       {role === 'amex' && view === 'overview' && <OverviewView onNavigate={setView} />}
       {role === 'amex' && view === 'graph' && (
         <Suspense fallback={null}>
           <GraphView />
         </Suspense>
       )}
-      {effectiveView === 'match' && <MatchingView role={role} />}
+      {role === 'sme' && effectiveView === 'match' && <MatchingView />}
       {role === 'amex' && view === 'gaps' && (
         <Suspense fallback={null}>
           <GapRadarView onGeneratePitch={generatePitch} />
@@ -134,7 +161,7 @@ export default function App() {
       )}
 
       <footer className="app-footer">
-        Synthetic demo data — all merchants, customers, scores, and uplift figures are invented
+        Synthetic demo data. All merchants, customers, scores, and uplift figures are invented
         to illustrate the system's reasoning, not real Amex data.
       </footer>
     </div>

@@ -27,7 +27,13 @@ export default function Nav({ view, onChange, items, role, onSwitchRole }: NavPr
     <div className="nav-wrap">
       <nav className="top-nav">
         <span className="brand">
-          Circuit <span className="brand-slash">/</span> Merchant Graph
+          <svg className="brand-mark" viewBox="0 0 28 28" aria-hidden="true">
+            {/* Two merchants and the edge between them, which is the product. */}
+            <line x1="7" y1="18.5" x2="21" y2="9.5" stroke="currentColor" strokeWidth="1.6" />
+            <circle cx="7" cy="18.5" r="4" fill="currentColor" />
+            <circle cx="21" cy="9.5" r="4" fill="none" stroke="currentColor" strokeWidth="1.8" />
+          </svg>
+          <span className="brand-word">Connexion</span>
           <span className="brand-role-badge">{role === 'amex' ? 'Amex Admin' : 'SME'}</span>
         </span>
 

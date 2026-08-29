@@ -130,16 +130,6 @@ export function UpliftTrendChart({ youLabel, themLabel, youValue, themValue }: U
           Month 6
         </text>
       </svg>
-      <div className="benefit-legend">
-        <span className="benefit-legend-item">
-          <i className="benefit-swatch benefit-swatch-you" />
-          {youLabel}
-        </span>
-        <span className="benefit-legend-item">
-          <i className="benefit-swatch benefit-swatch-them" />
-          {themLabel}
-        </span>
-      </div>
     </div>
   )
 }
