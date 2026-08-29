@@ -1,61 +1,46 @@
-import { PROSPECT_TARGETS, type ProspectTarget } from '../data/graphEngineData'
-import type { UsMerchant } from '../data/usMerchants'
+import type { ProspectTarget } from '../data/graphEngineData'
+import { US_MERCHANTS, type UsMerchant } from '../data/usMerchants'
 
 /**
- * Bridges Growth Radar's market-wide dataset (every business, Amex or not,
- * read from card network and acquiring data) to Gap Radar's dataset (the
- * structural holes the matching graph finds among Amex's own merchants).
- *
- * The two are built from data Amex actually has: matching only sees
- * merchants who already take Amex, so a gap is always found and named
- * there first. Growth Radar then checks the wider market for a specific,
- * already fast-growing business in that same category and cluster's city
- * — there is no transaction or overlap data for a business that has never
- * been an Amex merchant, so that's as far as the evidence goes. Anything
- * beyond a category and city match would be inventing data we don't have.
+ * Bridges Gap Radar's dataset (structural holes found among Amex's own
+ * merchants) to market-wide card network data: for a gap Gap Radar has
+ * already named, which real, currently-growing businesses — Amex merchant
+ * or not — could actually fill it. Gap Radar's own prospect is always one
+ * hand-picked example; this is evidence beyond that one pick, from data
+ * Amex actually has. A business already on Amex is excluded since it isn't
+ * a recruit target.
  */
 
-/** The one cluster Gap Radar names that also has a real city in Growth Radar's dataset. */
+/** The one cluster Gap Radar names that also has a real city in this market-wide dataset. */
 const CLUSTER_CITY: Partial<Record<string, string>> = {
   'Downtown Loop': 'Chicago',
 }
 
-/**
- * Businesses the two synthetic datasets happen to name identically. A name
- * match is the strongest signal available: it means Growth Radar's
- * independent growth read and Gap Radar's cluster analysis landed on the
- * exact same business without being told to.
- */
+/** Businesses the two synthetic datasets happen to name identically — the strongest signal available. */
 const NAME_MATCH_PROSPECT_ID: Record<string, number> = {
   'cedar recovery': 4, // -> Cedar Recovery Co., the Riverside Row wellness gap
 }
 
-export interface GapMatch {
-  prospect: ProspectTarget
-  /** Index into PROSPECT_TARGETS, what RecruitPitchView and App key off of. */
-  prospectIdx: number
+export interface GrowingMatch {
+  merchant: UsMerchant
   /** 'name': the same business was flagged independently by both engines. */
   reason: 'name' | 'category'
 }
 
-/** Growth Radar's evidence, if any, that this off-Amex business fills a gap Gap Radar has already found. */
-export function findGapMatch(merchant: UsMerchant): GapMatch | null {
-  if (merchant.onAmex) return null
+/** Real, currently-growing businesses that could fill this prospect's gap, ranked by growth. */
+export function findGrowingMatches(prospect: ProspectTarget): GrowingMatch[] {
+  const city = CLUSTER_CITY[prospect.cluster]
 
-  const byName = NAME_MATCH_PROSPECT_ID[merchant.name.toLowerCase()]
-  if (byName !== undefined) {
-    const prospectIdx = PROSPECT_TARGETS.findIndex((p) => p.id === byName)
-    if (prospectIdx >= 0) return { prospect: PROSPECT_TARGETS[prospectIdx], prospectIdx, reason: 'name' }
-  }
-
-  const categoryIdx = PROSPECT_TARGETS.findIndex(
-    (p) =>
-      CLUSTER_CITY[p.cluster] === merchant.city &&
-      p.category.toLowerCase() === merchant.category.toLowerCase(),
-  )
-  if (categoryIdx >= 0) {
-    return { prospect: PROSPECT_TARGETS[categoryIdx], prospectIdx: categoryIdx, reason: 'category' }
-  }
-
-  return null
+  return US_MERCHANTS.filter((m) => !m.onAmex)
+    .map((merchant): GrowingMatch | null => {
+      if (NAME_MATCH_PROSPECT_ID[merchant.name.toLowerCase()] === prospect.id) {
+        return { merchant, reason: 'name' }
+      }
+      if (city === merchant.city && merchant.category.toLowerCase() === prospect.category.toLowerCase()) {
+        return { merchant, reason: 'category' }
+      }
+      return null
+    })
+    .filter((m): m is GrowingMatch => m !== null)
+    .sort((a, b) => b.merchant.growthPct - a.merchant.growthPct)
 }

@@ -31,9 +31,9 @@ const PRONG_CARDS: ProngCard[] = [
     prong: 'Prong 2',
     title: 'Recruit pitch',
     description:
-      'For prospects with no transaction history yet: a category level projected preview, honestly labeled as predictive.',
-    linkLabel: 'Open recruit pitch',
-    view: 'pitch',
+      'For prospects with no transaction history yet: a category level projected preview, honestly labeled as predictive. Generated per prospect from Gap Radar.',
+    linkLabel: 'Open gap radar',
+    view: 'gaps',
   },
 ]
 

@@ -699,4 +699,89 @@ export const PROSPECT_TARGETS: ProspectTarget[] = [
       { name: 'Anchor & Awl Tailor', why: 'Shared foot traffic in the same three blocks.' },
     ],
   },
+  {
+    id: 5,
+    name: 'Whisker & Bramble Pet Co.',
+    category: 'Pet supply',
+    cluster: 'Old Mill Quarter',
+    reasoning:
+      'Millhouse Diner, Birchwood Apothecary, and Loft Nine Print & Copy cross-visit heavily, but no pet supply merchant serves the block.',
+    upliftRange: '+13 to 21%',
+    pitchCopy:
+      'Pet supply merchants entering diner-and-errand clusters like Old Mill Quarter typically pick up steady weekday trade from customers already running the same loop.',
+    contact: { name: 'Tamsin Okafor', role: 'Owner', email: 'tamsin@whiskerbramblepetco.example' },
+    waiting: [
+      { name: 'Millhouse Diner', why: 'Regulars run errands before or after breakfast, gap included.' },
+      { name: 'Birchwood Apothecary', why: 'Pet medication pickups already route customers past this block.' },
+      { name: 'Loft Nine Print & Copy', why: 'Shared foot traffic from the same three-block errand loop.' },
+    ],
+  },
+  {
+    id: 6,
+    name: 'Burrow Pet Supply',
+    category: 'Pet supply',
+    cluster: 'Old Mill Quarter',
+    reasoning:
+      'A second candidate for the same gap, with a smaller-format assortment that fits the block better than a big-box pet store.',
+    upliftRange: '+10 to 18%',
+    pitchCopy:
+      'Compact pet supply formats read as a natural fourth stop on an existing three-merchant errand loop, without needing customers to change their route.',
+    contact: { name: 'Deshawn Aldrich', role: 'Founder', email: 'deshawn@burrowpetsupply.example' },
+    waiting: [
+      { name: 'Millhouse Diner', why: 'Regulars run errands before or after breakfast, gap included.' },
+      { name: 'Birchwood Apothecary', why: 'Pet medication pickups already route customers past this block.' },
+      { name: 'Loft Nine Print & Copy', why: 'Shared foot traffic from the same three-block errand loop.' },
+    ],
+  },
+  {
+    id: 7,
+    name: 'Proof & Crumb Bakery',
+    category: 'Bakery',
+    cluster: 'Ferry Landing',
+    reasoning:
+      'Commuters cross-visit Ferry Landing Dry Cleaners, Cobblestone Shoe Repair, and Platform Nine News & Coffee on the way to the ferry, but no bakery serves the platform.',
+    upliftRange: '+16 to 24%',
+    pitchCopy:
+      'Bakeries placed at commuter-hub clusters like Ferry Landing typically see fast weekday-morning adoption from customers already moving through on a fixed schedule.',
+    contact: { name: 'Rosalind Achebe', role: 'Owner', email: 'rosalind@proofcrumbbakery.example' },
+    waiting: [
+      { name: 'Ferry Landing Dry Cleaners', why: 'Drop-off customers already pass the same platform corner each morning.' },
+      { name: 'Cobblestone Shoe Repair', why: 'Wait-time customers have nowhere nearby to grab breakfast.' },
+      { name: 'Platform Nine News & Coffee', why: 'Coffee-only customers are the clearest signal a bakery is missing.' },
+    ],
+  },
+  {
+    id: 8,
+    name: 'Millgate Bakehouse',
+    category: 'Bakery',
+    cluster: 'Ferry Landing',
+    reasoning:
+      "A second candidate for the same gap, with a grab-and-go format built for a commuter's fixed morning window rather than sit-down trade.",
+    upliftRange: '+12 to 19%',
+    pitchCopy:
+      "A grab-and-go bakehouse format matches the platform's actual dwell time better than a full café would, without competing on speed with the existing coffee cart.",
+    contact: { name: 'Cormac Whitlow', role: 'Founder', email: 'cormac@millgatebakehouse.example' },
+    waiting: [
+      { name: 'Ferry Landing Dry Cleaners', why: 'Drop-off customers already pass the same platform corner each morning.' },
+      { name: 'Cobblestone Shoe Repair', why: 'Wait-time customers have nowhere nearby to grab breakfast.' },
+      { name: 'Platform Nine News & Coffee', why: 'Coffee-only customers are the clearest signal a bakery is missing.' },
+    ],
+  },
+  {
+    id: 9,
+    name: 'Acorn & Owl Books',
+    category: "Children's bookstore",
+    cluster: 'Hollow Creek',
+    reasoning:
+      'Hollow Creek Nursery School, Tumble & Blocks Toy Co., and Creekside Pediatrics see heavy overlap in the same parent-and-child customer base, but no bookstore serves the block.',
+    upliftRange: '+14 to 22%',
+    pitchCopy:
+      "A children's bookstore entering a nursery-and-pediatrics cluster like Hollow Creek typically captures pickup-time and appointment-wait browsing that currently goes nowhere.",
+    contact: { name: 'Marisol Fenwick', role: 'Owner', email: 'marisol@acornowlbooks.example' },
+    waiting: [
+      { name: 'Hollow Creek Nursery School', why: 'Pickup-time browsing is currently unclaimed by any nearby merchant.' },
+      { name: 'Tumble & Blocks Toy Co.', why: 'Toy and book purchases are frequently paired in the same visit.' },
+      { name: 'Creekside Pediatrics', why: 'Waiting-room families are a steady, predictable browsing window.' },
+    ],
+  },
 ]

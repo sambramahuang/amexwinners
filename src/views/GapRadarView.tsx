@@ -1,12 +1,13 @@
-import { useState } from 'react'
-import type { View } from '../App'
+import { useLayoutEffect, useRef, useState } from 'react'
 import GraphCanvas from '../components/GraphCanvas'
 import { INDUSTRY_CLUSTERS } from '../data/graphSceneConfigs'
-import { PROSPECT_TARGETS } from '../data/graphEngineData'
+import { PROSPECT_TARGETS, type ProspectTarget } from '../data/graphEngineData'
+import { scoreProspect } from '../utils/prospectScore'
+import { findGrowingMatches } from '../utils/gapMatch'
 import './GapRadarView.css'
 
 interface GapRadarViewProps {
-  onGeneratePitch: (prospectIdx: number, view: View) => void
+  onGeneratePitch: (prospectIdx: number) => void
 }
 
 // Pixel distance between adjacent slots on the ring. Wide enough that a peek card's
@@ -21,10 +22,109 @@ function ringOffset(index: number, current: number, total: number): number {
   return wrapped > total / 2 ? wrapped - total : wrapped
 }
 
+function prospectsForCluster(label: string): { prospect: ProspectTarget; index: number }[] {
+  return PROSPECT_TARGETS.map((prospect, index) => ({ prospect, index }))
+    .filter(({ prospect }) => prospect.cluster === label)
+    // Best bet for Amex first, not just declaration order.
+    .sort((a, b) => scoreProspect(b.prospect) - scoreProspect(a.prospect))
+}
+
+interface RecruitTableProps {
+  clusterLabel: string
+  prospects: { prospect: ProspectTarget; index: number }[]
+  onGeneratePitch: (prospectIdx: number) => void
+}
+
+function RecruitTable({ clusterLabel, prospects, onGeneratePitch }: RecruitTableProps) {
+  if (prospects.length === 0) {
+    return (
+      <div className="gaps-empty">
+        {clusterLabel} is a fully-formed cluster right now — no structural gap to recruit against.
+      </div>
+    )
+  }
+
+  return (
+    <div className="gaps-table-wrap">
+      <table className="gaps-table">
+        <thead>
+          <tr>
+            <th>Prospect</th>
+            <th>Cluster</th>
+            <th>Why this gap</th>
+            <th>Waiting</th>
+            <th>Amex fit</th>
+            <th>Growing match</th>
+            <th />
+          </tr>
+        </thead>
+        <tbody>
+          {prospects.map(({ prospect, index }) => {
+            const growing = findGrowingMatches(prospect)
+            const best = growing[0]
+            return (
+              <tr key={prospect.id}>
+                <td>
+                  <div className="gaps-table-name">{prospect.name}</div>
+                  <div className="gaps-table-category">{prospect.category}</div>
+                </td>
+                <td>{prospect.cluster}</td>
+                <td className="gaps-table-reasoning">{prospect.reasoning}</td>
+                <td>{prospect.waiting.length} merchants</td>
+                <td className="gaps-table-fit">{scoreProspect(prospect)}</td>
+                <td className="gaps-table-growing">
+                  {best ? (
+                    <div
+                      title={
+                        growing.length > 1
+                          ? `${growing.length} real businesses growing to match this gap`
+                          : undefined
+                      }
+                    >
+                      <span className="gaps-table-growing-pct">+{best.merchant.growthPct}%</span>{' '}
+                      <span className="gaps-table-growing-name">{best.merchant.name}</span>
+                      {growing.length > 1 && (
+                        <span className="gaps-table-growing-more"> +{growing.length - 1} more</span>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="gaps-table-growing-empty">No live match yet</span>
+                  )}
+                </td>
+                <td className="gaps-table-action">
+                  <button className="gaps-generate-btn" onClick={() => onGeneratePitch(index)}>
+                    Generate pitch →
+                  </button>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 export default function GapRadarView({ onGeneratePitch }: GapRadarViewProps) {
   const [industryIdx, setIndustryIdx] = useState(0)
   const total = INDUSTRY_CLUSTERS.length
   const current = INDUSTRY_CLUSTERS[industryIdx]
+
+  // The recruit table's height varies a lot by cluster — some have three rows of
+  // wrapped reasoning text, some are the empty "fully covered" message. Switching
+  // industries with no fixed height reserved makes the whole page below it (and the
+  // footer) jump on every click. Rather than guess a pixel value that goes stale the
+  // next time a prospect gets added, measure every cluster's real rendered height
+  // once (via a zero-footprint hidden probe) and reserve the tallest.
+  const probeRef = useRef<HTMLDivElement>(null)
+  const [minRegionHeight, setMinRegionHeight] = useState(0)
+
+  useLayoutEffect(() => {
+    const probe = probeRef.current
+    if (!probe) return
+    const heights = Array.from(probe.children).map((child) => (child as HTMLElement).offsetHeight)
+    setMinRegionHeight(Math.max(0, ...heights))
+  }, [])
 
   function prevIndustry() {
     setIndustryIdx((i) => (i - 1 + total) % total)
@@ -34,9 +134,7 @@ export default function GapRadarView({ onGeneratePitch }: GapRadarViewProps) {
     setIndustryIdx((i) => (i + 1) % total)
   }
 
-  const clusterProspects = PROSPECT_TARGETS.map((prospect, index) => ({ prospect, index })).filter(
-    ({ prospect }) => prospect.cluster === current.label,
-  )
+  const clusterProspects = prospectsForCluster(current.label)
 
   return (
     <main className="gaps-main">
@@ -60,11 +158,16 @@ export default function GapRadarView({ onGeneratePitch }: GapRadarViewProps) {
             // rest of the ring stays invisible until it slides into range.
             if (offset < -1 || offset > 1) return null
             const isCurrent = offset === 0
+            // The visible sliver of a peek card is always its inner edge (the
+            // side facing the current card) — for the left peek that's its own
+            // right side, so its title needs to read from that end instead of
+            // the left-aligned default, or it'd be clipped before ever showing.
+            const roleClass = isCurrent ? 'is-current' : offset < 0 ? 'is-peek is-prev' : 'is-peek is-next'
 
             return (
               <div
                 key={cluster.id}
-                className={`carousel-slot ${isCurrent ? 'is-current' : 'is-peek'}`}
+                className={`carousel-slot ${roleClass}`}
                 style={{
                   transform: `translate(-50%, -50%) translateX(${offset * SLOT_SPACING}px) scale(${isCurrent ? 1 : 0.78})`,
                   zIndex: isCurrent ? 2 : 1,
@@ -99,45 +202,27 @@ export default function GapRadarView({ onGeneratePitch }: GapRadarViewProps) {
         ))}
       </div>
 
-      <div className="gaps-table-label">Recruit targets, ranked by gap fit</div>
-      <div className="gaps-table-region">
-        {clusterProspects.length > 0 ? (
-          <div className="gaps-table-wrap">
-            <table className="gaps-table">
-              <thead>
-                <tr>
-                  <th>Prospect</th>
-                  <th>Cluster</th>
-                  <th>Why this gap</th>
-                  <th>Waiting</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {clusterProspects.map(({ prospect, index }) => (
-                  <tr key={prospect.id}>
-                    <td>
-                      <div className="gaps-table-name">{prospect.name}</div>
-                      <div className="gaps-table-category">{prospect.category}</div>
-                    </td>
-                    <td>{prospect.cluster}</td>
-                    <td className="gaps-table-reasoning">{prospect.reasoning}</td>
-                    <td>{prospect.waiting.length} merchants</td>
-                    <td className="gaps-table-action">
-                      <button className="gaps-generate-btn" onClick={() => onGeneratePitch(index, 'pitch')}>
-                        Generate pitch →
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="gaps-empty">
-            {current.label} is a fully-formed cluster right now — no structural gap to recruit against.
-          </div>
-        )}
+      <div className="gaps-table-label">Recruit targets, ranked by fit for Amex</div>
+
+      <div className="gaps-table-probe-anchor" aria-hidden="true">
+        <div className="gaps-table-probe" ref={probeRef}>
+          {INDUSTRY_CLUSTERS.map((cluster) => (
+            <RecruitTable
+              key={cluster.id}
+              clusterLabel={cluster.label}
+              prospects={prospectsForCluster(cluster.label)}
+              onGeneratePitch={() => {}}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="gaps-table-region" style={{ minHeight: minRegionHeight || undefined }}>
+        <RecruitTable
+          clusterLabel={current.label}
+          prospects={clusterProspects}
+          onGeneratePitch={onGeneratePitch}
+        />
       </div>
     </main>
   )

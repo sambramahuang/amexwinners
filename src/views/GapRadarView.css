@@ -65,6 +65,13 @@
   max-width: 100%;
   height: 410px;
   overflow: hidden;
+  /* The peek cards' visible sliver (roughly the outer 13% of this viewport's
+     width on each side) is clipped hard by overflow: hidden above. Fading
+     only the outer half of that sliver — full opacity by 6% — leaves the
+     inner half of the peek clearly readable, dissolving into the page only
+     right at the edge instead of over the whole visible card. */
+  mask-image: linear-gradient(to right, transparent 0%, #000 6%, #000 94%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 6%, #000 94%, transparent 100%);
 }
 
 .carousel-slot {
@@ -135,6 +142,13 @@
 .carousel-slot.is-peek .cluster-gap-status,
 .carousel-slot.is-peek .cluster-diagram-caption {
   visibility: hidden;
+}
+
+/* The left peek's visible sliver is its own right edge, so its title needs to
+   read from that end — left-aligned (the default) would sit entirely in the
+   clipped-away portion of the card. */
+.carousel-slot.is-prev .cluster-diagram-title {
+  text-align: right;
 }
 
 @media (max-width: 760px) {
@@ -225,9 +239,29 @@
   margin-bottom: 10px;
 }
 
+/* Zero-footprint measuring probe: renders every cluster's table off-screen so
+   GapRadarView.tsx can measure the tallest one and reserve that much room in the
+   real region below, permanently — not a guessed pixel value that goes stale the
+   next time a prospect gets added. The anchor has no height of its own, so the
+   absolutely positioned probe inside it never affects layout or shows on screen. */
+.gaps-table-probe-anchor {
+  position: relative;
+  height: 0;
+  overflow: visible;
+}
+
+.gaps-table-probe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .gaps-table-region {
-  /* Reserves room for the tallest possible content (a 3-row table) so switching to a
-     shorter table, or the empty-state message, never shifts anything below it. */
+  /* Set inline from the measured probe height once mounted; this is just a floor
+     for the first paint before that measurement lands. */
   min-height: 230px;
   animation: fadeUp 0.4s ease both;
   animation-delay: 0.3s;
@@ -282,6 +316,39 @@
   font-size: 12px;
   opacity: 0.8;
   max-width: 260px;
+}
+
+.gaps-table-fit {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.gaps-table-growing {
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.gaps-table-growing-pct {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.gaps-table-growing-name {
+  opacity: 0.85;
+}
+
+.gaps-table-growing-more {
+  opacity: 0.55;
+}
+
+.gaps-table-growing-empty {
+  opacity: 0.5;
+  font-style: italic;
 }
 
 .gaps-table-action {

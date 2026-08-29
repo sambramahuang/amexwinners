@@ -105,9 +105,3 @@ export const US_MERCHANTS: UsMerchant[] = RAW.map(
     series: series(growthPct, (i + 1) * 7919),
   }),
 )
-
-/** Cities with at least two merchants, for the filter row. */
-export const US_CITIES = [
-  'All cities',
-  ...[...new Set(US_MERCHANTS.map((m) => m.city))].sort(),
-]

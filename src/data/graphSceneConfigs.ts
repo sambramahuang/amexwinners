@@ -100,6 +100,55 @@ export const MERIDIAN_HEIGHTS_GRAPH: GraphSceneConfig = {
   framingPoints: [CLUSTER_GAP_POSITION],
 }
 
+export const OLD_MILL_QUARTER_GRAPH: GraphSceneConfig = {
+  cameraPosition: CLUSTER_CAMERA_POSITION,
+  nodes: [
+    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0xc2703f, name: 'Millhouse Diner' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x5a8f6f, name: 'Birchwood Apothecary' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0x8a7a5a, name: 'Loft Nine Print & Copy' },
+  ],
+  edges: CLUSTER_TRIANGLE_EDGES,
+  gaps: [
+    { position: CLUSTER_GAP_POSITION, color: 0xc81e2e, connectedNodeIndexes: [0, 1, 2], label: 'No pet supply store' },
+  ],
+}
+
+// Fully-formed cluster, no structural gap — same contrast role as Harbor District / Meridian Heights.
+export const SABLE_QUAY_GRAPH: GraphSceneConfig = {
+  cameraPosition: CLUSTER_CAMERA_POSITION,
+  nodes: [
+    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x3a8fa0, name: 'Quay & Anchor Seafood' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x9e8a5a, name: 'Driftwood Mercantile' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0x5a6f9e, name: 'Lantern Row Books' },
+  ],
+  edges: CLUSTER_TRIANGLE_EDGES,
+  framingPoints: [CLUSTER_GAP_POSITION],
+}
+
+export const FERRY_LANDING_GRAPH: GraphSceneConfig = {
+  cameraPosition: CLUSTER_CAMERA_POSITION,
+  nodes: [
+    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x6a8caf, name: 'Ferry Landing Dry Cleaners' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0x8a6f4f, name: 'Cobblestone Shoe Repair' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0xb0784a, name: 'Platform Nine News & Coffee' },
+  ],
+  edges: CLUSTER_TRIANGLE_EDGES,
+  gaps: [{ position: CLUSTER_GAP_POSITION, color: 0xc81e2e, connectedNodeIndexes: [0, 1, 2], label: 'No bakery' }],
+}
+
+export const HOLLOW_CREEK_GRAPH: GraphSceneConfig = {
+  cameraPosition: CLUSTER_CAMERA_POSITION,
+  nodes: [
+    { position: CLUSTER_TRIANGLE_POSITIONS[0], color: 0x7fae7a, name: 'Hollow Creek Nursery School' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[1], color: 0xd97fa0, name: 'Tumble & Blocks Toy Co.' },
+    { position: CLUSTER_TRIANGLE_POSITIONS[2], color: 0x6fa3c9, name: 'Creekside Pediatrics' },
+  ],
+  edges: CLUSTER_TRIANGLE_EDGES,
+  gaps: [
+    { position: CLUSTER_GAP_POSITION, color: 0xc81e2e, connectedNodeIndexes: [0, 1, 2], label: 'No kids bookstore' },
+  ],
+}
+
 export interface IndustryCluster {
   id: string
   label: string
@@ -112,6 +161,10 @@ export interface IndustryCluster {
 export const INDUSTRY_CLUSTERS: IndustryCluster[] = [
   { id: 'downtown-loop', label: 'Downtown Loop', graph: DOWNTOWN_LOOP_GRAPH, gapLabel: 'No gift shop' },
   { id: 'riverside-row', label: 'Riverside Row', graph: RIVERSIDE_ROW_GRAPH, gapLabel: 'No wellness merchant' },
+  { id: 'old-mill-quarter', label: 'Old Mill Quarter', graph: OLD_MILL_QUARTER_GRAPH, gapLabel: 'No pet supply store' },
+  { id: 'ferry-landing', label: 'Ferry Landing', graph: FERRY_LANDING_GRAPH, gapLabel: 'No bakery' },
+  { id: 'hollow-creek', label: 'Hollow Creek', graph: HOLLOW_CREEK_GRAPH, gapLabel: 'No kids bookstore' },
   { id: 'harbor-district', label: 'Harbor District', graph: HARBOR_DISTRICT_GRAPH, gapLabel: null },
   { id: 'meridian-heights', label: 'Meridian Heights', graph: MERIDIAN_HEIGHTS_GRAPH, gapLabel: null },
+  { id: 'sable-quay', label: 'Sable Quay', graph: SABLE_QUAY_GRAPH, gapLabel: null },
 ]

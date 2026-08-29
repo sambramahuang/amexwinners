@@ -1,0 +1,182 @@
+.pitch-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(11, 28, 51, 0.45);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 500;
+  animation: fadeIn 0.2s ease both;
+}
+
+.pitch-modal {
+  position: relative;
+  width: min(760px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 40px;
+  box-shadow: 0 24px 60px rgba(11, 28, 51, 0.22);
+  animation: popIn 0.25s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.pitch-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-panel);
+  color: var(--text-70);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.pitch-modal-close:hover {
+  background: var(--border-soft);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.pitch-modal-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 6px;
+  padding-right: 30px;
+}
+
+.pitch-modal-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 24px;
+}
+
+.pitch-modal-meta {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 2px 0 14px;
+}
+
+.pitch-modal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  border: 1px solid var(--gold-dim);
+  padding: 4px 9px;
+  margin-bottom: 16px;
+}
+
+.pitch-modal-copy {
+  margin: 0 0 20px;
+  font-size: 13.5px;
+  line-height: 1.6;
+  opacity: 0.85;
+}
+
+.pitch-modal-section {
+  border-top: 1px solid var(--border-soft);
+  padding-top: 16px;
+  margin-bottom: 16px;
+}
+
+.pitch-modal-section-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-60);
+  margin-bottom: 10px;
+}
+
+.pitch-modal-score {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.pitch-modal-score-value {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 22px;
+  color: var(--accent);
+}
+
+.pitch-modal-score-caption {
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+.pitch-modal-reasoning {
+  margin: 0 0 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  opacity: 0.8;
+}
+
+.pitch-modal-uplift {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pitch-modal-uplift-value {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 26px;
+  color: var(--gold);
+}
+
+.pitch-modal-uplift-caption {
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+.pitch-modal-waiting-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.pitch-modal-waiting-card {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  padding: 10px 12px;
+}
+
+.pitch-modal-waiting-name {
+  font-weight: 500;
+  font-size: 12.5px;
+  margin-bottom: 4px;
+}
+
+.pitch-modal-waiting-why {
+  font-size: 11px;
+  opacity: 0.7;
+  line-height: 1.4;
+}
+
+.pitch-modal-email-section {
+  margin-bottom: 0;
+}

@@ -1,31 +1,27 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import Nav from './components/Nav'
 import HexagonBackground from './components/HexagonBackground'
-import GrowthRadarView from './views/GrowthRadarView'
+import PitchModal from './components/PitchModal'
 import StandingView from './views/StandingView'
 import MatchingView from './views/MatchingView'
-import RecruitPitchView from './views/RecruitPitchView'
 import RoleSelectView from './views/RoleSelectView'
+import { PROSPECT_TARGETS } from './data/graphEngineData'
 import './App.css'
 
 // The 3D graph view pulls in three.js, so it is code-split and only
 // downloaded when a visitor actually opens Gap Radar.
 const GapRadarView = lazy(() => import('./views/GapRadarView'))
 
-export type View = 'growth' | 'match' | 'gaps' | 'pitch' | 'standing'
+export type View = 'match' | 'gaps' | 'standing'
 export type Role = 'amex' | 'sme'
 
-const VIEWS: View[] = ['growth', 'match', 'gaps', 'pitch', 'standing']
+const VIEWS: View[] = ['match', 'gaps', 'standing']
 const ROLE_KEY = 'connexion.role.v1'
 
 const SME_VIEWS: View[] = ['standing', 'match']
 
 const NAV_ITEMS_BY_ROLE: Record<Role, { id: View; label: string }[]> = {
-  amex: [
-    { id: 'growth', label: 'Growth Radar' },
-    { id: 'gaps', label: 'Gap Radar' },
-    { id: 'pitch', label: 'Recruit Pitch' },
-  ],
+  amex: [{ id: 'gaps', label: 'Gap Radar' }],
   sme: [
     { id: 'standing', label: 'Your standing' },
     { id: 'match', label: 'Matching' },
@@ -34,7 +30,7 @@ const NAV_ITEMS_BY_ROLE: Record<Role, { id: View; label: string }[]> = {
 
 function readViewFromHash(): View {
   const hash = window.location.hash.slice(1)
-  return (VIEWS as string[]).includes(hash) ? (hash as View) : 'growth'
+  return (VIEWS as string[]).includes(hash) ? (hash as View) : 'gaps'
 }
 
 function loadRole(): Role | null {
@@ -65,7 +61,7 @@ function clearRole() {
 export default function App() {
   const [role, setRole] = useState<Role | null>(() => loadRole())
   const [view, setViewState] = useState<View>(() => readViewFromHash())
-  const [selectedProspectIdx, setSelectedProspectIdx] = useState(0)
+  const [pitchProspectIdx, setPitchProspectIdx] = useState<number | null>(null)
 
   function setView(nextView: View) {
     setViewState(nextView)
@@ -85,7 +81,7 @@ export default function App() {
   function chooseRole(nextRole: Role) {
     saveRole(nextRole)
     setRole(nextRole)
-    setView(nextRole === 'sme' ? 'standing' : 'growth')
+    setView(nextRole === 'sme' ? 'standing' : 'gaps')
   }
 
   function switchRole() {
@@ -93,9 +89,8 @@ export default function App() {
     setRole(null)
   }
 
-  function generatePitch(prospectIdx: number, nextView: View) {
-    setSelectedProspectIdx(prospectIdx)
-    setView(nextView)
+  function generatePitch(prospectIdx: number) {
+    setPitchProspectIdx(prospectIdx)
   }
 
   // Matching is the merchant's screen, so an admin landing on #match is sent
@@ -106,7 +101,7 @@ export default function App() {
         ? view
         : 'standing'
       : view === 'match'
-        ? 'growth'
+        ? 'gaps'
         : view
 
   // A redirected view should not leave a stale hash behind it. This has to sit
@@ -136,9 +131,6 @@ export default function App() {
         onSwitchRole={switchRole}
       />
 
-      {role === 'amex' && effectiveView === 'growth' && (
-        <GrowthRadarView onNavigate={setView} onGeneratePitch={(idx) => generatePitch(idx, 'pitch')} />
-      )}
       {role === 'sme' && effectiveView === 'standing' && (
         <StandingView onNavigate={setView} />
       )}
@@ -148,8 +140,12 @@ export default function App() {
           <GapRadarView onGeneratePitch={generatePitch} />
         </Suspense>
       )}
-      {role === 'amex' && view === 'pitch' && (
-        <RecruitPitchView selectedIdx={selectedProspectIdx} onSelect={setSelectedProspectIdx} />
+
+      {pitchProspectIdx !== null && PROSPECT_TARGETS[pitchProspectIdx] && (
+        <PitchModal
+          prospect={PROSPECT_TARGETS[pitchProspectIdx]}
+          onClose={() => setPitchProspectIdx(null)}
+        />
       )}
 
       <footer className="app-footer">
