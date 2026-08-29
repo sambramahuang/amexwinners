@@ -2,7 +2,6 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import Nav from './components/Nav'
 import HexagonBackground from './components/HexagonBackground'
 import GrowthRadarView from './views/GrowthRadarView'
-import OverviewView from './views/OverviewView'
 import StandingView from './views/StandingView'
 import MatchingView from './views/MatchingView'
 import RecruitPitchView from './views/RecruitPitchView'
@@ -13,10 +12,10 @@ import './App.css'
 // downloaded when a visitor actually opens Gap Radar.
 const GapRadarView = lazy(() => import('./views/GapRadarView'))
 
-export type View = 'growth' | 'overview' | 'match' | 'gaps' | 'pitch' | 'standing'
+export type View = 'growth' | 'match' | 'gaps' | 'pitch' | 'standing'
 export type Role = 'amex' | 'sme'
 
-const VIEWS: View[] = ['growth', 'overview', 'match', 'gaps', 'pitch', 'standing']
+const VIEWS: View[] = ['growth', 'match', 'gaps', 'pitch', 'standing']
 const ROLE_KEY = 'connexion.role.v1'
 
 const SME_VIEWS: View[] = ['standing', 'match']
@@ -24,7 +23,6 @@ const SME_VIEWS: View[] = ['standing', 'match']
 const NAV_ITEMS_BY_ROLE: Record<Role, { id: View; label: string }[]> = {
   amex: [
     { id: 'growth', label: 'Growth Radar' },
-    { id: 'overview', label: 'Overview' },
     { id: 'gaps', label: 'Gap Radar' },
     { id: 'pitch', label: 'Recruit Pitch' },
   ],
@@ -138,11 +136,12 @@ export default function App() {
         onSwitchRole={switchRole}
       />
 
-      {role === 'amex' && effectiveView === 'growth' && <GrowthRadarView onNavigate={setView} />}
+      {role === 'amex' && effectiveView === 'growth' && (
+        <GrowthRadarView onNavigate={setView} onGeneratePitch={(idx) => generatePitch(idx, 'pitch')} />
+      )}
       {role === 'sme' && effectiveView === 'standing' && (
         <StandingView onNavigate={setView} />
       )}
-      {role === 'amex' && view === 'overview' && <OverviewView onNavigate={setView} />}
       {role === 'sme' && effectiveView === 'match' && <MatchingView />}
       {role === 'amex' && view === 'gaps' && (
         <Suspense fallback={null}>

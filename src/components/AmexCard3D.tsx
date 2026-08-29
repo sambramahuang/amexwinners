@@ -2,19 +2,21 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
+import amexCrestSrc from './amex-crest.png'
 import './AmexCard3D.css'
 
 // Real card proportions: 85.6mm by 53.98mm.
 const CARD_W = 3.4
 const CARD_H = CARD_W / 1.586
 const CARD_D = 0.038
-const CORNER = 0.13
+const CORNER = 0.26
 
-// Platinum: a brushed metal face, engraved dark rather than printed light.
-const PLATE_LIGHT = '#f2f3f5'
-const PLATE_MID = '#d8dbe0'
-const PLATE_DEEP = '#b9bec6'
-const ENGRAVE = '#2b3038'
+// Black: a near-black brushed metal face, engraved in a light silver ink
+// rather than dark on light.
+const PLATE_LIGHT = '#2c2e33'
+const PLATE_MID = '#17181b'
+const PLATE_DEEP = '#08090a'
+const ENGRAVE = '#d7dae0'
 
 interface AmexCard3DProps {
   /** Height of the canvas. Width always fills the container. */
@@ -54,7 +56,7 @@ function roundedFace(w: number, h: number, r: number) {
 /** Guilloche: the fine interference pattern engraved on financial documents. */
 function drawGuilloche(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.save()
-  ctx.strokeStyle = 'rgba(43, 48, 56, 0.30)'
+  ctx.strokeStyle = 'rgba(215, 218, 224, 0.30)'
   ctx.lineWidth = 1.1
   const cx = w * 0.62
   const cy = h * 0.5
@@ -77,7 +79,7 @@ function drawGuilloche(ctx: CanvasRenderingContext2D, w: number, h: number) {
 /** Hexagon lattice, echoing the backdrop used across the Connexion interface. */
 function drawHexes(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.save()
-  ctx.strokeStyle = 'rgba(43, 48, 56, 0.055)'
+  ctx.strokeStyle = 'rgba(215, 218, 224, 0.055)'
   ctx.lineWidth = 1.4
   const s = 58
   for (let row = 0; row * s * 1.5 < h + s; row += 1) {
@@ -140,7 +142,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, W: number, H: number) {
   const innerRadius = Math.max(0, cardRadiusPx - innerInset)
 
   ctx.save()
-  ctx.strokeStyle = 'rgba(43, 48, 56, 0.85)'
+  ctx.strokeStyle = 'rgba(215, 218, 224, 0.85)'
   ctx.lineWidth = 5
   ctx.beginPath()
   ctx.roundRect(m, m, W - m * 2, H - m * 2, outerRadius)
@@ -155,7 +157,7 @@ function drawFrame(ctx: CanvasRenderingContext2D, W: number, H: number) {
   // strays past the curve the rules themselves now follow.
   const tickClearance = outerRadius + 6
   ctx.lineWidth = 1
-  ctx.strokeStyle = 'rgba(43, 48, 56, 0.45)'
+  ctx.strokeStyle = 'rgba(215, 218, 224, 0.45)'
   for (let x = m + tickClearance; x < W - m - tickClearance; x += 9) {
     ctx.beginPath()
     ctx.moveTo(x, m + 4)
@@ -176,13 +178,15 @@ function drawFrame(ctx: CanvasRenderingContext2D, W: number, H: number) {
 }
 
 /**
- * Engraved medallion. An original device carrying this product's mark: two
- * merchants and the edge between them, ringed the way a struck seal is.
+ * Engraved medallion: a laurel wreath rising to a star, the crest language
+ * expected on a premium card face, in place of Connexion's own two-node
+ * mark. Built from the same primitives as the rest of the plate (arcs,
+ * radiating lines) rather than traced from any existing artwork.
  */
 function drawMedallion(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
   ctx.save()
   ctx.translate(cx, cy)
-  ctx.strokeStyle = 'rgba(43, 48, 56, 0.88)'
+  ctx.strokeStyle = 'rgba(215, 218, 224, 0.88)'
 
   ctx.lineWidth = 3
   ctx.beginPath()
@@ -196,7 +200,7 @@ function drawMedallion(ctx: CanvasRenderingContext2D, cx: number, cy: number, r:
 
   // Radiating engine-turned lines inside the ring.
   ctx.lineWidth = 0.9
-  ctx.strokeStyle = 'rgba(43, 48, 56, 0.38)'
+  ctx.strokeStyle = 'rgba(215, 218, 224, 0.38)'
   for (let i = 0; i < 96; i += 1) {
     const a = (i / 96) * Math.PI * 2
     ctx.beginPath()
@@ -205,24 +209,160 @@ function drawMedallion(ctx: CanvasRenderingContext2D, cx: number, cy: number, r:
     ctx.stroke()
   }
 
-  // The mark itself.
-  ctx.strokeStyle = 'rgba(43, 48, 56, 0.85)'
-  ctx.fillStyle = 'rgba(43, 48, 56, 0.85)'
-  ctx.lineWidth = 4
+  // The mark itself: two laurel branches climbing from a shared stem,
+  // open at the top for the star. Sized to read as leaves rather than a
+  // dotted ring once the medallion is scaled down onto the card.
+  ctx.fillStyle = 'rgba(215, 218, 224, 0.85)'
+  const leaves = 6
+  const startDeg = 88
+  const endDeg = -58
+  for (const side of [-1, 1] as const) {
+    for (let i = 0; i < leaves; i += 1) {
+      const t = i / (leaves - 1)
+      const deg = startDeg + (endDeg - startDeg) * t
+      const a = (deg * Math.PI) / 180
+      const rad = r * (0.32 + t * 0.5)
+      const x = side * Math.cos(a) * rad
+      const y = Math.sin(a) * rad
+      // Tangent to the branch's curve, so each leaf lies along it.
+      const tangent = Math.atan2(Math.cos(a), -side * Math.sin(a))
+      ctx.save()
+      ctx.translate(x, y)
+      ctx.rotate(tangent)
+      ctx.beginPath()
+      ctx.ellipse(0, 0, 34 - t * 14, 14 - t * 5, 0, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
+    }
+  }
+
+  // Stem tying both branches to a shared base.
+  ctx.strokeStyle = 'rgba(215, 218, 224, 0.85)'
+  ctx.lineWidth = 6
   ctx.beginPath()
-  ctx.moveTo(-r * 0.3, r * 0.22)
-  ctx.lineTo(r * 0.3, -r * 0.22)
+  ctx.moveTo(0, r * 0.3)
+  ctx.lineTo(0, r * 0.5)
   ctx.stroke()
+
+  // Five-pointed star, centred where the wreath opens.
+  const spikes = 5
+  const outerR = r * 0.24
+  const innerR = outerR * 0.42
   ctx.beginPath()
-  ctx.arc(-r * 0.3, r * 0.22, 9, 0, Math.PI * 2)
+  for (let i = 0; i < spikes * 2; i += 1) {
+    const a = (Math.PI / spikes) * i - Math.PI / 2
+    const rr = i % 2 === 0 ? outerR : innerR
+    const x = Math.cos(a) * rr
+    const y = Math.sin(a) * rr - r * 0.06
+    if (i === 0) ctx.moveTo(x, y)
+    else ctx.lineTo(x, y)
+  }
+  ctx.closePath()
   ctx.fill()
-  ctx.beginPath()
-  ctx.arc(r * 0.3, -r * 0.22, 9, 0, Math.PI * 2)
-  ctx.stroke()
+
   ctx.restore()
 }
 
-function frontTexture(holder: string) {
+/**
+ * The supplied crest is a flat RGB export with a plain white square behind
+ * the badge, not a transparent PNG. Flood-fills from the four corners over
+ * near-white pixels so only the connected background is cut out; the
+ * badge's own white line art (the helmet, the wordmark) is enclosed by blue
+ * and never touches the edge, so it survives untouched.
+ */
+function stripWhiteBackground(img: HTMLImageElement): HTMLCanvasElement {
+  const w = img.naturalWidth
+  const h = img.naturalHeight
+  const c = document.createElement('canvas')
+  c.width = w
+  c.height = h
+  const ctx = c.getContext('2d')!
+  ctx.drawImage(img, 0, 0)
+
+  const imageData = ctx.getImageData(0, 0, w, h)
+  const d = imageData.data
+  // The export's "background" is actually two very close shades (a checker
+  // pattern invisible on a light page, stark once composited onto black),
+  // so the threshold has to clear both rather than just pure white.
+  const isBg = (px: number) => d[px] > 225 && d[px + 1] > 225 && d[px + 2] > 225
+  const visited = new Uint8Array(w * h)
+  const queue: number[] = []
+
+  function seed(x: number, y: number) {
+    const idx = y * w + x
+    if (!visited[idx] && isBg(idx * 4)) {
+      visited[idx] = 1
+      queue.push(idx)
+    }
+  }
+  for (let x = 0; x < w; x += 1) {
+    seed(x, 0)
+    seed(x, h - 1)
+  }
+  for (let y = 0; y < h; y += 1) {
+    seed(0, y)
+    seed(w - 1, y)
+  }
+
+  while (queue.length) {
+    const idx = queue.pop()!
+    const x = idx % w
+    const y = (idx / w) | 0
+    d[idx * 4 + 3] = 0
+    if (x > 0) seed(x - 1, y)
+    if (x < w - 1) seed(x + 1, y)
+    if (y > 0) seed(x, y - 1)
+    if (y < h - 1) seed(x, y + 1)
+  }
+
+  ctx.putImageData(imageData, 0, 0)
+  return c
+}
+
+/**
+ * The crest's only two colors are its blue fill and white line art. Rather
+ * than threshold them (which bands the antialiased edge between the two),
+ * each opaque pixel is projected onto the blue-to-white axis and remapped
+ * to the same position on a black-to-white axis, so the disc goes black,
+ * the line art stays white, and the antialiasing in between stays smooth.
+ */
+function blueToBlack(canvas: HTMLCanvasElement): HTMLCanvasElement {
+  const ctx = canvas.getContext('2d')!
+  const { width: w, height: h } = canvas
+  const imageData = ctx.getImageData(0, 0, w, h)
+  const d = imageData.data
+  const blue = [0, 132, 179]
+  const span = [255 - blue[0], 255 - blue[1], 255 - blue[2]]
+  const denom = span[0] ** 2 + span[1] ** 2 + span[2] ** 2
+  for (let i = 0; i < d.length; i += 4) {
+    if (d[i + 3] === 0) continue
+    const dot = (d[i] - blue[0]) * span[0] + (d[i + 1] - blue[1]) * span[1] + (d[i + 2] - blue[2]) * span[2]
+    const t = Math.max(0, Math.min(1, dot / denom))
+    const v = Math.round(t * 255)
+    d[i] = v
+    d[i + 1] = v
+    d[i + 2] = v
+  }
+  ctx.putImageData(imageData, 0, 0)
+  return canvas
+}
+
+// Loaded once and cached module-wide: every card instance shares the same
+// crest rather than re-fetching or re-processing it.
+let crestPromise: Promise<HTMLCanvasElement | null> | null = null
+function loadCrest(): Promise<HTMLCanvasElement | null> {
+  if (!crestPromise) {
+    crestPromise = new Promise((resolve) => {
+      const img = new Image()
+      img.onload = () => resolve(blueToBlack(stripWhiteBackground(img)))
+      img.onerror = () => resolve(null) // fall back to the drawn medallion rather than break the card
+      img.src = amexCrestSrc
+    })
+  }
+  return crestPromise
+}
+
+function frontTexture(holder: string, crest: HTMLCanvasElement | null) {
   const W = 2048
   const H = Math.round(W / 1.586)
   const c = document.createElement('canvas')
@@ -257,7 +397,14 @@ function frontTexture(holder: string) {
   ctx.restore()
 
   drawFrame(ctx, W, H)
-  drawMedallion(ctx, W * 0.52, H * 0.47, 205)
+  // The real Amex crest once it has loaded; the hand-drawn wreath stands in
+  // for the one frame or two before that (and if it never loads at all).
+  if (crest) {
+    const d = 205 * 2
+    ctx.drawImage(crest, W * 0.52 - d / 2, H * 0.47 - d / 2, d, d)
+  } else {
+    drawMedallion(ctx, W * 0.52, H * 0.47, 205)
+  }
 
   // Wordmark, centred above the medallion.
   ctx.fillStyle = ENGRAVE
@@ -268,7 +415,7 @@ function frontTexture(holder: string) {
 
   ctx.font = '500 46px Futura, "Futura PT", Jost, system-ui, sans-serif'
   ctx.letterSpacing = '26px'
-  ctx.fillStyle = 'rgba(43, 48, 56, 0.82)'
+  ctx.fillStyle = 'rgba(215, 218, 224, 0.82)'
   ctx.fillText('CONNEXION', W / 2 + 13, 268)
   ctx.letterSpacing = '0px'
   ctx.textAlign = 'left'
@@ -276,7 +423,7 @@ function frontTexture(holder: string) {
   drawChip(ctx, 150, H * 0.43, 250, 192)
 
   // Member since, set small to the right of the medallion.
-  ctx.fillStyle = 'rgba(43, 48, 56, 0.72)'
+  ctx.fillStyle = 'rgba(215, 218, 224, 0.72)'
   ctx.font = '500 24px Futura, "Futura PT", Jost, system-ui, sans-serif'
   ctx.letterSpacing = '3px'
   ctx.fillText('MEMBER SINCE', W * 0.72, H * 0.44)
@@ -284,21 +431,22 @@ function frontTexture(holder: string) {
   ctx.fillText('26', W * 0.72, H * 0.52)
   ctx.letterSpacing = '0px'
 
-  // Embossed digits: a light underprint and a dark face, so they sit proud.
+  // Embossed digits: a dark underprint and a light face, so they sit proud
+  // against the black plate (the reverse pairing of ink-on-light).
   ctx.font = '500 72px "IBM Plex Mono", ui-monospace, monospace'
   ctx.letterSpacing = '9px'
   const digits = '3782  822463  10005'
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.75)'
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.6)'
   ctx.fillText(digits, 150, H * 0.79 - 3)
-  ctx.fillStyle = 'rgba(43, 48, 56, 0.9)'
+  ctx.fillStyle = 'rgba(215, 218, 224, 0.9)'
   ctx.fillText(digits, 152, H * 0.79)
   ctx.letterSpacing = '0px'
 
   ctx.font = '600 40px Futura, "Futura PT", Jost, system-ui, sans-serif'
   ctx.letterSpacing = '5px'
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.55)'
   ctx.fillText(holder.toUpperCase(), 150, H * 0.925 - 2)
-  ctx.fillStyle = 'rgba(43, 48, 56, 0.88)'
+  ctx.fillStyle = 'rgba(215, 218, 224, 0.88)'
   ctx.fillText(holder.toUpperCase(), 152, H * 0.925)
   ctx.letterSpacing = '0px'
 
@@ -339,7 +487,7 @@ function backTexture() {
   ctx.font = '500 44px "IBM Plex Mono", ui-monospace, monospace'
   ctx.fillText('4021', W * 0.752, H * 0.545)
 
-  ctx.fillStyle = 'rgba(43,48,56,0.5)'
+  ctx.fillStyle = 'rgba(215,218,224,0.5)'
   ctx.font = '400 24px Futura, "Futura PT", Jost, system-ui, sans-serif'
   ctx.fillText('Concept prototype. Not a payment instrument.', W * 0.08, H * 0.74)
   ctx.fillText('Synthetic demo asset, AMEX AI Innovation Hackathon 2026.', W * 0.08, H * 0.79)
@@ -417,7 +565,7 @@ function mountCard(container: HTMLDivElement, holder: string, rpm: number) {
 
   const bodyGeo = new RoundedBoxGeometry(CARD_W, CARD_H, CARD_D, 10, CORNER)
   const bodyMat = new THREE.MeshPhysicalMaterial({
-    color: 0xd3d7dd,
+    color: 0x1c1d20,
     metalness: 1,
     roughness: 0.13,
     clearcoat: 1,
@@ -427,7 +575,7 @@ function mountCard(container: HTMLDivElement, holder: string, rpm: number) {
   card.add(new THREE.Mesh(bodyGeo, bodyMat))
 
   const faceGeo = roundedFace(CARD_W - 0.012, CARD_H - 0.012, CORNER - 0.006)
-  const frontTex = frontTexture(holder)
+  let frontTex = frontTexture(holder, null)
   const backTex = backTexture()
 
   const frontMat = new THREE.MeshPhysicalMaterial({
@@ -575,15 +723,20 @@ function mountCard(container: HTMLDivElement, holder: string, rpm: number) {
   }
   window.addEventListener('resize', handleResize)
 
-  // Webfonts land after first paint; redraw the face once they are ready so
-  // the card is not baked with fallback type.
+  // Webfonts land after first paint, and the crest is fetched over the
+  // network; redraw the face once both are ready so the card is not baked
+  // with fallback type or the drawn-medallion stand-in.
   let cancelled = false
-  document.fonts?.ready.then(() => {
-    if (cancelled || disposed) return
-    frontMat.map = frontTexture(holder)
-    frontMat.needsUpdate = true
-    frontTex.dispose()
-  })
+  document.fonts?.ready
+    .then(() => loadCrest())
+    .then((crest) => {
+      if (cancelled || disposed) return
+      const nextTex = frontTexture(holder, crest)
+      frontMat.map = nextTex
+      frontMat.needsUpdate = true
+      frontTex.dispose()
+      frontTex = nextTex
+    })
 
   return () => {
     disposed = true
