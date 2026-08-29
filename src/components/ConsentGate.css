@@ -67,7 +67,6 @@
   gap: 2px;
   margin: 22px 0 0;
   padding: 0;
-  counter-reset: clause;
 }
 
 .consent-clause {
@@ -82,19 +81,13 @@
   border-bottom: none;
 }
 
-.consent-clause-number {
+.consent-clause-bullet {
   flex: 0 0 auto;
-  width: 24px;
-  height: 24px;
-  display: grid;
-  place-items: center;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
-  background: var(--accent-dim-strong);
-  color: var(--accent-active);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 500;
-  margin-top: 1px;
+  background: var(--accent);
+  margin-top: 7px;
 }
 
 .consent-clause-body {
@@ -198,10 +191,10 @@
 .consent-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
   flex-wrap: wrap;
-  margin-top: 24px;
-  padding-top: 20px;
+  margin-top: 26px;
+  padding-top: 22px;
   border-top: 1px solid var(--border-soft);
 }
 

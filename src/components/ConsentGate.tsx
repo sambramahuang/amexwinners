@@ -79,17 +79,17 @@ export default function ConsentGate({
         time.
       </p>
 
-      <ol className="consent-clauses">
+      <ul className="consent-clauses">
         {CLAUSES.map((c, i) => (
           <li className="consent-clause" key={c.id} style={{ animationDelay: `${i * 60}ms` }}>
-            <span className="consent-clause-number">{i + 1}</span>
+            <span className="consent-clause-bullet" aria-hidden="true" />
             <span className="consent-clause-body">
               <span className="consent-clause-title">{c.title}</span>
               <span className="consent-clause-detail">{c.detail}</span>
             </span>
           </li>
         ))}
-      </ol>
+      </ul>
 
       <div className="consent-never">
         <div className="consent-never-label">Never shared, with anyone</div>

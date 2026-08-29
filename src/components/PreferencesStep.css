@@ -89,10 +89,11 @@
 
 .prefs-actions {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
   flex-wrap: wrap;
-  margin-top: 24px;
-  padding-top: 20px;
+  margin-top: 26px;
+  padding-top: 22px;
   border-top: 1px solid var(--border-soft);
 }
 

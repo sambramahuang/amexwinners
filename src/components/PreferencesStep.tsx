@@ -9,20 +9,13 @@ interface PreferencesStepProps {
   initial?: PartnershipGoal[]
 }
 
-const ORDER: PartnershipGoal[] = [
-  'cross-industry',
-  'long-term',
-  'new-demographic',
-  'same-industry',
-]
+const ORDER: PartnershipGoal[] = ['cross-industry', 'long-term', 'same-industry']
 
 const DETAIL: Record<PartnershipGoal, string> = {
   'cross-industry':
     'A business in a different trade whose customers overlap with yours. The most common shape, and usually the easiest to run.',
   'long-term':
     'Something that outlasts a single offer. These merchants have held a partnership for months rather than weeks.',
-  'new-demographic':
-    'A merchant whose customers are not already yours, to put your business in front of people who have not found it.',
   'same-industry':
     'Another merchant in your trade. Not a competitor if the hours or the catchment differ, and often the fastest to agree terms.',
 }

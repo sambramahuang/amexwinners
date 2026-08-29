@@ -17,16 +17,11 @@ export type RelationshipTier = 1 | 2 | 3
  * reorder the queue rather than to score: the transaction data decides how
  * good a match is, this decides which good matches to show first.
  */
-export type PartnershipGoal =
-  | 'cross-industry'
-  | 'long-term'
-  | 'new-demographic'
-  | 'same-industry'
+export type PartnershipGoal = 'cross-industry' | 'long-term' | 'same-industry'
 
 export const GOAL_LABELS: Record<PartnershipGoal, string> = {
   'cross-industry': 'Cross industry collaboration',
   'long-term': 'Long term partnership',
-  'new-demographic': 'Exposure to a new demographic',
   'same-industry': 'Collaboration in my own industry',
 }
 
@@ -125,7 +120,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 9,
     responseRate: 61,
     mark: { initials: 'FF', color: '#4f7f6a' },
-    goals: ['cross-industry', 'new-demographic'],
+    goals: ['cross-industry'],
     tier: 2,
     monthsActive: 5,
     tierRationale: '5 months and 3 offer cycles of steady redemption support repeating this on an ongoing cadence instead of renegotiating each time.',
@@ -145,7 +140,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 4,
     responseRate: 74,
     mark: { initials: 'NB', color: '#a35a86' },
-    goals: ['cross-industry', 'new-demographic'],
+    goals: ['cross-industry'],
     tier: 2,
     monthsActive: 4,
     tierRationale: '4 months and 2 offer cycles of consistent redemption support repeating this on an ongoing cadence instead of renegotiating each time.',
@@ -165,7 +160,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 21,
     responseRate: 38,
     mark: { initials: 'LB', color: '#c2683f' },
-    goals: ['cross-industry', 'new-demographic'],
+    goals: ['cross-industry'],
     tier: 1,
     monthsActive: 1,
     tierRationale: 'A new, single-offer proposal. The sequencing signal is still forming, so it starts here rather than at a recurring cadence.',
@@ -185,7 +180,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 6,
     responseRate: 69,
     mark: { initials: 'RY', color: '#5b7fa6' },
-    goals: ['cross-industry', 'new-demographic', 'long-term'],
+    goals: ['cross-industry', 'long-term'],
     tier: 1,
     monthsActive: 2,
     tierRationale: 'A new, single-offer proposal. The sequencing signal is still sparse, so it starts here rather than at a recurring cadence.',
@@ -250,7 +245,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 11,
     responseRate: 54,
     mark: { initials: 'NP', color: '#4f6f8f' },
-    goals: ['cross-industry', 'new-demographic'],
+    goals: ['cross-industry'],
   },
   {
     id: 9,
@@ -292,7 +287,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 6,
     responseRate: 63,
     mark: { initials: 'FG', color: '#a35a86' },
-    goals: ['cross-industry', 'new-demographic'],
+    goals: ['cross-industry'],
   },
   {
     id: 11,
@@ -313,7 +308,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 4,
     responseRate: 77,
     mark: { initials: 'GC', color: '#c2683f' },
-    goals: ['cross-industry', 'new-demographic'],
+    goals: ['cross-industry'],
   },
   {
     id: 12,
@@ -334,7 +329,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 19,
     responseRate: 41,
     mark: { initials: 'AE', color: '#7b6a94' },
-    goals: ['cross-industry', 'new-demographic'],
+    goals: ['cross-industry'],
   },
   {
     id: 13,
@@ -397,7 +392,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 7,
     responseRate: 66,
     mark: { initials: 'HR', color: '#b06bc9' },
-    goals: ['cross-industry', 'new-demographic'],
+    goals: ['cross-industry'],
   },
   {
     id: 16,
@@ -439,7 +434,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 5,
     responseRate: 72,
     mark: { initials: 'VV', color: '#6b5b8a' },
-    goals: ['cross-industry', 'new-demographic'],
+    goals: ['cross-industry'],
   },
   {
     id: 18,
@@ -481,7 +476,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 1,
     responseRate: 89,
     mark: { initials: 'FC', color: '#3f6f8f' },
-    goals: ['cross-industry', 'long-term', 'new-demographic'],
+    goals: ['cross-industry', 'long-term'],
   },
   {
     id: 20,
@@ -502,7 +497,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 6,
     responseRate: 68,
     mark: { initials: 'AM', color: '#5f8a6a' },
-    goals: ['cross-industry', 'new-demographic'],
+    goals: ['cross-industry'],
   },
   {
     id: 21,
@@ -523,7 +518,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 14,
     responseRate: 49,
     mark: { initials: 'PP', color: '#7a3f52' },
-    goals: ['cross-industry', 'new-demographic'],
+    goals: ['cross-industry'],
   },
   {
     id: 22,
@@ -544,7 +539,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 2,
     responseRate: 84,
     mark: { initials: 'RR', color: '#b1743f' },
-    goals: ['same-industry', 'new-demographic'],
+    goals: ['same-industry'],
   },
   {
     id: 23,
@@ -565,7 +560,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 23,
     responseRate: 37,
     mark: { initials: 'LT', color: '#4f7f8a' },
-    goals: ['cross-industry', 'new-demographic'],
+    goals: ['cross-industry'],
   },
   {
     id: 24,
@@ -586,7 +581,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     lastActiveDays: 3,
     responseRate: 79,
     mark: { initials: 'EY', color: '#8a5f7a' },
-    goals: ['cross-industry', 'long-term', 'new-demographic'],
+    goals: ['cross-industry', 'long-term'],
   },
   {
     id: 25,
