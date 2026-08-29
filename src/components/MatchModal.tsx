@@ -90,7 +90,14 @@ export default function MatchModal({
           <p>{candidate.sequential}</p>
         </div>
 
-        <div className="match-modal-terms">Suggested terms: {candidate.terms}</div>
+        <div className="match-modal-terms">
+          Suggested terms: {candidate.terms}
+          {candidate.tier !== 3 && (
+            <p className="match-modal-terms-disclaimer">
+              A non-binding starting point. The merchants handle the actual arrangement themselves.
+            </p>
+          )}
+        </div>
         {mode === 'preview' ? (
           <div className="match-modal-breakdown">
             <div className="match-modal-section-label">How this score was built</div>
