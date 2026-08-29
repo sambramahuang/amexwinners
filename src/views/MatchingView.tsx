@@ -176,6 +176,15 @@ export default function MatchingView() {
     }
   }
 
+  // Mobile fires pointercancel far more than desktop does (address-bar
+  // animation, an OS edge gesture, a stray second touch), so a drag that gets
+  // cancelled mid-gesture must still snap back rather than leaving the card
+  // stuck under a pointer that no longer exists.
+  function onCancel() {
+    setDragging(false)
+    setDrag({ x: 0, y: 0 })
+  }
+
   function swipeAway(dir: SwipeDirection) {
     if (exiting) return
     const card = rankedCandidates[qIndex]
@@ -338,6 +347,7 @@ export default function MatchingView() {
                   onPointerMove={onMove}
                   onPointerUp={onUp}
                   onPointerLeave={onUp}
+                  onPointerCancel={onCancel}
                 >
                   <CornerBrackets />
 
