@@ -26,7 +26,8 @@ export default function RoleSelectView({ onSelect }: RoleSelectViewProps) {
           <div className="role-card-label">Internal</div>
           <div className="role-card-title">Amex Admin</div>
           <p className="role-card-description">
-            The full toolset: the region's fastest growing merchants, the graph behind them, the matching queue, gap radar and the recruit pitch generator.
+            Gap Radar: scan every merchant cluster for structural gaps, then see exactly who to recruit,
+            ranked by fit for Amex, with pitch and outreach ready to go.
           </p>
           <span className="role-card-link">
             Enter admin view
