@@ -11,7 +11,7 @@ export default function RoleSelectView({ onSelect }: RoleSelectViewProps) {
   return (
     <main className="role-select-main">
       <div className="role-select-card">
-        <AmexCard3D height={300} rpm={4.2} holder="American Express" />
+        <AmexCard3D height={300} rpm={4.2} holder="Connexion Member" />
       </div>
 
       <div className="role-select-intro">

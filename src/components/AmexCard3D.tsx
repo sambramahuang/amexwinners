@@ -10,9 +10,11 @@ const CARD_H = CARD_W / 1.586
 const CARD_D = 0.038
 const CORNER = 0.13
 
-const DEEP = '#0b2a4a'
-const BLUE = '#006fcf'
-const NIGHT = '#061a2f'
+// Platinum: a brushed metal face, engraved dark rather than printed light.
+const PLATE_LIGHT = '#f2f3f5'
+const PLATE_MID = '#d8dbe0'
+const PLATE_DEEP = '#b9bec6'
+const ENGRAVE = '#2b3038'
 
 interface AmexCard3DProps {
   /** Height of the canvas. Width always fills the container. */
@@ -52,7 +54,7 @@ function roundedFace(w: number, h: number, r: number) {
 /** Guilloche: the fine interference pattern engraved on financial documents. */
 function drawGuilloche(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.save()
-  ctx.strokeStyle = 'rgba(120, 190, 255, 0.16)'
+  ctx.strokeStyle = 'rgba(43, 48, 56, 0.30)'
   ctx.lineWidth = 1.1
   const cx = w * 0.62
   const cy = h * 0.5
@@ -75,8 +77,8 @@ function drawGuilloche(ctx: CanvasRenderingContext2D, w: number, h: number) {
 /** Hexagon lattice, echoing the backdrop used across the Connexion interface. */
 function drawHexes(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.save()
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.055)'
-  ctx.lineWidth = 1.6
+  ctx.strokeStyle = 'rgba(43, 48, 56, 0.055)'
+  ctx.lineWidth = 1.4
   const s = 58
   for (let row = 0; row * s * 1.5 < h + s; row += 1) {
     for (let col = 0; col * s * 1.732 < w + s * 2; col += 1) {
@@ -124,6 +126,87 @@ function drawChip(ctx: CanvasRenderingContext2D, x: number, y: number, w: number
   ctx.stroke()
 }
 
+
+/** Double-ruled frame with corner flourishes, the way engraved stock is bordered. */
+function drawFrame(ctx: CanvasRenderingContext2D, W: number, H: number) {
+  const m = 44
+  ctx.save()
+  ctx.strokeStyle = 'rgba(43, 48, 56, 0.85)'
+  ctx.lineWidth = 5
+  ctx.strokeRect(m, m, W - m * 2, H - m * 2)
+  ctx.lineWidth = 1.8
+  ctx.strokeRect(m + 11, m + 11, W - (m + 11) * 2, H - (m + 11) * 2)
+
+  // Fine ticks between the rules, which is what gives an engraved border its
+  // texture at a distance.
+  ctx.lineWidth = 1
+  ctx.strokeStyle = 'rgba(43, 48, 56, 0.45)'
+  for (let x = m + 16; x < W - m - 16; x += 9) {
+    ctx.beginPath()
+    ctx.moveTo(x, m + 4)
+    ctx.lineTo(x, m + 8)
+    ctx.moveTo(x, H - m - 4)
+    ctx.lineTo(x, H - m - 8)
+    ctx.stroke()
+  }
+  for (let y = m + 16; y < H - m - 16; y += 9) {
+    ctx.beginPath()
+    ctx.moveTo(m + 4, y)
+    ctx.lineTo(m + 8, y)
+    ctx.moveTo(W - m - 4, y)
+    ctx.lineTo(W - m - 8, y)
+    ctx.stroke()
+  }
+  ctx.restore()
+}
+
+/**
+ * Engraved medallion. An original device carrying this product's mark: two
+ * merchants and the edge between them, ringed the way a struck seal is.
+ */
+function drawMedallion(ctx: CanvasRenderingContext2D, cx: number, cy: number, r: number) {
+  ctx.save()
+  ctx.translate(cx, cy)
+  ctx.strokeStyle = 'rgba(43, 48, 56, 0.88)'
+
+  ctx.lineWidth = 3
+  ctx.beginPath()
+  ctx.arc(0, 0, r, 0, Math.PI * 2)
+  ctx.stroke()
+
+  ctx.lineWidth = 1.2
+  ctx.beginPath()
+  ctx.arc(0, 0, r - 9, 0, Math.PI * 2)
+  ctx.stroke()
+
+  // Radiating engine-turned lines inside the ring.
+  ctx.lineWidth = 0.9
+  ctx.strokeStyle = 'rgba(43, 48, 56, 0.38)'
+  for (let i = 0; i < 96; i += 1) {
+    const a = (i / 96) * Math.PI * 2
+    ctx.beginPath()
+    ctx.moveTo(Math.cos(a) * (r - 13), Math.sin(a) * (r - 13))
+    ctx.lineTo(Math.cos(a) * (r - 30), Math.sin(a) * (r - 30))
+    ctx.stroke()
+  }
+
+  // The mark itself.
+  ctx.strokeStyle = 'rgba(43, 48, 56, 0.85)'
+  ctx.fillStyle = 'rgba(43, 48, 56, 0.85)'
+  ctx.lineWidth = 4
+  ctx.beginPath()
+  ctx.moveTo(-r * 0.3, r * 0.22)
+  ctx.lineTo(r * 0.3, -r * 0.22)
+  ctx.stroke()
+  ctx.beginPath()
+  ctx.arc(-r * 0.3, r * 0.22, 9, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.beginPath()
+  ctx.arc(r * 0.3, -r * 0.22, 9, 0, Math.PI * 2)
+  ctx.stroke()
+  ctx.restore()
+}
+
 function frontTexture(holder: string) {
   const W = 2048
   const H = Math.round(W / 1.586)
@@ -132,63 +215,76 @@ function frontTexture(holder: string) {
   c.height = H
   const ctx = c.getContext('2d')!
 
+  // Brushed plate: a light metal field, brightest across the diagonal.
   const g = ctx.createLinearGradient(0, 0, W, H)
-  g.addColorStop(0, NIGHT)
-  g.addColorStop(0.45, DEEP)
-  g.addColorStop(0.78, '#0d3f70')
-  g.addColorStop(1, '#07223d')
+  g.addColorStop(0, PLATE_DEEP)
+  g.addColorStop(0.22, PLATE_MID)
+  g.addColorStop(0.44, PLATE_LIGHT)
+  g.addColorStop(0.68, PLATE_MID)
+  g.addColorStop(1, '#a8aeb7')
   ctx.fillStyle = g
   ctx.fillRect(0, 0, W, H)
 
   drawHexes(ctx, W, H)
   drawGuilloche(ctx, W, H)
 
-  // Diagonal sheen band.
-  const sheen = ctx.createLinearGradient(W * 0.1, 0, W * 0.75, H)
-  sheen.addColorStop(0, 'rgba(255,255,255,0)')
-  sheen.addColorStop(0.5, 'rgba(140, 200, 255, 0.10)')
-  sheen.addColorStop(1, 'rgba(255,255,255,0)')
-  ctx.fillStyle = sheen
-  ctx.fillRect(0, 0, W, H)
+  // Brush grain, which is what separates metal from painted plastic.
+  ctx.save()
+  ctx.globalAlpha = 0.07
+  ctx.strokeStyle = ENGRAVE
+  ctx.lineWidth = 1
+  for (let y = 0; y < H; y += 3) {
+    ctx.beginPath()
+    ctx.moveTo(0, y + Math.sin(y * 0.4) * 1.4)
+    ctx.lineTo(W, y + Math.sin(y * 0.4 + 1) * 1.4)
+    ctx.stroke()
+  }
+  ctx.restore()
 
-  ctx.fillStyle = 'rgba(255,255,255,0.94)'
-  ctx.font = '700 78px Futura, "Futura PT", Jost, system-ui, sans-serif'
-  ctx.fillText('American Express', 96, 150)
+  drawFrame(ctx, W, H)
+  drawMedallion(ctx, W * 0.52, H * 0.47, 205)
 
-  ctx.fillStyle = BLUE
-  ctx.fillRect(96, 176, 300, 5)
+  // Wordmark, centred above the medallion.
+  ctx.fillStyle = ENGRAVE
+  ctx.textAlign = 'center'
+  ctx.font = '700 94px Futura, "Futura PT", Jost, system-ui, sans-serif'
+  ctx.letterSpacing = '4px'
+  ctx.fillText('AMERICAN EXPRESS', W / 2, 196)
 
-  ctx.fillStyle = 'rgba(255,255,255,0.5)'
-  ctx.font = '500 26px "IBM Plex Mono", ui-monospace, monospace'
-  ctx.letterSpacing = '9px'
-  ctx.fillText('CONNEXION', 96, 224)
+  ctx.font = '500 46px Futura, "Futura PT", Jost, system-ui, sans-serif'
+  ctx.letterSpacing = '26px'
+  ctx.fillStyle = 'rgba(43, 48, 56, 0.82)'
+  ctx.fillText('CONNEXION', W / 2 + 13, 268)
+  ctx.letterSpacing = '0px'
+  ctx.textAlign = 'left'
+
+  drawChip(ctx, 150, H * 0.43, 250, 192)
+
+  // Member since, set small to the right of the medallion.
+  ctx.fillStyle = 'rgba(43, 48, 56, 0.72)'
+  ctx.font = '500 24px Futura, "Futura PT", Jost, system-ui, sans-serif'
+  ctx.letterSpacing = '3px'
+  ctx.fillText('MEMBER SINCE', W * 0.72, H * 0.44)
+  ctx.font = '600 44px Futura, "Futura PT", Jost, system-ui, sans-serif'
+  ctx.fillText('26', W * 0.72, H * 0.52)
   ctx.letterSpacing = '0px'
 
-  drawChip(ctx, 96, H * 0.40, 268, 206)
-
-  ctx.font = '500 76px "IBM Plex Mono", ui-monospace, monospace'
+  // Embossed digits: a light underprint and a dark face, so they sit proud.
+  ctx.font = '500 72px "IBM Plex Mono", ui-monospace, monospace'
   ctx.letterSpacing = '9px'
   const digits = '3782  822463  10005'
-  // Underprint plus highlight fakes the relief of embossed digits.
-  ctx.fillStyle = 'rgba(3, 14, 26, 0.55)'
-  ctx.fillText(digits, 98, H * 0.79 + 3)
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.93)'
-  ctx.fillText(digits, 96, H * 0.79)
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.75)'
+  ctx.fillText(digits, 150, H * 0.79 - 3)
+  ctx.fillStyle = 'rgba(43, 48, 56, 0.9)'
+  ctx.fillText(digits, 152, H * 0.79)
   ctx.letterSpacing = '0px'
 
-  ctx.fillStyle = 'rgba(255,255,255,0.45)'
-  ctx.font = '400 24px "IBM Plex Mono", ui-monospace, monospace'
-  ctx.letterSpacing = '3px'
-  ctx.fillText('MEMBER SINCE 26', 96, H * 0.895)
-  ctx.fillText('VALID THRU 08/31', W * 0.42, H * 0.895)
-  ctx.letterSpacing = '0px'
-
-  ctx.font = '600 42px Futura, "Futura PT", Jost, system-ui, sans-serif'
+  ctx.font = '600 40px Futura, "Futura PT", Jost, system-ui, sans-serif'
   ctx.letterSpacing = '5px'
-  ctx.fillStyle = 'rgba(3, 14, 26, 0.5)'
-  ctx.fillText(holder.toUpperCase(), 98, H * 0.955 + 2)
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)'
-  ctx.fillText(holder.toUpperCase(), 96, H * 0.955)
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.7)'
+  ctx.fillText(holder.toUpperCase(), 150, H * 0.925 - 2)
+  ctx.fillStyle = 'rgba(43, 48, 56, 0.88)'
+  ctx.fillText(holder.toUpperCase(), 152, H * 0.925)
   ctx.letterSpacing = '0px'
 
   const tex = new THREE.CanvasTexture(c)
@@ -206,28 +302,29 @@ function backTexture() {
   const ctx = c.getContext('2d')!
 
   const g = ctx.createLinearGradient(0, 0, W, H)
-  g.addColorStop(0, '#06192c')
-  g.addColorStop(1, '#0a2d4f')
+  g.addColorStop(0, PLATE_DEEP)
+  g.addColorStop(0.5, PLATE_MID)
+  g.addColorStop(1, PLATE_DEEP)
   ctx.fillStyle = g
   ctx.fillRect(0, 0, W, H)
   drawHexes(ctx, W, H)
 
-  ctx.fillStyle = '#04101d'
+  ctx.fillStyle = '#14181e'
   ctx.fillRect(0, H * 0.12, W, H * 0.2)
 
-  ctx.fillStyle = '#e8eef6'
+  ctx.fillStyle = '#f4f5f7'
   ctx.fillRect(W * 0.08, H * 0.46, W * 0.62, H * 0.13)
-  ctx.fillStyle = 'rgba(11,28,51,0.5)'
+  ctx.fillStyle = 'rgba(43,48,56,0.55)'
   ctx.font = 'italic 44px Futura, "Futura PT", Jost, system-ui, sans-serif'
   ctx.fillText('authorised signature', W * 0.1, H * 0.545)
 
-  ctx.fillStyle = '#04101d'
+  ctx.fillStyle = '#14181e'
   ctx.fillRect(W * 0.73, H * 0.46, W * 0.12, H * 0.13)
-  ctx.fillStyle = '#e8eef6'
+  ctx.fillStyle = '#f4f5f7'
   ctx.font = '500 44px "IBM Plex Mono", ui-monospace, monospace'
   ctx.fillText('4021', W * 0.752, H * 0.545)
 
-  ctx.fillStyle = 'rgba(255,255,255,0.34)'
+  ctx.fillStyle = 'rgba(43,48,56,0.5)'
   ctx.font = '400 24px Futura, "Futura PT", Jost, system-ui, sans-serif'
   ctx.fillText('Concept prototype. Not a payment instrument.', W * 0.08, H * 0.74)
   ctx.fillText('Synthetic demo asset, AMEX AI Innovation Hackathon 2026.', W * 0.08, H * 0.79)
@@ -257,7 +354,7 @@ function shadowTexture() {
 export default function AmexCard3D({
   height = 520,
   rpm = 4.5,
-  holder = 'American Express',
+  holder = 'Connexion Member',
   className = '',
 }: AmexCard3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -309,12 +406,12 @@ export default function AmexCard3D({
 
     const bodyGeo = new RoundedBoxGeometry(CARD_W, CARD_H, CARD_D, 6, CORNER)
     const bodyMat = new THREE.MeshPhysicalMaterial({
-      color: 0x2f5f8c,
+      color: 0xd3d7dd,
       metalness: 1,
-      roughness: 0.16,
+      roughness: 0.13,
       clearcoat: 1,
-      clearcoatRoughness: 0.1,
-      envMapIntensity: 2.6,
+      clearcoatRoughness: 0.08,
+      envMapIntensity: 2.9,
     })
     card.add(new THREE.Mesh(bodyGeo, bodyMat))
 
@@ -324,11 +421,11 @@ export default function AmexCard3D({
 
     const frontMat = new THREE.MeshPhysicalMaterial({
       map: frontTex,
-      metalness: 0.45,
-      roughness: 0.22,
+      metalness: 0.86,
+      roughness: 0.19,
       clearcoat: 1,
-      clearcoatRoughness: 0.06,
-      envMapIntensity: 1.9,
+      clearcoatRoughness: 0.05,
+      envMapIntensity: 2.1,
     })
     const front = new THREE.Mesh(faceGeo, frontMat)
     front.position.z = CARD_D / 2 + 0.0012
@@ -336,11 +433,11 @@ export default function AmexCard3D({
 
     const backMat = new THREE.MeshPhysicalMaterial({
       map: backTex,
-      metalness: 0.4,
-      roughness: 0.3,
-      clearcoat: 0.8,
-      clearcoatRoughness: 0.18,
-      envMapIntensity: 1.5,
+      metalness: 0.8,
+      roughness: 0.26,
+      clearcoat: 0.85,
+      clearcoatRoughness: 0.15,
+      envMapIntensity: 1.8,
     })
     const back = new THREE.Mesh(faceGeo, backMat)
     back.position.z = -CARD_D / 2 - 0.0012
