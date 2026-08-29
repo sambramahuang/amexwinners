@@ -765,15 +765,18 @@
   font-weight: 500;
 }
 
-/* One line on what the number is, on hover. Set to the right of the dial and
-   outside the card, so it covers neither the merchant nor the evidence. */
+/* One line on what the number is, on hover. It hangs off the right of the dial
+   itself, not the score block, so it reads as belonging to the number and stays
+   clear of the sidebar. The dial is 112px wide, centred in the block, and sits
+   flush with the block's top edge, so its right edge is 50% + 56px across and
+   its centre is 56px down. Fully opaque, since it sits over the card. */
 .score-tip {
   position: absolute;
-  top: 50%;
-  left: calc(100% + 24px);
+  top: 56px;
+  left: calc(50% + 70px);
   width: 200px;
   transform: translate(-6px, -50%);
-  z-index: 12;
+  z-index: 30;
   padding: 12px 14px;
   background: var(--bg);
   border: 1px solid var(--border);
@@ -781,7 +784,7 @@
   font-size: 12.5px;
   line-height: 1.5;
   text-align: left;
-  box-shadow: 0 14px 30px -18px rgba(11, 28, 51, 0.45);
+  box-shadow: 0 16px 34px -16px rgba(11, 28, 51, 0.5);
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
