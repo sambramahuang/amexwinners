@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { OutreachEmail } from '../utils/outreachEmails'
 import './EmailComposer.css'
 
@@ -13,11 +13,13 @@ interface EmailComposerProps {
 }
 
 /**
- * Composed outreach, ready to go out.
+ * Composed outreach, ready to edit and then go.
  *
- * Sending is simulated: this is a prototype with synthetic merchants on a
- * reserved .example domain, so nothing can leave the browser. The copy on the
- * confirmation says as much rather than implying mail was delivered.
+ * Connexion writes the first draft because a blank page is where most
+ * introductions die, but the merchant sends it, so subject and body are theirs
+ * to change before it goes. Sending is simulated: this is a prototype with
+ * synthetic merchants on a reserved .example domain, so nothing leaves the
+ * browser, and the confirmation says so rather than implying delivery.
  */
 export default function EmailComposer({
   email,
@@ -25,12 +27,32 @@ export default function EmailComposer({
   sentLabel,
   recipients,
 }: EmailComposerProps) {
+  const [subject, setSubject] = useState(email.subject)
+  const [body, setBody] = useState(email.body)
   const [sent, setSent] = useState(false)
   const [copied, setCopied] = useState(false)
+  const bodyRef = useRef<HTMLTextAreaElement>(null)
+
+  // A different candidate means a different draft.
+  useEffect(() => {
+    setSubject(email.subject)
+    setBody(email.body)
+    setSent(false)
+  }, [email.subject, email.body])
+
+  // Grow to the text rather than making the merchant scroll a small box.
+  useEffect(() => {
+    const el = bodyRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }, [body])
+
+  const edited = subject !== email.subject || body !== email.body
 
   async function copy() {
     try {
-      await navigator.clipboard.writeText(`Subject: ${email.subject}\n\n${email.body}`)
+      await navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
@@ -38,18 +60,32 @@ export default function EmailComposer({
     }
   }
 
+  function reset() {
+    setSubject(email.subject)
+    setBody(email.body)
+  }
+
   return (
     <div className="composer">
       <div className="composer-head">
         <div>
-          <div className="composer-label">Drafted by Connexion</div>
+          <div className="composer-label">
+            {edited ? 'Drafted by Connexion, edited by you' : 'Drafted by Connexion'}
+          </div>
           <div className="composer-from">
             {email.fromName}, {email.fromRole}
           </div>
         </div>
-        <button className="btn btn-ghost" onClick={copy}>
-          {copied ? 'Copied' : 'Copy'}
-        </button>
+        <div className="composer-head-actions">
+          {edited && (
+            <button className="btn btn-ghost" onClick={reset}>
+              Reset draft
+            </button>
+          )}
+          <button className="btn btn-ghost" onClick={copy}>
+            {copied ? 'Copied' : 'Copy'}
+          </button>
+        </div>
       </div>
 
       <div className="composer-fields">
@@ -73,13 +109,26 @@ export default function EmailComposer({
             )}
           </span>
         </div>
-        <div className="composer-field">
+        <label className="composer-field">
           <span className="composer-key">Subject</span>
-          <span className="composer-val composer-subject">{email.subject}</span>
-        </div>
+          <input
+            className="composer-input"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            disabled={sent}
+          />
+        </label>
       </div>
 
-      <pre className="composer-body">{email.body}</pre>
+      <textarea
+        ref={bodyRef}
+        className="composer-body"
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        disabled={sent}
+        spellCheck
+        aria-label="Message body"
+      />
 
       <div className="composer-actions">
         <button
@@ -105,8 +154,8 @@ export default function EmailComposer({
           )}
         </button>
         <span className="composer-note">
-          Prototype: addresses use the reserved .example domain and nothing leaves
-          the browser. Edit before sending for real.
+          Edit anything above before you send. Prototype: addresses use the
+          reserved .example domain and nothing leaves the browser.
         </span>
       </div>
     </div>
