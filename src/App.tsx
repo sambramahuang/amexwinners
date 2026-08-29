@@ -1,6 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from 'react'
 import Nav from './components/Nav'
-import EngravedBackdrop from './components/EngravedBackdrop'
 import HexagonBackground from './components/HexagonBackground'
 import GrowthRadarView from './views/GrowthRadarView'
 import OverviewView from './views/OverviewView'
@@ -124,7 +123,6 @@ export default function App() {
   if (!role) {
     return (
       <div className="app-shell">
-        <EngravedBackdrop />
         <HexagonBackground className="app-hexagon-backdrop" hexagonSize={55} />
         <RoleSelectView onSelect={chooseRole} />
       </div>
@@ -133,7 +131,6 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <EngravedBackdrop />
       <HexagonBackground className="app-hexagon-backdrop" hexagonSize={55} />
       <Nav
         view={effectiveView}
