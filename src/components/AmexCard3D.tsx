@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import amexCrestSrc from './amex-crest.png'
 import './AmexCard3D.css'
@@ -28,8 +27,8 @@ interface AmexCard3DProps {
   className?: string
 }
 
-/** Rounded rectangle as a flat face, with UVs remapped to 0..1 across the face. */
-function roundedFace(w: number, h: number, r: number) {
+/** A card-shaped rounded rectangle, centred at the origin. */
+function roundedRectShape(w: number, h: number, r: number) {
   const shape = new THREE.Shape()
   const x = -w / 2
   const y = -h / 2
@@ -42,14 +41,47 @@ function roundedFace(w: number, h: number, r: number) {
   shape.quadraticCurveTo(x, y + h, x, y + h - r)
   shape.lineTo(x, y + r)
   shape.quadraticCurveTo(x, y, x + r, y)
+  return shape
+}
 
-  const geo = new THREE.ShapeGeometry(shape, 22)
+/** Rounded rectangle as a flat face, with UVs remapped to 0..1 across the face. */
+function roundedFace(w: number, h: number, r: number) {
+  const geo = new THREE.ShapeGeometry(roundedRectShape(w, h, r), 22)
   const pos = geo.attributes.position
   const uv = geo.attributes.uv
   for (let i = 0; i < pos.count; i += 1) {
     uv.setXY(i, (pos.getX(i) + w / 2) / w, (pos.getY(i) + h / 2) / h)
   }
   uv.needsUpdate = true
+  return geo
+}
+
+/**
+ * The card body: the rounded-rect plan shape extruded to the card's
+ * thickness, with a small bevel softening the front/back edges. A real
+ * card's plan-view corner radius (CORNER, generous) and its edge bevel (a
+ * fraction of CARD_D, since the card is thin) are two different-scaled
+ * features — RoundedBoxGeometry applies one uniform radius to both and
+ * clamps it to at most half the thinnest dimension, so with CORNER far
+ * bigger than CARD_D it silently rendered an almost-sharp corner. Building
+ * from the same 2D shape as the face keeps the two in sync instead.
+ */
+function roundedBody(w: number, h: number, totalDepth: number, r: number) {
+  // ExtrudeGeometry's bevel adds bevelThickness beyond `depth` at each end
+  // rather than carving into it, so the straight section is shrunk to
+  // leave room for it — otherwise the body would extend past totalDepth
+  // and bury the face meshes, which sit at the intended ±totalDepth / 2.
+  const bevel = totalDepth * 0.25
+  const straightDepth = totalDepth - bevel * 2
+  const geo = new THREE.ExtrudeGeometry(roundedRectShape(w, h, r), {
+    depth: straightDepth,
+    bevelEnabled: true,
+    bevelThickness: bevel,
+    bevelSize: bevel,
+    bevelSegments: 3,
+    curveSegments: 22,
+  })
+  geo.translate(0, 0, -totalDepth / 2)
   return geo
 }
 
@@ -554,7 +586,7 @@ export default function AmexCard3D({
     const card = new THREE.Group()
     scene.add(card)
 
-    const bodyGeo = new RoundedBoxGeometry(CARD_W, CARD_H, CARD_D, 6, CORNER)
+    const bodyGeo = roundedBody(CARD_W, CARD_H, CARD_D, CORNER)
     const bodyMat = new THREE.MeshPhysicalMaterial({
       color: 0x1c1d20,
       metalness: 1,
