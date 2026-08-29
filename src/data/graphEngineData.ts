@@ -103,7 +103,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     tierRationale:
       '8 months of consistent redemption and the closest value symmetry in the cluster make this a candidate for a standing relationship, not just a recurring offer.',
     tier3Suggestion:
-      'Peer cafe and bookstore pairs of this size typically settle into a shared weekly event slot (one in-store reading or tasting per week) rather than a one-off offer.',
+      'Peer café and bookstore pairs of this size typically settle into a shared weekly event slot (one in-store reading or tasting per week) rather than a one-off offer.',
   },
   {
     id: 2,
@@ -466,7 +466,7 @@ export const MATCH_CANDIDATES: MatchCandidate[] = [
     sequential: "47% of Foundry members buy from Basin at least twice a week.",
     upliftYou: 24,
     upliftThem: 18,
-    terms: "Member rate: Foundry members get a standing discount, Basin becomes the house cafe.",
+    terms: "Member rate: Foundry members get a standing discount, Basin becomes the house café.",
     tier: 3,
     monthsActive: 11,
     tierRationale:
